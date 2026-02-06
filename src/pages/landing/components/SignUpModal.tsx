@@ -120,26 +120,26 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToSignIn }: SignU
         <div className="fixed inset-0 z-[9999] flex items-center justify-center md:items-center">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+                className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
             />
 
             {/* Modal Card */}
-            <div className="relative w-full h-full md:h-auto md:w-[480px] bg-white md:rounded-2xl shadow-2xl p-6 md:p-8 transform transition-all animate-in fade-in duration-300 overflow-y-auto">
+            <div className="relative w-full h-full md:h-auto md:w-[480px] bg-zinc-900 border border-zinc-800 md:rounded-2xl shadow-2xl p-6 md:p-8 transform transition-all animate-in fade-in duration-300 overflow-y-auto">
 
                 {/* Header */}
                 <div className="flex justify-between items-start mb-6">
                     <div>
-                        <h2 className="text-2xl font-bold text-slate-900">
+                        <h2 className="text-2xl font-bold text-white">
                             {step === 'DETAILS' ? 'Get Started' : 'Verify Email'}
                         </h2>
-                        <p className="text-slate-500 mt-1 text-sm">
+                        <p className="text-zinc-400 mt-1 text-sm">
                             {step === 'DETAILS' ? 'Create your FITZELLY account' : `Enter code sent to ${email}`}
                         </p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="text-slate-400 hover:text-slate-600 transition-colors bg-slate-100 p-1.5 rounded-full cursor-pointer"
+                        className="text-zinc-500 hover:text-white transition-colors bg-zinc-800 hover:bg-zinc-700 p-1.5 rounded-full cursor-pointer"
                     >
                         <X size={20} />
                     </button>
@@ -147,7 +147,7 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToSignIn }: SignU
 
                 {/* Error Banner */}
                 {error && (
-                    <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100 mb-4 text-center">
+                    <div className="bg-red-500/10 text-red-500 text-sm p-3 rounded-lg border border-red-500/20 mb-4 text-center">
                         {error}
                     </div>
                 )}
@@ -156,13 +156,13 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToSignIn }: SignU
                 {step === 'DETAILS' && (
                     <form className="space-y-4" onSubmit={handleInitiateSignUp}>
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Email</label>
+                            <label className="block text-sm font-semibold text-zinc-300 mb-1">Email</label>
                             <input
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="you@example.com"
-                                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-slate-900 placeholder:text-slate-400 transition-all"
+                                className="w-full px-4 py-3 bg-black border border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent text-white placeholder:text-zinc-600 transition-all font-medium"
                                 required
                             />
                         </div>
@@ -190,10 +190,10 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToSignIn }: SignU
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className={`w-full bg-[#00ffd5] hover:bg-[#00e6c0] text-slate-900 font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_14px_0_rgba(0,255,213,0.39)] hover:shadow-[0_6px_20px_rgba(0,255,213,0.23)] transform hover:-translate-y-0.5 mt-2 cursor-pointer flex items-center justify-center ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            className={`w-full bg-emerald-400 hover:bg-emerald-500 text-black font-bold py-3.5 rounded-xl transition-all shadow-[0_0_10px_rgba(52,211,153,0.3)] hover:shadow-[0_0_20px_rgba(52,211,153,0.5)] transform hover:-translate-y-0.5 mt-2 cursor-pointer flex items-center justify-center ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
                             {isLoading ? (
-                                <div className="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
+                                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
                             ) : (
                                 "Send Verification Code"
                             )}
@@ -205,14 +205,14 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToSignIn }: SignU
                 {step === 'OTP' && (
                     <form className="space-y-6" onSubmit={handleCompleteSignUp}>
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2 text-center">Enter 6-Digit Code</label>
+                            <label className="block text-sm font-semibold text-zinc-300 mb-2 text-center">Enter 6-Digit Code</label>
                             <input
                                 type="text"
                                 value={otp}
                                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                                 placeholder="123456"
                                 maxLength={6}
-                                className="w-full px-4 py-4 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-slate-900 placeholder:text-slate-300 transition-all text-center text-2xl font-bold tracking-widest"
+                                className="w-full px-4 py-4 bg-black border border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent text-white placeholder:text-zinc-700 transition-all text-center text-2xl font-bold tracking-widest"
                                 required
                             />
                         </div>
@@ -220,10 +220,10 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToSignIn }: SignU
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className={`w-full bg-[#00ffd5] hover:bg-[#00e6c0] text-slate-900 font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_14px_0_rgba(0,255,213,0.39)] hover:shadow-[0_6px_20px_rgba(0,255,213,0.23)] transform hover:-translate-y-0.5 cursor-pointer flex items-center justify-center ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            className={`w-full bg-emerald-400 hover:bg-emerald-500 text-black font-bold py-3.5 rounded-xl transition-all shadow-[0_0_10px_rgba(52,211,153,0.3)] hover:shadow-[0_0_20px_rgba(52,211,153,0.5)] transform hover:-translate-y-0.5 cursor-pointer flex items-center justify-center ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
                             {isLoading ? (
-                                <div className="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
+                                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
                             ) : (
                                 "Verify & Create Account"
                             )}
@@ -232,9 +232,9 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToSignIn }: SignU
                 )}
 
                 <div className="my-6 flex items-center gap-4">
-                    <div className="h-px bg-slate-200 flex-1"></div>
-                    <span className="text-slate-400 text-sm">Or</span>
-                    <div className="h-px bg-slate-200 flex-1"></div>
+                    <div className="h-px bg-zinc-800 flex-1"></div>
+                    <span className="text-zinc-500 text-sm">Or</span>
+                    <div className="h-px bg-zinc-800 flex-1"></div>
                 </div>
 
                 <div className="space-y-4">
@@ -243,7 +243,7 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToSignIn }: SignU
                             <button
                                 type="button"
                                 onClick={handleGoogleSignup}
-                                className="w-full max-w-[300px] bg-white border border-slate-200 text-slate-700 font-semibold py-2.5 rounded-full hover:bg-slate-50 transition-all flex items-center justify-center gap-3 cursor-pointer shadow-sm"
+                                className="w-full max-w-[300px] bg-zinc-800 border border-zinc-700 text-zinc-300 font-semibold py-2.5 rounded-full hover:bg-zinc-700 hover:text-white transition-all flex items-center justify-center gap-3 cursor-pointer shadow-sm"
                             >
                                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                                     <path
@@ -268,11 +268,11 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToSignIn }: SignU
                         </div>
                     )}
 
-                    <p className="text-center text-slate-500 text-sm">
+                    <p className="text-center text-zinc-500 text-sm">
                         Already have an account?{' '}
                         <button
                             onClick={onSwitchToSignIn}
-                            className="text-teal-500 font-semibold hover:text-teal-600 cursor-pointer"
+                            className="text-emerald-400 font-semibold hover:text-emerald-300 cursor-pointer"
                         >
                             Login
                         </button>

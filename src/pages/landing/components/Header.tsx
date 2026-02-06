@@ -58,7 +58,7 @@ export default function Header() {
     useEffect(() => {
         const error = searchParams.get("error");
         if (error) {
-            toast.error(error) 
+            toast.error(error)
         }
     }, [searchParams])
 
@@ -78,7 +78,7 @@ export default function Header() {
     return (
         <header
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
-                ? "bg-slate-900/90 backdrop-blur-md shadow-lg py-4"
+                ? "bg-zinc-950/90 backdrop-blur-md shadow-lg py-4 border-b border-zinc-800"
                 : "bg-transparent py-6"
                 }`}
         >
@@ -89,21 +89,25 @@ export default function Header() {
                         className="flex items-center gap-2 cursor-pointer"
                         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                     >
-                        <div className="w-8 h-8 bg-[#00ffd5] rounded-lg flex items-center justify-center text-slate-900 font-bold text-xl">
-                            F
+                        <div className="w-8 h-8 rounded bg-emerald-400 flex items-center justify-center">
+                            <div className="w-5 h-5 text-black">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14.4 14.4 9.6 9.6M18.65 9.35A9 9 0 1 1 5.35 18.65L18.65 9.35M6.34 17.66l-1.41 1.41" /></svg>
+                            </div>
                         </div>
-                        <span className={`text-xl font-bold tracking-tight transition-colors ${isScrolled ? "text-white" : "text-slate-900"
-                            }`}>
-                            FITZELLY
-                        </span>
+                        <div className="flex flex-col leading-none">
+                            <span className={`text-xl font-bold tracking-wider transition-colors ${isScrolled ? "text-white" : "text-white"
+                                }`}>
+                                FITZ<span className="text-emerald-400">ELLY</span>
+                            </span>
+                        </div>
                     </div>
 
                     <nav className="hidden md:flex items-center gap-8">
                         <button
                             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                             className={`font-medium transition-colors ${isScrolled
-                                ? "text-slate-300 hover:text-white"
-                                : "text-slate-900 hover:text-slate-900"
+                                ? "text-zinc-400 hover:text-white"
+                                : "text-zinc-300 hover:text-white"
                                 }`}
                         >
                             Home
@@ -111,8 +115,8 @@ export default function Header() {
                         <button
                             onClick={() => scrollToSection("features")}
                             className={`font-medium transition-colors ${isScrolled
-                                ? "text-slate-300 hover:text-white"
-                                : "text-slate-900 hover:text-slate-900"
+                                ? "text-zinc-400 hover:text-white"
+                                : "text-zinc-300 hover:text-white"
                                 }`}
                         >
                             Features
@@ -120,8 +124,8 @@ export default function Header() {
                         <button
                             onClick={() => scrollToSection("pricing")}
                             className={`font-medium transition-colors ${isScrolled
-                                ? "text-slate-300 hover:text-white"
-                                : "text-slate-900 hover:text-slate-900"
+                                ? "text-zinc-400 hover:text-white"
+                                : "text-zinc-300 hover:text-white"
                                 }`}
                         >
                             Pricing
@@ -131,18 +135,18 @@ export default function Header() {
                     {/* desktop sigin/dashboard button */}
                     <div className="hidden md:flex items-center gap-4">
                         {isLoading ? (
-                            <div className="w-6 h-6 border-2 border-[#00ffd5] border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-6 h-6 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
                         ) : isAuthenticated ? (
                             <button
                                 onClick={() => navigate(getDashboardPath())}
-                                className="bg-[#00ffd5] text-slate-900 px-5 py-2.5 rounded-lg font-bold hover:bg-[#00e6c0] transition-colors cursor-pointer"
+                                className="bg-emerald-400 text-black px-5 py-2.5 rounded-lg font-bold hover:bg-emerald-500 transition-colors cursor-pointer shadow-[0_0_10px_rgba(52,211,153,0.3)] hover:shadow-[0_0_20px_rgba(52,211,153,0.5)]"
                             >
                                 {getDashboardLabel()}
                             </button>
                         ) : (
                             <button
                                 onClick={() => setIsSignInModalOpen(true)}
-                                className="bg-[#00ffd5] text-slate-900 px-5 py-2.5 rounded-lg font-bold hover:bg-[#00e6c0] transition-colors cursor-pointer"
+                                className="bg-emerald-400 text-black px-5 py-2.5 rounded-lg font-bold hover:bg-emerald-500 transition-colors cursor-pointer shadow-[0_0_10px_rgba(52,211,153,0.3)] hover:shadow-[0_0_20px_rgba(52,211,153,0.5)]"
                             >
                                 Sign In
                             </button>
@@ -151,7 +155,7 @@ export default function Header() {
 
                     {/* mobile menu button */}
                     <button
-                        className={`md:hidden ${isScrolled ? "text-white" : "text-slate-900"}`}
+                        className={`md:hidden ${isScrolled ? "text-white" : "text-white"}`}
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                     >
                         {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -161,37 +165,37 @@ export default function Header() {
 
             {/* mobile menu */}
             {isMobileMenuOpen && (
-                <div className="md:hidden bg-slate-900 absolute top-full left-0 right-0 border-t border-slate-800 p-4">
+                <div className="md:hidden bg-zinc-950 absolute top-full left-0 right-0 border-t border-zinc-800 p-4 shadow-xl">
                     <div className="flex flex-col space-y-4">
                         <button
                             onClick={() => {
                                 window.scrollTo({ top: 0, behavior: "smooth" });
                                 setIsMobileMenuOpen(false);
                             }}
-                            className="text-left text-slate-300 hover:text-white font-medium"
+                            className="text-left text-zinc-400 hover:text-white font-medium"
                         >
                             Home
                         </button>
                         <button
                             onClick={() => scrollToSection("features")}
-                            className="text-left text-slate-300 hover:text-white font-medium"
+                            className="text-left text-zinc-400 hover:text-white font-medium"
                         >
                             Features
                         </button>
                         <button
                             onClick={() => scrollToSection("pricing")}
-                            className="text-left text-slate-300 hover:text-white font-medium"
+                            className="text-left text-zinc-400 hover:text-white font-medium"
                         >
                             Pricing
                         </button>
-                        <div className="h-px bg-slate-800 my-2"></div>
+                        <div className="h-px bg-zinc-800 my-2"></div>
                         {isAuthenticated ? (
                             <button
                                 onClick={() => {
                                     setIsMobileMenuOpen(false);
                                     navigate(getDashboardPath());
                                 }}
-                                className="w-full bg-[#00ffd5] text-slate-900 px-5 py-2.5 rounded-lg font-bold hover:bg-[#00e6c0] transition-colors text-center cursor-pointer"
+                                className="w-full bg-emerald-400 text-black px-5 py-2.5 rounded-lg font-bold hover:bg-emerald-500 transition-colors text-center cursor-pointer"
                             >
                                 {getDashboardLabel()}
                             </button>
@@ -201,7 +205,7 @@ export default function Header() {
                                     setIsMobileMenuOpen(false);
                                     setIsSignInModalOpen(true);
                                 }}
-                                className="w-full bg-[#00ffd5] text-slate-900 px-5 py-2.5 rounded-lg font-bold hover:bg-[#00e6c0] transition-colors text-center cursor-pointer"
+                                className="w-full bg-emerald-400 text-black px-5 py-2.5 rounded-lg font-bold hover:bg-emerald-500 transition-colors text-center cursor-pointer"
                             >
                                 Sign In
                             </button>

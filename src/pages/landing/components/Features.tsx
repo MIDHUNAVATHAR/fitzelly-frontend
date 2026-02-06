@@ -1,4 +1,4 @@
-import { Users, UserCheck, MapPin, TrendingUp, Calendar, Bell, Dumbbell, Activity, ClipboardList } from 'lucide-react';
+import { Users, UserCheck, MapPin, TrendingUp, Calendar, Bell, CreditCard, Activity, ClipboardList } from 'lucide-react';
 
 const features = [
     {
@@ -19,7 +19,7 @@ const features = [
     {
         icon: TrendingUp,
         title: "Boost Revenue",
-        description: "Enable trainers to offer personal training subscriptions and increase your gym's income."
+        description: "Track clients and track enquiries for increase your gym's income."
     },
     {
         icon: Calendar,
@@ -32,10 +32,11 @@ const features = [
         description: "Automatic membership expiry notifications to reduce churn and improve retention."
     },
     {
-        icon: Dumbbell,
-        title: "Zelly Exercise Library",
-        description: "Comprehensive exercise library with video guides accessible to all clients."
+        icon: CreditCard,
+        title: "Membership & Payments",
+        description: "Manage memberships, track payments, and renewals with clear billing history."
     },
+
     {
         icon: Activity,
         title: "BMI Tracking",
@@ -50,19 +51,23 @@ const features = [
 
 export default function Features() {
     return (
-        <section id="features" className="py-20 px-4 bg-white">
+        <section id="features" className="py-20 px-4 bg-black/50">
             <div className="max-w-7xl mx-auto">
+                <div className="text-center mb-16">
+                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">Powerful Features for Modern Gyms</h2>
+                    <p className="text-zinc-400 max-w-2xl mx-auto">Everything you need to manage your gym efficiently and increase member retention.</p>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {features.map((feature, index) => (
                         <div
                             key={index}
-                            className="bg-white p-8 rounded-2xl border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_30px_-4px_rgba(0,0,0,0.1)] transition-all duration-300 group hover:-translate-y-1"
+                            className="bg-zinc-900/50 backdrop-blur-sm p-8 rounded-2xl border border-zinc-800 hover:border-emerald-400/50 transition-all duration-300 group hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)]"
                         >
-                            <div className="w-12 h-12 bg-[#00ffd5]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#00ffd5]/20 transition-colors text-[#00c4a4]">
+                            <div className="w-12 h-12 bg-emerald-400/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-emerald-400/20 transition-colors text-emerald-400">
                                 <feature.icon className="w-6 h-6" />
                             </div>
-                            <h3 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h3>
-                            <p className="text-slate-600 leading-relaxed text-sm">
+                            <h3 className="text-xl font-bold text-white mb-3 group-hover:text-emerald-400 transition-colors">{feature.title}</h3>
+                            <p className="text-zinc-400 leading-relaxed text-sm group-hover:text-zinc-300">
                                 {feature.description}
                             </p>
                         </div>

@@ -7,7 +7,7 @@ import Footer from "./components/Footer";
 
 export default function LandingPage() {
     return (
-        <div className="min-h-screen font-sans selection:bg-teal-500/30">
+        <div className="min-h-screen font-sans selection:bg-emerald-400/30 bg-black text-slate-200">
             <Header />
             <main className="flex-grow">
                 <Home />

@@ -185,23 +185,23 @@ export default function ForgotPasswordModal({ isOpen, onClose, onSwitchToSignIn 
         <div className="fixed inset-0 z-[9999] flex items-center justify-center md:items-center">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+                className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
             />
 
             {/* Modal Card */}
-            <div className="relative w-full h-full md:h-auto md:w-[480px] bg-white md:rounded-2xl shadow-2xl p-6 md:p-8 transform transition-all animate-in fade-in duration-300 overflow-y-auto">
+            <div className="relative w-full h-full md:h-auto md:w-[480px] bg-zinc-900 border border-zinc-800 md:rounded-2xl shadow-2xl p-6 md:p-8 transform transition-all animate-in fade-in duration-300 overflow-y-auto">
 
                 {/* Header */}
                 <div className="flex justify-between items-start mb-6">
                     <div>
-                        <h2 className="text-2xl font-bold text-slate-900">
+                        <h2 className="text-2xl font-bold text-white">
                             {step === 'EMAIL' && 'Forgot Password?'}
                             {step === 'OTP' && 'Verify Email'}
                             {step === 'RESET_PASSWORD' && 'Reset Password'}
                             {step === 'SUCCESS' && 'Password Reset'}
                         </h2>
-                        <p className="text-slate-500 mt-1 text-sm">
+                        <p className="text-zinc-400 mt-1 text-sm">
                             {step === 'EMAIL' && "Enter your email to reset your password"}
                             {step === 'OTP' && `Enter the OTP sent to ${email}`}
                             {step === 'RESET_PASSWORD' && "Create a new strong password"}
@@ -210,7 +210,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onSwitchToSignIn 
                     </div>
                     <button
                         onClick={onClose}
-                        className="text-slate-400 hover:text-slate-600 transition-colors bg-slate-100 p-1.5 rounded-full cursor-pointer"
+                        className="text-zinc-500 hover:text-white transition-colors bg-zinc-800 hover:bg-zinc-700 p-1.5 rounded-full cursor-pointer"
                     >
                         <X size={20} />
                     </button>
@@ -219,13 +219,13 @@ export default function ForgotPasswordModal({ isOpen, onClose, onSwitchToSignIn 
                 {/* Role Toggle - Only show on EMAIL step */}
                 {step === 'EMAIL' && (
                     <div className="mb-6">
-                        <div className="flex gap-2 p-1 bg-slate-100 rounded-lg">
+                        <div className="flex gap-2 p-1 bg-zinc-950 border border-zinc-800 rounded-lg">
                             <button
                                 type="button"
                                 onClick={() => setSelectedRole('gym')}
                                 className={`flex-1 py-2 px-4 rounded-md font-medium transition-all ${selectedRole === 'gym'
-                                    ? 'bg-white text-slate-900 shadow-sm'
-                                    : 'text-slate-600 hover:text-slate-900'
+                                    ? 'bg-zinc-800 text-white shadow-sm'
+                                    : 'text-zinc-500 hover:text-zinc-300'
                                     }`}
                             >
                                 Gym
@@ -234,8 +234,8 @@ export default function ForgotPasswordModal({ isOpen, onClose, onSwitchToSignIn 
                                 type="button"
                                 onClick={() => setSelectedRole('client')}
                                 className={`flex-1 py-2 px-4 rounded-md font-medium transition-all ${selectedRole === 'client'
-                                    ? 'bg-white text-slate-900 shadow-sm'
-                                    : 'text-slate-600 hover:text-slate-900'
+                                    ? 'bg-zinc-800 text-white shadow-sm'
+                                    : 'text-zinc-500 hover:text-zinc-300'
                                     }`}
                             >
                                 Client
@@ -244,8 +244,8 @@ export default function ForgotPasswordModal({ isOpen, onClose, onSwitchToSignIn 
                                 type="button"
                                 onClick={() => setSelectedRole('trainer')}
                                 className={`flex-1 py-2 px-4 rounded-md font-medium transition-all ${selectedRole === 'trainer'
-                                    ? 'bg-white text-slate-900 shadow-sm'
-                                    : 'text-slate-600 hover:text-slate-900'
+                                    ? 'bg-zinc-800 text-white shadow-sm'
+                                    : 'text-zinc-500 hover:text-zinc-300'
                                     }`}
                             >
                                 Trainer
@@ -256,7 +256,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onSwitchToSignIn 
 
                 {/* Error Message */}
                 {error && (
-                    <div className="mb-4 bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100">
+                    <div className="mb-4 bg-red-500/10 text-red-500 text-sm p-3 rounded-lg border border-red-500/20">
                         {error}
                     </div>
                 )}
@@ -265,23 +265,23 @@ export default function ForgotPasswordModal({ isOpen, onClose, onSwitchToSignIn 
                 {step === 'EMAIL' && (
                     <form className="space-y-5" onSubmit={handleSendOtpSubmit}>
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
+                            <label className="block text-sm font-semibold text-zinc-300 mb-2">Email Address</label>
                             <input
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="you@example.com"
-                                className="w-full pl-4 pr-10 py-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-slate-900 placeholder:text-slate-400 transition-all"
+                                className="w-full px-4 py-3 bg-black border border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent text-white placeholder:text-zinc-600 transition-all font-medium"
                                 required
                             />
                         </div>
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className={`w-full bg-[#00ffd5] hover:bg-[#00e6c0] text-slate-900 font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_14px_0_rgba(0,255,213,0.39)] hover:shadow-[0_6px_20px_rgba(0,255,213,0.23)] transform hover:-translate-y-0.5 cursor-pointer flex items-center justify-center ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            className={`w-full bg-emerald-400 hover:bg-emerald-500 text-black font-bold py-3.5 rounded-xl transition-all shadow-[0_0_10px_rgba(52,211,153,0.3)] hover:shadow-[0_0_20px_rgba(52,211,153,0.5)] transform hover:-translate-y-0.5 cursor-pointer flex items-center justify-center ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
                             {isLoading ? (
-                                <div className="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
+                                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
                             ) : (
                                 'Send OTP'
                             )}
@@ -290,7 +290,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onSwitchToSignIn 
                             <button
                                 type="button"
                                 onClick={onSwitchToSignIn}
-                                className="text-slate-500 hover:text-slate-800 text-sm font-medium transition-colors cursor-pointer flex items-center justify-center gap-2 mx-auto"
+                                className="text-zinc-400 hover:text-white text-sm font-medium transition-colors cursor-pointer flex items-center justify-center gap-2 mx-auto"
                             >
                                 <ArrowLeft size={16} /> Back to Login
                             </button>
@@ -302,38 +302,38 @@ export default function ForgotPasswordModal({ isOpen, onClose, onSwitchToSignIn 
                 {step === 'OTP' && (
                     <form className="space-y-5" onSubmit={handleVerifyOtp}>
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">One-Time Password</label>
+                            <label className="block text-sm font-semibold text-zinc-300 mb-2">One-Time Password</label>
                             <input
                                 type="text"
                                 value={otp}
                                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                                 placeholder="Enter 6-digit OTP"
                                 maxLength={6}
-                                className="w-full pl-4 pr-10 py-3 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-slate-900 placeholder:text-slate-400 transition-all tracking-widest text-center text-lg font-bold"
+                                className="w-full px-4 py-3 bg-black border border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent text-white placeholder:text-zinc-600 transition-all tracking-widest text-center text-lg font-bold"
                                 required
                             />
                         </div>
 
                         <div className="flex items-center justify-center gap-2 text-sm">
-                            <Timer size={16} className="text-slate-400" />
+                            <Timer size={16} className="text-zinc-500" />
                             {canResend ? (
                                 <button
                                     type="submit"
                                     onClick={sendOtp}
-                                    className="text-teal-500 font-semibold hover:text-teal-600 cursor-pointer"
+                                    className="text-emerald-400 font-semibold hover:text-emerald-300 cursor-pointer"
                                 >
                                     Resend OTP
                                 </button>
                             ) : (
-                                <span className="text-slate-500">
-                                    Resend code in <span className="font-mono font-medium text-slate-700">{formatTime(timeLeft)}</span>
+                                <span className="text-zinc-500">
+                                    Resend code in <span className="font-mono font-medium text-zinc-300">{formatTime(timeLeft)}</span>
                                 </span>
                             )}
                         </div>
 
                         <button
                             type="submit"
-                            className="w-full bg-[#00ffd5] hover:bg-[#00e6c0] text-slate-900 font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_14px_0_rgba(0,255,213,0.39)] hover:shadow-[0_6px_20px_rgba(0,255,213,0.23)] transform hover:-translate-y-0.5 cursor-pointer"
+                            className="w-full bg-emerald-400 hover:bg-emerald-500 text-black font-bold py-3.5 rounded-xl transition-all shadow-[0_0_10px_rgba(52,211,153,0.3)] hover:shadow-[0_0_20px_rgba(52,211,153,0.5)] transform hover:-translate-y-0.5 cursor-pointer"
                         >
                             Verify & Proceed
                         </button>
@@ -360,10 +360,10 @@ export default function ForgotPasswordModal({ isOpen, onClose, onSwitchToSignIn 
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className={`w-full bg-[#00ffd5] hover:bg-[#00e6c0] text-slate-900 font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_14px_0_rgba(0,255,213,0.39)] hover:shadow-[0_6px_20px_rgba(0,255,213,0.23)] transform hover:-translate-y-0.5 cursor-pointer mt-2 flex items-center justify-center ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            className={`w-full bg-emerald-400 hover:bg-emerald-500 text-black font-bold py-3.5 rounded-xl transition-all shadow-[0_0_10px_rgba(52,211,153,0.3)] hover:shadow-[0_0_20px_rgba(52,211,153,0.5)] transform hover:-translate-y-0.5 cursor-pointer mt-2 flex items-center justify-center ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
                             {isLoading ? (
-                                <div className="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
+                                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
                             ) : (
                                 'Reset Password'
                             )}
@@ -374,16 +374,16 @@ export default function ForgotPasswordModal({ isOpen, onClose, onSwitchToSignIn 
                 {/* Step 4: Success */}
                 {step === 'SUCCESS' && (
                     <div className="text-center py-8">
-                        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="w-16 h-16 bg-emerald-400/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-400/20">
+                            <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                             </svg>
                         </div>
-                        <h3 className="text-xl font-bold text-slate-900 mb-2">All Set!</h3>
-                        <p className="text-slate-500 mb-8">Your password has been reset successfully. You can now login with your new password.</p>
+                        <h3 className="text-xl font-bold text-white mb-2">All Set!</h3>
+                        <p className="text-zinc-400 mb-8">Your password has been reset successfully. You can now login with your new password.</p>
                         <button
                             onClick={onSwitchToSignIn}
-                            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl transition-colors cursor-pointer"
+                            className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3.5 rounded-xl transition-colors cursor-pointer"
                         >
                             Back to Login
                         </button>

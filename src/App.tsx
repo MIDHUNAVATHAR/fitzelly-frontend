@@ -1,9 +1,13 @@
+import React, { Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import LandingPage from "./pages/landing/LandingPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import NotFoundPage from "./pages/NotFoundPage";
 import SuperAdminLoginPage from "./pages/super-admin/SuperAdminLoginPage";
+import Spinner from "./components/ui/Spinner";
+
+const GymPage = React.lazy(() => import("./pages/gym/GymPage"))
 
 
 function App() {
@@ -28,7 +32,11 @@ function App() {
 
         { /* Gym protected routes */}
         <Route element={<ProtectedRoute allowedRoles={["gym"]} />} >
-          <Route path="/gym/dashboard" element={<>   <h1>Gym Dahboard</h1></>} />
+          <Route path="/gym/dashboard" element={
+            <Suspense fallback={<Spinner />} >
+              <GymPage />
+            </Suspense>
+          } />
         </Route>
 
         { /* super admin protected routes */}

@@ -4,7 +4,7 @@ import { useAuth } from "../context/useAuth";
 
 
 const AxiosInterceptorProvider = ({ children }: { children: React.ReactNode }) => {
-    const { accessToken, setAccessToken, } = useAuth();
+    const { accessToken, setAccessToken } = useAuth();
 
     useEffect(() => {
         setupInterceptors(() => accessToken || "", setAccessToken)

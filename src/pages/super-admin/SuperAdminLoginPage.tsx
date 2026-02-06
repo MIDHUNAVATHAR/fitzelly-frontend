@@ -9,6 +9,7 @@ import { resetPassword } from '../../api/forgotpassword.api';
 import { useAuth } from '../../context/useAuth';
 import { isAxiosError } from 'axios';
 import { ROLES } from '../../constants/roles';
+import PasswordInput from '../landing/components/PasswordInput';
 
 type AuthView = 'LOGIN' | 'FORGOT_EMAIL' | 'VERIFY_OTP' | 'RESET_PASSWORD';
 
@@ -115,73 +116,68 @@ const SuperAdminLoginPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-900 flex items-center justify-center p-0 md:p-4">
-            {/* Modal Container - Full screen on mobile, centered on desktop */}
-            <div className="w-full h-screen md:w-full md:h-auto md:max-w-md md:max-h-[90vh] md:rounded-2xl bg-white shadow-xl overflow-y-auto animate-fade-in-up
-                  md:min-w-[400px] relative">
+        <div className="min-h-screen bg-black flex items-center justify-center p-0 md:p-4">
+            {/* Modal Container */}
+            <div className="w-full h-screen md:w-full md:h-auto md:max-w-md md:rounded-2xl bg-zinc-900 border border-zinc-800 shadow-2xl overflow-y-auto animate-fade-in-up md:min-w-[400px] relative">
 
 
                 <button
                     onClick={() => navigate(-1)}
-                    className="absolute top-4 right-4 md:hidden text-slate-500 hover:text-slate-700 z-20"
+                    className="absolute top-4 right-4 md:hidden text-zinc-500 hover:text-zinc-300 z-20"
                     aria-label="Close"
                 >
                     <X className="w-6 h-6" />
                 </button>
 
-                {/* Header Section - Fixed height */}
-                <div className="bg-slate-800 p-6 text-center relative overflow-hidden flex-shrink-0">
+                {/* Header Section */}
+                <div className="bg-zinc-950 p-6 text-center relative overflow-hidden flex-shrink-0 border-b border-zinc-800">
                     <div className="absolute top-0 left-0 w-full h-full opacity-10">
-                        <div className="absolute top-10 left-10 w-20 h-20 bg-cyan-400 rounded-full blur-xl"></div>
-                        <div className="absolute bottom-10 right-10 w-20 h-20 bg-teal-400 rounded-full blur-xl"></div>
+                        <div className="absolute top-10 left-10 w-20 h-20 bg-emerald-400 rounded-full blur-xl"></div>
+                        <div className="absolute bottom-10 right-10 w-20 h-20 bg-emerald-600 rounded-full blur-xl"></div>
                     </div>
 
                     <div className="relative z-10 flex flex-col items-center">
-                        <div className="w-10 h-10 bg-cyan-400 rounded-lg flex items-center justify-center text-slate-900 font-bold text-xl mb-3 shadow-lg shadow-cyan-400/20">
+                        <div className="w-10 h-10 bg-emerald-400 rounded-lg flex items-center justify-center text-black font-bold text-xl mb-3 shadow-lg shadow-emerald-400/20">
                             F
                         </div>
                         <h1 className="text-xl font-bold text-white mb-1">Fitzelly</h1>
-                        <p className="text-cyan-200 text-sm">Super Admin Portal</p>
+                        <p className="text-emerald-400 text-sm font-medium">Super Admin Portal</p>
                     </div>
                 </div>
 
-                {/* Body Section - Takes remaining space */}
+                {/* Body Section */}
                 <div className="p-6 md:p-8 flex-1 flex flex-col">
                     {/* LOGIN VIEW */}
                     {view === 'LOGIN' && (
                         <form onSubmit={handleLogin} className="space-y-6 flex-1 flex flex-col">
                             <div className="space-y-6 flex-1">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
+                                    <label className="block text-sm font-medium text-zinc-300 mb-2">Email Address</label>
                                     <div className="relative">
-                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-5 h-5 block z-10" />
                                         <input
                                             type="email"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 outline-none transition-all"
+                                            className="w-full pl-10 pr-4 py-3 bg-black border border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent text-white placeholder:text-zinc-600 transition-all font-medium relative"
                                             placeholder="admin@fitzelly.com"
                                         />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
-                                    <div className="relative">
-                                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                                        <input
-                                            type="password"
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 outline-none transition-all"
-                                            placeholder="••••••••"
-                                        />
-                                    </div>
-                                    <div className="flex justify-end mt-2">
+                                    <PasswordInput
+                                        label="Password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="••••••••"
+                                        className="mb-2"
+                                    />
+                                    <div className="flex justify-end">
                                         <button
                                             type="button"
                                             onClick={() => setView('FORGOT_EMAIL')}
-                                            className="text-sm text-cyan-600 hover:text-cyan-700 font-medium"
+                                            className="text-sm text-emerald-400 hover:text-emerald-300 font-medium transition-colors"
                                         >
                                             Forgot Password?
                                         </button>
@@ -192,7 +188,7 @@ const SuperAdminLoginPage: React.FC = () => {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full bg-slate-900 text-white py-3 rounded-lg font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20 disabled:opacity-70 disabled:cursor-not-allowed mt-auto"
+                                className={`w-full bg-emerald-400 hover:bg-emerald-500 text-black py-3 rounded-lg font-bold transition-all flex items-center justify-center gap-2 shadow-[0_0_10px_rgba(52,211,153,0.3)] hover:shadow-[0_0_20px_rgba(52,211,153,0.5)] transform hover:-translate-y-0.5 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed mt-auto`}
                             >
                                 {isLoading ? 'Authenticating...' : 'Sign In'}
                                 {!isLoading && <ArrowRight className="w-4 h-4" />}
@@ -205,19 +201,19 @@ const SuperAdminLoginPage: React.FC = () => {
                         <form onSubmit={handleSendOtp} className="space-y-6 flex-1 flex flex-col animate-fade-in-up">
                             <div className="space-y-6 flex-1">
                                 <div className="text-center mb-6">
-                                    <h3 className="text-xl font-bold text-slate-800">Reset Password</h3>
-                                    <p className="text-slate-500 text-sm mt-2">Enter your email to receive an OTP.</p>
+                                    <h3 className="text-xl font-bold text-white">Reset Password</h3>
+                                    <p className="text-zinc-400 text-sm mt-2">Enter your email to receive an OTP.</p>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
+                                    <label className="block text-sm font-medium text-zinc-300 mb-2">Email Address</label>
                                     <div className="relative">
-                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-5 h-5 block z-10" />
                                         <input
                                             type="email"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 outline-none transition-all"
+                                            className="w-full pl-10 pr-4 py-3 bg-black border border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent text-white placeholder:text-zinc-600 transition-all font-medium relative"
                                             placeholder="admin@fitzelly.com"
                                         />
                                     </div>
@@ -228,7 +224,7 @@ const SuperAdminLoginPage: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full bg-cyan-400 text-slate-900 py-3 rounded-lg font-bold hover:bg-cyan-300 transition-all flex items-center justify-center gap-2 shadow-lg shadow-cyan-400/20 disabled:opacity-70 disabled:cursor-not-allowed"
+                                    className="w-full bg-emerald-400 text-black py-3 rounded-lg font-bold hover:bg-emerald-500 transition-all flex items-center justify-center gap-2 shadow-[0_0_10px_rgba(52,211,153,0.3)] hover:shadow-[0_0_20px_rgba(52,211,153,0.5)] transform hover:-translate-y-0.5 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     {isLoading ? 'Sending...' : 'Send OTP'}
                                     {!isLoading && <ArrowRight className="w-4 h-4" />}
@@ -237,7 +233,7 @@ const SuperAdminLoginPage: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={() => setView('LOGIN')}
-                                    className="w-full text-slate-500 py-2 font-medium hover:text-slate-700 flex items-center justify-center gap-2"
+                                    className="w-full text-zinc-500 py-2 font-medium hover:text-white transition-colors flex items-center justify-center gap-2 cursor-pointer"
                                 >
                                     <ArrowLeft className="w-4 h-4" /> Back to Login
                                 </button>
@@ -250,19 +246,19 @@ const SuperAdminLoginPage: React.FC = () => {
                         <form onSubmit={handleVerifyOtp} className="space-y-6 flex-1 flex flex-col animate-fade-in-up">
                             <div className="space-y-6 flex-1">
                                 <div className="text-center mb-6">
-                                    <h3 className="text-xl font-bold text-slate-800">Verify OTP</h3>
-                                    <p className="text-slate-500 text-sm mt-2">Enter the verification code sent to {email}</p>
+                                    <h3 className="text-xl font-bold text-white">Verify OTP</h3>
+                                    <p className="text-zinc-400 text-sm mt-2">Enter the verification code sent to {email}</p>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">One-Time Password</label>
+                                    <label className="block text-sm font-medium text-zinc-300 mb-2">One-Time Password</label>
                                     <div className="relative">
-                                        <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                                        <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-5 h-5 block z-10" />
                                         <input
                                             type="text"
                                             value={otp}
                                             onChange={(e) => setOtp(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 outline-none transition-all tracking-widest text-center text-lg font-bold"
+                                            className="w-full pl-10 pr-4 py-3 bg-black border border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent text-white placeholder:text-zinc-600 transition-all tracking-widest text-center text-lg font-bold relative"
                                             placeholder="123456"
                                             maxLength={6}
                                         />
@@ -274,7 +270,7 @@ const SuperAdminLoginPage: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full bg-cyan-400 text-slate-900 py-3 rounded-lg font-bold hover:bg-cyan-300 transition-all flex items-center justify-center gap-2 shadow-lg shadow-cyan-400/20 disabled:opacity-70 disabled:cursor-not-allowed"
+                                    className="w-full bg-emerald-400 text-black py-3 rounded-lg font-bold hover:bg-emerald-500 transition-all flex items-center justify-center gap-2 shadow-[0_0_10px_rgba(52,211,153,0.3)] hover:shadow-[0_0_20px_rgba(52,211,153,0.5)] transform hover:-translate-y-0.5 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     {isLoading ? 'Verifying...' : 'Verify OTP'}
                                 </button>
@@ -282,7 +278,7 @@ const SuperAdminLoginPage: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={() => setView('FORGOT_EMAIL')}
-                                    className="w-full text-slate-500 py-2 font-medium hover:text-slate-700 flex items-center justify-center gap-2"
+                                    className="w-full text-zinc-500 py-2 font-medium hover:text-white transition-colors flex items-center justify-center gap-2 cursor-pointer"
                                 >
                                     <ArrowLeft className="w-4 h-4" /> Change Email
                                 </button>
@@ -295,43 +291,31 @@ const SuperAdminLoginPage: React.FC = () => {
                         <form onSubmit={handleResetPassword} className="space-y-6 flex-1 flex flex-col animate-fade-in-up">
                             <div className="space-y-6 flex-1">
                                 <div className="text-center mb-6">
-                                    <h3 className="text-xl font-bold text-slate-800">New Password</h3>
-                                    <p className="text-slate-500 text-sm mt-2">Create a secure password including numbers and symbols.</p>
+                                    <h3 className="text-xl font-bold text-white">New Password</h3>
+                                    <p className="text-zinc-400 text-sm mt-2">Create a secure password including numbers and symbols.</p>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">New Password</label>
-                                    <div className="relative">
-                                        <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                                        <input
-                                            type="password"
-                                            value={newPassword}
-                                            onChange={(e) => setNewPassword(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 outline-none transition-all"
-                                            placeholder="••••••••"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Confirm Password</label>
-                                    <div className="relative">
-                                        <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                                        <input
-                                            type="password"
-                                            value={confirmPassword}
-                                            onChange={(e) => setConfirmPassword(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 outline-none transition-all"
-                                            placeholder="••••••••"
-                                        />
-                                    </div>
+                                    <PasswordInput
+                                        label="New Password"
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
+                                        placeholder="••••••••"
+                                        className="mb-4"
+                                    />
+                                    <PasswordInput
+                                        label="Confirm Password"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        placeholder="••••••••"
+                                    />
                                 </div>
                             </div>
 
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full bg-slate-900 text-white py-3 rounded-lg font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20 disabled:opacity-70 disabled:cursor-not-allowed mt-auto"
+                                className="w-full bg-emerald-400 text-black py-3 rounded-lg font-bold hover:bg-emerald-500 transition-all flex items-center justify-center gap-2 shadow-[0_0_10px_rgba(52,211,153,0.3)] hover:shadow-[0_0_20px_rgba(52,211,153,0.5)] transform hover:-translate-y-0.5 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed mt-auto"
                             >
                                 {isLoading ? 'Resetting...' : 'Reset Password'}
                             </button>
@@ -344,6 +328,3 @@ const SuperAdminLoginPage: React.FC = () => {
 };
 
 export default SuperAdminLoginPage;
-
-
-

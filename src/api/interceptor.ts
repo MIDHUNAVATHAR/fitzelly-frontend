@@ -8,6 +8,10 @@ type QueueItem = {
 let isRefreshing = false;
 let failedQueue: QueueItem[] = [];
 
+let requestInterceptor: number | null = null;
+let responseInterceptor: number | null = null;
+
+
 const processQueue = (error: Error | null, token: string | null) => {
     failedQueue.forEach(prom => {
         if (error) {
@@ -20,9 +24,12 @@ const processQueue = (error: Error | null, token: string | null) => {
 }
 
 
-export const setupInterceptors = (getAccessToken: () => string, setAccessToken: (token: string | null) => void) => {
+export const setupInterceptors = (getAccessToken: () => string | null, setAccessToken: (token: string | null) => void) => {
 
-    axiosInstance.interceptors.request.use((config) => {
+    if (requestInterceptor !== null) axiosInstance.interceptors.request.eject(requestInterceptor);
+    if (responseInterceptor !== null) axiosInstance.interceptors.response.eject(responseInterceptor);
+
+    requestInterceptor = axiosInstance.interceptors.request.use((config) => {
         const token = getAccessToken();  //take token from auth context. 
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
@@ -30,7 +37,7 @@ export const setupInterceptors = (getAccessToken: () => string, setAccessToken: 
         return config;
     })
 
-    axiosInstance.interceptors.response.use(res => res, async error => {
+    responseInterceptor = axiosInstance.interceptors.response.use(res => res, async error => {
         const originalRequest = error.config;
 
         const isAuthRoute = originalRequest.url?.includes("/auth/login") ||

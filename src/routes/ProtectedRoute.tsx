@@ -1,6 +1,7 @@
 
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
+import Spinner from "../components/ui/Spinner";
 
 
 interface ProtectedRouteProps {
@@ -12,7 +13,7 @@ const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
 
 
     if (isLoading) {
-        return <div className="h-screen flex items-center justify-center">Loading...</div>;
+        return <Spinner />
     }
 
     if (!user) {
