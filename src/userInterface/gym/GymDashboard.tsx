@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Menu } from 'lucide-react';
-import Sidebar from "./components/Sidebar";
+import Sidebar from "./Sidebar";
 
-import Profile from "./components/Profile";
+import Profile from "./gym-profile/Profile";
 
 const GymPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -49,10 +49,9 @@ const GymPage: React.FC = () => {
                         <Menu className="w-6 h-6" />
                     </button>
                     <span className="font-bold text-white">FITZELLY</span>
-                    <div className="w-10" /> {/* Spacer for centering */}
+                    <div className="w-10" />
                 </div>
 
-                {/* Scrollable Content */}
                 <div className="flex-1 overflow-y-auto p-4 lg:p-6 custom-scrollbar w-full">
                     <div className="w-full">
                         {renderContent()}

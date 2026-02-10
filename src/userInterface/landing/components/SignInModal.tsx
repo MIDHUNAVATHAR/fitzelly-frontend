@@ -42,7 +42,7 @@ export default function SignInModal({ isOpen, onClose, onSwitchToSignUp, onForgo
 
     const { login: updateAuthContext } = useAuth();
 
-    const handleSignIn = async (e: any) => {
+    const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
@@ -242,7 +242,7 @@ export default function SignInModal({ isOpen, onClose, onSwitchToSignUp, onForgo
                 <p className="mt-8 text-center text-zinc-500 text-sm">
                     Don't have an account?{' '}
                     <button
-                        onClick={() => { resetError(), onSwitchToSignUp?.() }}
+                        onClick={() => { resetError(); onSwitchToSignUp?.() }}
                         className="text-emerald-400 font-semibold hover:text-emerald-300 cursor-pointer"
                     >
                         Start free trial

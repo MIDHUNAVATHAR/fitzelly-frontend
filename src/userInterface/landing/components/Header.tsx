@@ -28,7 +28,7 @@ export default function Header() {
     const getDashboardPath = () => {
         switch (role) {
             case ROLES.SUPER_ADMIN:
-                return "/fitzelly-hq";
+                return "/super-admin/dashboard";
             case ROLES.GYM:
                 return "/gym/dashboard";
             case ROLES.TRAINER:

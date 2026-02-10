@@ -11,7 +11,6 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
     const { user, isLoading } = useAuth();
 
-
     if (isLoading) {
         return <Spinner />
     }

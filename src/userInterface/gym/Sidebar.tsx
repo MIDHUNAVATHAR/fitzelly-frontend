@@ -9,6 +9,9 @@ import {
     LogOut,
 
 } from 'lucide-react';
+import { useLogout } from '../../hooks/useLogout';
+
+
 
 interface SidebarProps {
     activeTab: string;
@@ -26,6 +29,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isMobileOpen
         { id: 'payments', label: 'Payments', icon: CreditCard },
         { id: 'settings', label: 'Settings', icon: Settings },
     ];
+
+    const { handleLogout } = useLogout();
+
 
     return (
         <>
@@ -87,9 +93,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isMobileOpen
                         })}
                     </nav>
 
-                    {/* User / Logout */}
+                    {/* Logout */}
                     <div className="p-4 border-t border-zinc-800 mt-auto">
-                        <button className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-400/10 transition-colors">
+                        <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-400/10 transition-colors">
                             <LogOut className="w-5 h-5" />
                             <span className="font-medium">Logout</span>
                         </button>

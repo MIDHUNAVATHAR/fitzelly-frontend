@@ -6,6 +6,7 @@ import { initiateGymSignup } from '../../../api/gym-registration.api';
 import { verifyGymSignupOtp } from '../../../api/gym-registration.api';
 import { initiateGoogleLogin } from '../../../api/google-login.api';
 import axios from 'axios';
+import type React from 'react';
 
 
 interface SignUpModalProps {
@@ -46,7 +47,7 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToSignIn }: SignU
         setIsLoading(false);
     };
 
-    const handleInitiateSignUp = async (e: any) => {
+    const handleInitiateSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
 
@@ -79,7 +80,7 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToSignIn }: SignU
         }
     };
 
-    const handleCompleteSignUp = async (e: any) => {
+    const handleCompleteSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
 

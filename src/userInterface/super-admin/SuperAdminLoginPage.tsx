@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Key, ArrowRight, ArrowLeft, ShieldCheck, X } from 'lucide-react';
+import { Mail, ArrowRight, ArrowLeft, ShieldCheck, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../api/login.api';

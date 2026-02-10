@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider } from "./providers/AuthProvider";
 import AxiosInterceptorProvider from "./providers/AxiosInterceptorProvider";
 import ErrorBoundary from "./components/error/ErrorBoundary";
 import "./index.css";

@@ -16,7 +16,7 @@ export interface GymProfile {
 }
 
 
-export const getGymProfile = async () => {
+export const getGymProfile = async () => {  
     const response = await axiosInstance.get('/api/gym/profile');
     return response.data.data;
 }
@@ -29,7 +29,7 @@ export const updateGymProfile = async (data: Partial<GymProfile>) => {
 export const uploadGymLogo = async (file: File) => {
     const formData = new FormData();
     formData.append('logo', file);
-    const response = await axiosInstance.post('/api/gym/profile/logo', formData);//content type axios handle ;
+    const response = await axiosInstance.post('/api/gym/profile/logo', formData);
     return response.data.data;
 }
 
