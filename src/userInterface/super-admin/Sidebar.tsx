@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard,
     User,
@@ -10,24 +11,19 @@ import { useLogout } from '../../hooks/useLogout';
 
 
 
-
-
 interface SidebarProps {
-    activeTab: string;
-    setActiveTab: (tab: string) => void;
     isMobileOpen: boolean;
     setIsMobileOpen: (isOpen: boolean) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isMobileOpen, setIsMobileOpen }) => {
-
+const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
+    const { pathname } = useLocation();
     const { handleLogout } = useLogout();
 
-
     const menuItems = [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { id: 'profile', label: 'Profile', icon: User },
-        { id: 'gyms', label: 'Gyms', icon: Building2 },
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/super-admin/dashboard' },
+        { id: 'profile', label: 'Profile', icon: User, path: '/super-admin/profile' },
+        { id: 'gyms', label: 'Gyms', icon: Building2, path: '/super-admin/gyms' },
     ];
 
 
@@ -62,13 +58,14 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isMobileOpen
                     <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
                         {menuItems.map((item) => {
                             const Icon = item.icon;
-                            const isActive = activeTab === item.id || activeTab.startsWith(`${item.id}-`);
+                            
+                            const isActive = pathname.startsWith(item.path);
 
                             return (
-                                <button
+                                <Link
                                     key={item.id}
+                                    to={item.path}
                                     onClick={() => {
-                                        setActiveTab(item.id);
                                         setIsMobileOpen(false); // Close mobile sidebar on selection
                                     }}
                                     className={`
@@ -86,7 +83,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isMobileOpen
                                     {isActive && (
                                         <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
                                     )}
-                                </button>
+                                </Link>
                             );
                         })}
                     </nav>

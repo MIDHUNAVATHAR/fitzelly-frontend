@@ -7,31 +7,28 @@ import {
     CreditCard,
     Settings,
     LogOut,
-
 } from 'lucide-react';
 import { useLogout } from '../../hooks/useLogout';
-
-
+import { Link, useLocation } from 'react-router-dom';
 
 interface SidebarProps {
-    activeTab: string;
-    setActiveTab: (tab: string) => void;
     isMobileOpen: boolean;
     setIsMobileOpen: (isOpen: boolean) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isMobileOpen, setIsMobileOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
+    const location = useLocation();
+
     const menuItems = [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { id: 'profile', label: 'Profile', icon: User },
-        { id: 'members', label: 'Members', icon: Users },
-        { id: 'trainers', label: 'Trainers', icon: Dumbbell },
-        { id: 'payments', label: 'Payments', icon: CreditCard },
-        { id: 'settings', label: 'Settings', icon: Settings },
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/gym/dashboard' },
+        { id: 'profile', label: 'Profile', icon: User, path: '/gym/profile' },
+        { id: 'clients', label: 'Clients', icon: Users, path: '/gym/clients' },
+        { id: 'trainers', label: 'Trainers', icon: Dumbbell, path: '/gym/trainers' },
+        { id: 'payments', label: 'Payments', icon: CreditCard, path: '/gym/payments' },
+        { id: 'settings', label: 'Settings', icon: Settings, path: '/gym/settings' },
     ];
 
     const { handleLogout } = useLogout();
-
 
     return (
         <>
@@ -64,15 +61,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isMobileOpen
                     <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
                         {menuItems.map((item) => {
                             const Icon = item.icon;
-                            const isActive = activeTab === item.id;
+                            const isActive = location.pathname.startsWith(item.path);
 
                             return (
-                                <button
+                                <Link
                                     key={item.id}
-                                    onClick={() => {
-                                        setActiveTab(item.id);
-                                        setIsMobileOpen(false); // Close mobile sidebar on selection
-                                    }}
+                                    to={item.path}
+                                    onClick={() => setIsMobileOpen(false)}
                                     className={`
                     w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 group
                     ${isActive
@@ -88,7 +83,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isMobileOpen
                                     {isActive && (
                                         <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
                                     )}
-                                </button>
+                                </Link>
                             );
                         })}
                     </nav>

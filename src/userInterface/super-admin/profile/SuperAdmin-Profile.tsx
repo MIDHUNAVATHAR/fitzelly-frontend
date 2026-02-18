@@ -56,7 +56,7 @@ const SuperAdmProfile: React.FC = () => {
         aspectRatio: 1 // Square for app logo
     });
 
-    
+
     // Get profile info
     useEffect(() => {
         const loadProfile = async () => {
@@ -68,7 +68,7 @@ const SuperAdmProfile: React.FC = () => {
                 toast.error("Failed to load profile");
             }
         };
-        
+
         loadProfile();
     }, []);
 
@@ -76,6 +76,15 @@ const SuperAdmProfile: React.FC = () => {
 
     // Profile edit
     const handleSave = async () => {
+        const { appName, caption, contactEmail, phoneNumber, description } = formData;
+        if (!appName?.trim() || !caption?.trim() || !contactEmail?.trim() || !phoneNumber?.trim() || !description?.trim()) {
+            toast.error("All Fields are mandatory");
+            return;
+        }
+        if (appName.trim().length > 30 || caption.trim().length > 30 || contactEmail.trim().length > 30 || phoneNumber.trim().length > 30||description.trim().length>100) {
+            toast.error("Data too long....");
+            return;
+        }
         setIsSaving(true);
         try {
             const data = await updateSuperAdminProfile(formData);

@@ -9,9 +9,9 @@ export const useLogout = () => {
         try {
             await logout();
         } finally {
-            navigate("/", { replace: true })
+            navigate("/", { replace: true });
         }
     }
 
-    return {handleLogout}
+    return { handleLogout };
 }

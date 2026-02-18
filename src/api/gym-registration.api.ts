@@ -1,4 +1,5 @@
 import { axiosInstance } from "./axios";
+import { GYM } from "../constants/routes";
 
 interface GymSignupInitiatePayload {
     email: string;
@@ -11,11 +12,11 @@ interface GymSignupVerifyPayload {
 }
 
 export const initiateGymSignup = async (payload: GymSignupInitiatePayload) => {
-    const res = await axiosInstance.post("/api/gym/auth/signup/initiate", payload);
+    const res = await axiosInstance.post(GYM.INITIATE_GYM_SIGNUP, payload);
     return res.data;
 }
 
 export const verifyGymSignupOtp = async (payload: GymSignupVerifyPayload) => {
-    const res = await axiosInstance.post("/api/gym/auth/signup/complete", payload);
+    const res = await axiosInstance.post(GYM.COMPLETE_GYM_SIGNUP, payload);
     return res.data;
 }

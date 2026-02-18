@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mail, Phone, MapPin, Edit3, Camera, Save, Crosshair, AlertTriangle } from 'lucide-react';
+import { Mail, Phone, MapPin, Edit3, Camera, Save, Crosshair, AlertTriangle, Clock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getGymProfile, updateGymProfile, uploadGymLogo, type GymProfile } from "../../../api/gym-profile.api";
 import { useImageCropper } from '../../../hooks/useImageCropper';
@@ -8,6 +8,8 @@ import { useLocation } from '../../../hooks/useLocation';
 
 const Profile: React.FC = () => {
     const [isEditing, setIsEditing] = useState(false);
+    const [loadingProfile, setLoadingProfile] = useState(true);
+
     const [profile, setProfile] = useState<GymProfile | null>(null);
     const [formData, setFormData] = useState<GymProfile>({});
     const [showLocationWarning, setShowLocationWarning] = useState(false);
@@ -66,6 +68,8 @@ const Profile: React.FC = () => {
         } catch (error) {
             console.error(error);
             toast.error("Failed to load profile");
+        } finally {
+            setLoadingProfile(false);
         }
     };
 
@@ -79,7 +83,7 @@ const Profile: React.FC = () => {
                 return;
             }
 
-            // Validate file size (max 5MB)
+            // Validate file size -max 5MB
             if (file.size > 5 * 1024 * 1024) {
                 toast.error("Image size should be less than 5MB");
                 return;
@@ -91,15 +95,26 @@ const Profile: React.FC = () => {
     };
 
     const handleSave = async () => {
+
+        const { gymName, caption, phoneNumber, address, description } = formData;
+
+        if (!gymName?.trim() || !caption?.trim() || !phoneNumber?.trim() || !address?.trim() || !description?.trim()) {
+            toast.error("All fields are mandatory");
+            return;
+        }
+
+        if (gymName?.trim().length > 30 || caption?.trim().length > 50 || phoneNumber?.trim().length > 30 || address?.trim().length > 30 || description?.trim().length > 30) {
+            toast.error("Data too long...");
+            return;
+        }
         setIsSaving(true);
         try {
             const updatedProfile = await updateGymProfile(formData);
             setProfile({ ...updatedProfile });
             setIsEditing(false);
             toast.success("Profile updated successfully");
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to update profile");
+        } catch {
+            toast.error("Failed to update the profile");
         } finally {
             setIsSaving(false);
         }
@@ -136,6 +151,21 @@ const Profile: React.FC = () => {
         }
     };
 
+
+    // Check if approval status is not approved
+
+    const isNotApproved = profile?.approvalStatus !== "Approved";
+
+    // Get status color based on subscription status
+    const getStatusColor = (status: string | undefined) => {
+        switch (status) {
+            case 'Active': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+            case 'Trial': return 'text-blue-400 bg-blue-400/10 border-blue-400/20';
+            case 'Expired': return 'text-red-400 bg-red-400/10 border-red-400/20';
+            default: return 'text-amber-400 bg-amber-400/10 border-amber-400/20'; // Pending
+        }
+    };
+
     return (
         <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header */}
@@ -143,6 +173,52 @@ const Profile: React.FC = () => {
                 <h1 className="text-2xl sm:text-3xl font-bold text-white">Gym Profile</h1>
                 <p className="text-zinc-400 mt-1 text-sm sm:text-base">Manage your gym's public information and settings.</p>
             </div>
+
+            {/* Approval Status Banner -not approved */}
+            {isNotApproved && !loadingProfile && (
+                <div className="mb-6 bg-gradient-to-r from-amber-300/20 to-orange-400/20 border border-amber-500/30 rounded-xl p-4 sm:p-5 backdrop-blur-sm">
+                    <div className="flex items-start gap-3 sm:gap-4">
+                        <div className="p-2 sm:p-3 bg-amber-500/20 rounded-xl flex-shrink-0">
+                            <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="text-base sm:text-lg font-semibold text-amber-400 mb-1">Approval {profile?.approvalStatus}</h3>
+                            <p className="text-sm sm:text-base text-amber-200/90">
+                                Your gym profile is currently under review. Once approved, you'll automatically receive a <span className="font-bold text-amber-300">30-day free trial</span> to explore all premium features!
+                            </p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                                <span className="text-xs bg-amber-500/20 text-amber-300 px-2 py-1 rounded-full border border-amber-500/30">
+                                    ✓ Complete your profile
+                                </span>
+                                <span className="text-xs bg-amber-500/20 text-amber-300 px-2 py-1 rounded-full border border-amber-500/30">
+                                    ✓ Get approved
+                                </span>
+                                <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-full border border-emerald-500/30">
+                                    🎁 30 days free trial
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Simple Subscription Status Banner */}
+            {profile?.subscriptionStatus !== "Pending" && !loadingProfile &&(
+
+                <div className={`mb-4 px-4 py-3 rounded-lg border ${getStatusColor(profile?.subscriptionStatus)} flex items-center justify-between`}>
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Subscription Status:</span>
+                        <span className="text-sm font-semibold capitalize">{profile?.subscriptionStatus || 'Pending'}</span>
+                    </div>
+                    {profile?.expiryDate && profile?.subscriptionStatus !== 'Pending' && (
+                        <span className="text-xs text-zinc-400">
+                            Expires: {new Date(profile.expiryDate).toLocaleDateString('en-IN')}
+                        </span>
+                    )}
+                </div>
+            )}
+
+
 
             <div className="grid grid-cols-1 gap-6">
                 <div className="space-y-6">
@@ -350,6 +426,10 @@ const Profile: React.FC = () => {
                             </button>
                         </div>
                     </div>
+
+
+
+
                 </div>
             </div>
 

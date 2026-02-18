@@ -166,5 +166,4 @@ export const useImageCropper = ({
     };
 };
 
-// Export the cropping function if needed elsewhere
 export { getCroppedImg };
