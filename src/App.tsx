@@ -5,6 +5,7 @@ import LandingPage from "./userInterface/landing/LandingPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import NotFoundPage from "./components/ui/NotFoundPage";
 import SuperAdminLoginPage from "./userInterface/super-admin/SuperAdminLoginPage";
+import CreatePassword from "./userInterface/auth/CreatePassword";
 import { ROLES } from "./constants/roles";
 import { lazyComponent } from "./components/wrapper/lazyLoad";
 
@@ -16,13 +17,11 @@ const GymProfile = lazyComponent(React.lazy(() => import("./userInterface/gym/gy
 
 const GymClients = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-clients/ClientsList")));
 const AddClient = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-clients/AddClient")));
-const ViewClient = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-clients/ViewClient")))
-const EditClient = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-clients/EditClient")))
+const ClientProfile = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-clients/ClientProfile")));
 
 const GymTrainers = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-trainers/TrainerList")));
 const AddTrainer = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-trainers/AddTrainer")));
-const EditTrainer = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-trainers/EditTrainer")));
-const ViewTrainer = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-trainers/ViewTrainer")));
+const TrainerProfile = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-trainers/TrainerProfile")))
 
 const SuperAdminLayout = lazyComponent(React.lazy(() => import("./userInterface/super-admin/SuperAdminLayout")));
 const SuperDashboardHome = lazyComponent(React.lazy(() => import("./userInterface/super-admin/dashboard/DashboardHome")));
@@ -30,6 +29,22 @@ const SuperProfile = lazyComponent(React.lazy(() => import("./userInterface/supe
 const GymList = lazyComponent(React.lazy(() => import("./userInterface/super-admin/gyms/GymList")));
 const GymView = lazyComponent(React.lazy(() => import("./userInterface/super-admin/gyms/ViewGym")));
 const EditGym = lazyComponent(React.lazy(() => import("./userInterface/super-admin/gyms/EditGym")));
+
+/**
+ * client components
+ * @returns 
+ */
+const ClientLayout = lazyComponent(React.lazy(() => import("./userInterface/client/ClientLayout")));
+const ClientDashboardHome = lazyComponent(React.lazy(() => import("./userInterface/client/dashboard/DashboardHome")));
+const ClientProfilePage = lazyComponent(React.lazy(() => import("./userInterface/client/profile/ClientProfile")))
+const GymDetailsPage = lazyComponent(React.lazy(() => import("./userInterface/client/gym-details/GymDetails")));
+
+/**
+ * trainer components 
+ * @returns 
+ */
+const TrainerLayout = lazyComponent(React.lazy(() => import("./userInterface/trainer/TrainerLayout")));
+const TrainerDashboardHome = lazyComponent(React.lazy(() => import("./userInterface/trainer/dashboard/DashboardHome")));
 
 
 
@@ -52,6 +67,7 @@ function App() {
       <Routes>
         { /* Public Routes */}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/create-password" element={<CreatePassword />} />
 
         { /* Gym protected routes */}
         <Route element={<ProtectedRoute allowedRoles={[ROLES.GYM]} />} >
@@ -62,17 +78,35 @@ function App() {
 
             <Route path="clients" element={<GymClients />} />
             <Route path="clients/add" element={<AddClient />} />
-            <Route path="clients/:id" element={<ViewClient />} />
-            <Route path="clients/:id/edit" element={<EditClient />} />
+            <Route path="clients/:id" element={<ClientProfile />} />
+            <Route path="clients/:id/edit" element={<ClientProfile />} />
 
 
             <Route path="trainers" element={<GymTrainers />} />
             <Route path="trainers/add" element={<AddTrainer />} />
-            <Route path="trainers/:id" element={<ViewTrainer />} />
-            <Route path="trainers/:id/edit" element={<EditTrainer />} />
+            <Route path="trainers/:id" element={<TrainerProfile />} />
+            <Route path="trainers/:id/edit" element={<TrainerProfile />} />
 
 
           </Route >
+        </Route>
+
+        { /* Client protected routes */}
+        <Route element={<ProtectedRoute allowedRoles={[ROLES.CLIENT]} />}>
+          <Route path="/client" element={<ClientLayout />}>
+            <Route index element={<ClientDashboardHome />} />
+            <Route path="dashboard" element={<ClientDashboardHome />} />
+            <Route path="profile" element={<ClientProfilePage />} />
+            <Route path="gym-details" element={<GymDetailsPage />} />
+          </Route>
+        </Route>
+
+        { /* Trainer protected routes */}
+        <Route element={<ProtectedRoute allowedRoles={[ROLES.TRAINER]} />}>
+          <Route path="/trainer" element={<TrainerLayout />}>
+            <Route index element={<TrainerDashboardHome />} />
+            <Route path="dashboard" element={<TrainerDashboardHome />} />
+          </Route>
         </Route>
 
         { /* super admin login route */}

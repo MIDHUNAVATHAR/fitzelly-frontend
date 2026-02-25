@@ -203,7 +203,7 @@ const Profile: React.FC = () => {
             )}
 
             {/* Simple Subscription Status Banner */}
-            {profile?.subscriptionStatus !== "Pending" && !loadingProfile &&(
+            {profile?.subscriptionStatus !== "Pending" && !loadingProfile && (
 
                 <div className={`mb-4 px-4 py-3 rounded-lg border ${getStatusColor(profile?.subscriptionStatus)} flex items-center justify-between`}>
                     <div className="flex items-center gap-2">

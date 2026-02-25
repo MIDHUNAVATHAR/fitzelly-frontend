@@ -40,13 +40,13 @@ export const fetchGyms = async (
 
 
 export const getGymById = async (gymId: string): Promise<Gym> => {
-    const response = await axiosInstance.get(SUPER_ADMIN.GET_GYM_BY_ID(gymId));
+    const response = await axiosInstance.get(SUPER_ADMIN.GYM_BY_ID(gymId));
     return response.data.data;
 
 };
 
 
 export const updateGymStatus = async (gymId: string, gymData: Partial<Gym>): Promise<Gym> => {
-    const response = await axiosInstance.patch(`/api/super-admin/gyms/${gymId}`, gymData);
-    return response.data.data;
+    const response = await axiosInstance.patch(SUPER_ADMIN.GYM_BY_ID(gymId), gymData);
+    return response.data.data; 
 };

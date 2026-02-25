@@ -29,10 +29,12 @@ export const setupInterceptors = (getAccessToken: () => string | null, setAccess
     if (requestInterceptor !== null) axiosInstance.interceptors.request.eject(requestInterceptor);
     if (responseInterceptor !== null) axiosInstance.interceptors.response.eject(responseInterceptor);
 
-    requestInterceptor = axiosInstance.interceptors.request.use((config) => {
-        const token = getAccessToken();  //take token from auth context. 
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+    requestInterceptor = axiosInstance.interceptors.request.use((config: any) => {
+        if (!config._retry) {
+            const token = getAccessToken();  //take token from auth context. 
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
         }
         return config;
     })
@@ -42,8 +44,8 @@ export const setupInterceptors = (getAccessToken: () => string | null, setAccess
 
         const isAuthRoute = originalRequest.url?.includes("/auth/login") ||
             originalRequest.url?.includes("/auth/refresh-token") ||
-            originalRequest.url.includes("/auth/logout") ||
-            originalRequest.url.includes("/auth/forgot-password/initiate")
+            originalRequest.url?.includes("/auth/logout") ||
+            originalRequest.url?.includes("/auth/forgot-password/initiate")
 
         if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
 
@@ -52,6 +54,7 @@ export const setupInterceptors = (getAccessToken: () => string | null, setAccess
                 return new Promise((resolve, reject) => {
                     failedQueue.push({ resolve, reject })
                 }).then(token => {
+                    originalRequest._retry = true;
                     originalRequest.headers.Authorization = `Bearer ${token}`;
                     return axiosInstance(originalRequest)
                 })

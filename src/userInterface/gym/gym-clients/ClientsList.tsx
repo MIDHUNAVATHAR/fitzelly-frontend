@@ -1,33 +1,38 @@
-import React,{useState,useEffect,useCallback} from "react";
-import { useNavigate,Link } from "react-router-dom";
-import {Plus,Eye,Edit,Trash2,Mail} from "lucide-react";
-import {toast} from  "react-hot-toast";
-import {fetchClients,softDeleteClient,sendWelcomeEmail} from "../../../api/gym-clients.api";
-import type{Client} from "../../../api/gym-clients.api";
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { Plus, Eye, Edit, Trash2, Mail, Loader } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { getClients, softDeleteClient, sendWelcomeEmail } from "../../../api/gym-clients.api";
+import type { ClientDTO } from "../../../api/gym-clients.api";
 import ReusableTable from "../../../components/ui/ReusableTable";
 import type { Column } from "../../../components/ui/ReusableTable";
 import SearchInput from "../../../components/ui/SearchInput";
 import Pagination from "../../../components/ui/Pagination";
+import ConfirmModal from "../../../components/ui/ConfirmModal";
 
 
 //debounce function
-function useDebounceValue<T>(value:T,delay:number):T {
-    const [debounceValue,setDebounceValue]= useState<T>(value);
-    useEffect(()=>{
-       const handler = setTimeout(()=>setDebounceValue(value),delay);
-       return ()=>clearTimeout(handler)
-    },[value,delay]);
-    return debounceValue; 
+function useDebounceValue<T>(value: T, delay: number): T {
+    const [debounceValue, setDebounceValue] = useState<T>(value);
+    useEffect(() => {
+        const handler = setTimeout(() => setDebounceValue(value), delay);
+        return () => clearTimeout(handler)
+    }, [value, delay]);
+    return debounceValue;
 }
 
 const ClientsList: React.FC = () => {
     const navigate = useNavigate();
-    const [clients, setClients] = useState<Client[]>([]);
+    const [clients, setClients] = useState<ClientDTO[]>([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    const [clientToDelete, setClientToDelete] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [sendingEmailId, setSendingEmailId] = useState<string | null>(null);
 
     const debouncedSearch = useDebounceValue(search, 500);
 
@@ -41,11 +46,15 @@ const ClientsList: React.FC = () => {
     const loadClients = useCallback(async (pageNum: number, searchQuery: string, append: boolean = false) => {
         try {
             setLoading(true);
-            const data = await fetchClients(pageNum, searchQuery);
+            const data = await getClients(pageNum, searchQuery);
+            if (data.status != "success") {
+                toast.error('Failed to load clients');
+                return
+            }
             if (append) {
-                setClients(prev => [...prev, ...data.clients]);
+                setClients(prev => [...prev, ...data.data.clients]);
             } else {
-                setClients(data.clients);
+                setClients(data.data.clients);
             }
             setTotalPages(data.totalPages);
         } catch (error) {
@@ -92,33 +101,51 @@ const ClientsList: React.FC = () => {
     }, [handleScroll]);
 
 
-    const handleDelete = async (id: string) => {
-        if (!window.confirm("Are you sure you want to delete this client?")) return;
+    const handleDelete = (id: string) => {
+        setClientToDelete(id);
+    };
+
+    const confirmDelete = async () => {
+        if (!clientToDelete) return;
+
+        setIsDeleting(true);
         try {
-            await softDeleteClient(id);
+            await softDeleteClient(clientToDelete);
             toast.success("Client deleted successfully");
             loadClients(1, debouncedSearch, false); // Reload
         } catch {
             toast.error("Failed to delete client");
+        } finally {
+            setIsDeleting(false);
+            setClientToDelete(null);
         }
     };
 
-    const handleSendWelcome = async (id: string) => {
+    const handleSendWelcome = async (client: ClientDTO, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (client.isEmailVerified) {
+            toast.error("Already verified");
+            return;
+        }
+
+        setSendingEmailId(client.id);
         try {
-            await sendWelcomeEmail(id);
+            await sendWelcomeEmail(client.id);
             toast.success("Welcome email sent!");
         } catch {
             toast.error("Failed to send email");
+        } finally {
+            setSendingEmailId(null);
         }
     }
 
-    const columns: Column<Client>[] = [
+    const columns: Column<ClientDTO>[] = [
         { header: 'Full Name', accessor: 'fullName' },
         { header: 'Current Plan', accessor: (client) => client.currentPlan || 'N/A' },
         { header: 'Email', accessor: 'email' },
         { header: 'Phone', accessor: 'phoneNumber' },
         {
-            header: 'Status',
+            header: 'Membership Status',
             accessor: (client) => (
                 <span className={`px-2 py-1 rounded text-xs font-semibold
           ${client.membershipStatus === 'Active' ? 'bg-green-500/20 text-green-400' :
@@ -133,21 +160,30 @@ const ClientsList: React.FC = () => {
             accessor: (client) => (
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={(e) => { e.stopPropagation(); handleSendWelcome(client.id) }}
-                        title="Send Welcome Email"
-                        className="p-1.5 bg-zinc-800 rounded hover:bg-zinc-700 text-zinc-400 hover:text-white transition"
+                        onClick={(e) => handleSendWelcome(client, e)}
+                        disabled={sendingEmailId === client.id}
+                        title={client.isEmailVerified ? "Already verified" : "Send Welcome Email"}
+                        className={`p-1.5 rounded transition ${client.isEmailVerified ? 'bg-zinc-800 text-zinc-600 cursor-not-allowed' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white'}`}
                     >
-                        <Mail className="w-4 h-4" />
+                        {sendingEmailId === client.id ? <Loader className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
                     </button>
                     <button
-                        onClick={(e) => { e.stopPropagation(); navigate(`/gym/clients/${client.id}`) }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/gym/clients/${client.id}`);
+                        }}
                         title="View"
                         className="p-1.5 bg-zinc-800 rounded hover:bg-zinc-700 text-blue-400 transition"
                     >
                         <Eye className="w-4 h-4" />
                     </button>
                     <button
-                        onClick={(e) => { e.stopPropagation(); navigate(`/gym/clients/${client.id}/edit`) }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/gym/clients/${client.id}/edit`, {
+                                state: { enableEditing: true }
+                            });
+                        }}
                         title="Edit"
                         className="p-1.5 bg-zinc-800 rounded hover:bg-zinc-700 text-amber-400 transition"
                     >
@@ -205,6 +241,15 @@ const ClientsList: React.FC = () => {
                     />
                 </div>
             )}
+
+            <ConfirmModal
+                isOpen={!!clientToDelete}
+                onClose={() => setClientToDelete(null)}
+                onConfirm={confirmDelete}
+                title="Delete Client"
+                message="Are you sure you want to delete this client? This action can be undone later."
+                isProcessing={isDeleting}
+            />
         </div>
     );
 };

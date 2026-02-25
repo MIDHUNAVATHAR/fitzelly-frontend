@@ -5,9 +5,10 @@ import ReusableTable from '../../../components/ui/ReusableTable';
 import type { Column } from '../../../components/ui/ReusableTable';
 import SearchInput from '../../../components/ui/SearchInput';
 import Pagination from '../../../components/ui/Pagination';
-import { Plus, Mail, Eye, Edit, Trash2 } from 'lucide-react';
-import { fetchTrainers, softDeleteTrainer, sendWelcomeEmail } from "../../../api/gym-trainers.api";
-import type { Trainer } from "../../../api/gym-trainers.api"; 
+import ConfirmModal from '../../../components/ui/ConfirmModal';
+import { Plus, Mail, Eye, Edit, Trash2, Loader } from 'lucide-react';
+import { getTrainers, softDeleteTrainer, sendWelcomeEmail } from "../../../api/gym-trainers.api";
+import type { Trainer } from "../../../api/gym-trainers.api";
 import { toast } from 'react-hot-toast';
 
 const TrainersList: React.FC = () => {
@@ -21,6 +22,10 @@ const TrainersList: React.FC = () => {
     // For infinite scroll
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
+    const [trainerToDelete, setTrainerToDelete] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [sendingEmailId, setSendingEmailId] = useState<string | null>(null);
+
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 1024);
         window.addEventListener('resize', checkMobile);
@@ -30,7 +35,7 @@ const TrainersList: React.FC = () => {
     const loadTrainers = useCallback(async (page: number, searchTerm: string, append: boolean = false) => {
         try {
             setLoading(true);
-            const data = await fetchTrainers(page, searchTerm);
+            const data = await getTrainers(page, searchTerm);
             setTrainers(prev => append ? [...prev, ...data.trainers] : data.trainers);
             setTotalPages(data?.totalPages);
         } catch (error) {
@@ -50,7 +55,7 @@ const TrainersList: React.FC = () => {
         if (!isMobile) {
             loadTrainers(currentPage, search, false);
         }
-    }, [currentPage, isMobile, loadTrainers,search]); 
+    }, [currentPage, isMobile, loadTrainers, search]);
 
 
     // Infinite Scroll Handler
@@ -79,27 +84,43 @@ const TrainersList: React.FC = () => {
     }, [handleScroll]);
 
 
-    const handleDelete = async (id: string, e: React.MouseEvent) => {
+    const handleDelete = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        if (window.confirm("Are you sure you want to delete this trainer?")) {
-            try {
-                await softDeleteTrainer(id);
-                toast.success("Trainer deleted");
-                loadTrainers(1, search, false); // Reload
-                setCurrentPage(1);
-            } catch {
-                toast.error("Failed to delete trainer");
-            }
+        setTrainerToDelete(id);
+    }
+
+    const confirmDelete = async () => {
+        if (!trainerToDelete) return;
+
+        setIsDeleting(true);
+        try {
+            await softDeleteTrainer(trainerToDelete);
+            toast.success("Trainer deleted");
+            loadTrainers(1, search, false); // Reload
+            setCurrentPage(1);
+        } catch {
+            toast.error("Failed to delete trainer");
+        } finally {
+            setIsDeleting(false);
+            setTrainerToDelete(null);
         }
     }
 
-    const handleSendWelcome = async (id: string, e: React.MouseEvent) => {
+    const handleSendWelcome = async (trainer: Trainer, e: React.MouseEvent) => {
         e.stopPropagation();
+        if (trainer.isEmailVerified) {
+            toast.error("Already verified");
+            return;
+        }
+
+        setSendingEmailId(trainer.id!);
         try {
-            await sendWelcomeEmail(id);
+            await sendWelcomeEmail(trainer.id!);
             toast.success("Welcome email sent");
         } catch {
             toast.error("Failed to send email");
+        } finally {
+            setSendingEmailId(null);
         }
     }
 
@@ -111,35 +132,38 @@ const TrainersList: React.FC = () => {
         { header: 'Specialization', accessor: (trainer) => trainer.specialization || 'N/A' },
         {
             header: 'Salary',
-            accessor: (trainer) => trainer.salary ? `$${trainer.salary}` : '-'
+            accessor: (trainer) => trainer.salary ? `${trainer.salary}` : '-'
         },
         {
             header: 'Actions',
             accessor: (trainer) => (
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={(e) => handleSendWelcome(trainer._id!, e)}
-                        className="p-1.5 bg-zinc-800 rounded hover:bg-zinc-700 text-zinc-400 hover:text-white transition"
-                        title="Send Welcome Email"
+                        onClick={(e) => handleSendWelcome(trainer, e)}
+                        disabled={sendingEmailId === trainer.id}
+                        className={`p-1.5 rounded transition ${trainer.isEmailVerified ? 'bg-zinc-800 text-zinc-600 cursor-not-allowed' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white'}`}
+                        title={trainer.isEmailVerified ? "Already verified" : "Send Welcome Email"}
                     >
-                        <Mail className="w-4 h-4" />
+                        {sendingEmailId === trainer.id ? <Loader className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
                     </button>
                     <button
-                        onClick={(e) => { e.stopPropagation(); navigate(`/gym/trainers/${trainer._id}`) }}
+                        onClick={(e) => { e.stopPropagation(); navigate(`/gym/trainers/${trainer.id}`) }}
                         className="p-1.5 bg-zinc-800 rounded hover:bg-zinc-700 text-blue-400 transition"
                         title="View"
                     >
                         <Eye className="w-4 h-4" />
                     </button>
+
                     <button
-                        onClick={(e) => { e.stopPropagation(); navigate(`/gym/trainers/${trainer._id}/edit`) }}
+                        onClick={(e) => { e.stopPropagation(); navigate(`/gym/trainers/${trainer.id}/edit`) }}
                         className="p-1.5 bg-zinc-800 rounded hover:bg-zinc-700 text-amber-400 transition"
                         title="Edit"
                     >
                         <Edit className="w-4 h-4" />
                     </button>
+
                     <button
-                        onClick={(e) => handleDelete(trainer._id!, e)}
+                        onClick={(e) => handleDelete(trainer.id!, e)}
                         className="p-1.5 bg-zinc-800 rounded hover:bg-zinc-700 text-red-400 transition"
                         title="Delete"
                     >
@@ -173,7 +197,7 @@ const TrainersList: React.FC = () => {
                 data={trainers}
                 columns={columns}
                 isLoading={loading}
-                onRowClick={(trainer) => navigate(`/gym/trainers/${trainer._id}`)}
+                onRowClick={(trainer) => navigate(`/gym/trainers/${trainer.id}`)}
             />
 
             {!isMobile && totalPages > 1 && (
@@ -185,6 +209,15 @@ const TrainersList: React.FC = () => {
                     />
                 </div>
             )}
+
+            <ConfirmModal
+                isOpen={!!trainerToDelete}
+                onClose={() => setTrainerToDelete(null)}
+                onConfirm={confirmDelete}
+                title="Delete Trainer"
+                message="Are you sure you want to delete this trainer? This action can be undone later."
+                isProcessing={isDeleting}
+            />
         </div>
     );
 };
