@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { Mail, Phone, Calendar, User, PhoneCall, Tag, Award, ArrowLeft, Edit3, Save, X, Loader2 } from 'lucide-react';
+import { Mail, Phone, Calendar, User, PhoneCall, Tag, Award, ArrowLeft, Edit3, Save, X, Loader2, IndianRupee, CreditCard } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getClientById, updateClient } from "../../../api/gym-clients.api";
 import type { ClientDTO } from "../../../api/gym-clients.api";
+import { useDateFormat } from "../../../hooks/useDateFormat";
+import DateInput from "../../../components/ui/DateInput";
 
 const ClientProfile: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -18,6 +20,7 @@ const ClientProfile: React.FC = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [client, setClient] = useState<ClientDTO | null>(null);
     const [formData, setFormData] = useState<Partial<ClientDTO>>({});
+    const { formatToShortMonth: formatDate } = useDateFormat();
 
     useEffect(() => {
         loadClient();
@@ -90,25 +93,26 @@ const ClientProfile: React.FC = () => {
         navigate('/gym/clients');
     };
 
-    // Get membership status color
     const getStatusColor = (status: string | undefined) => {
-        switch (status) {
-            case 'Active': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
-            case 'Pending': return 'text-amber-400 bg-amber-400/10 border-amber-400/20';
-            case 'Expired': return 'text-red-400 bg-red-400/10 border-red-400/20';
+        if (!status) return 'text-zinc-400 bg-zinc-400/10 border-zinc-400/20';
+        switch (status.toUpperCase()) {
+            case 'ACTIVE': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+            case 'PENDING': return 'text-amber-400 bg-amber-400/10 border-amber-400/20';
+            case 'EXPIRED': return 'text-red-400 bg-red-400/10 border-red-400/20';
             default: return 'text-zinc-400 bg-zinc-400/10 border-zinc-400/20';
         }
     };
 
-    // Format date for display
-    const formatDate = (dateString?: string) => {
-        if (!dateString) return 'N/A';
-        return new Date(dateString).toLocaleDateString('en-IN', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        });
+    const getPaymentStatusColor = (status: string | undefined) => {
+        switch (status) {
+            case 'PAID': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+            case 'PARTIAL': return 'text-amber-400 bg-amber-400/10 border-amber-400/20';
+            case 'UNPAID': return 'text-red-400 bg-red-400/10 border-red-400/20';
+            default: return 'text-zinc-400 bg-zinc-400/10 border-zinc-400/20';
+        }
     };
+
+    // Removed local formatDate since we use hook
 
     if (loading) {
         return (
@@ -131,7 +135,7 @@ const ClientProfile: React.FC = () => {
                     <ArrowLeft className="w-5 h-5" />
                 </button>
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-white">Client Profile</h1>
+                    <h1 className="text-2xl font-bold text-white">Client Profile</h1>
                     <p className="text-zinc-400 mt-1 text-sm sm:text-base">
                         {isEditing ? 'Edit client information' : 'View client information'}
                     </p>
@@ -139,7 +143,7 @@ const ClientProfile: React.FC = () => {
             </div>
 
             {/* Main Card */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
                 {/* Header Gradient */}
                 <div className="h-20 sm:h-32 bg-gradient-to-r from-blue-900/20 to-zinc-900 relative">
                     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-400/10 via-transparent to-transparent"></div>
@@ -171,9 +175,9 @@ const ClientProfile: React.FC = () => {
                             <div className="flex justify-end mb-3 sm:mb-4">
                                 <button
                                     onClick={() => setIsEditing(true)}
-                                    className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-emerald-400 text-black font-semibold rounded-lg text-xs sm:text-sm hover:bg-emerald-500 transition-colors"
+                                    className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white font-semibold rounded-lg text-sm hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20"
                                 >
-                                    <Edit3 className="w-3 h-3 sm:w-4 sm:h-4" />
+                                    <Edit3 className="w-4 h-4" />
                                     Edit Profile
                                 </button>
                             </div>
@@ -264,8 +268,7 @@ const ClientProfile: React.FC = () => {
                             {isEditing ? (
                                 <div className="relative">
                                     <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 absolute left-3 top-2.5 z-10" />
-                                    <input
-                                        type="date"
+                                    <DateInput
                                         name="dateOfBirth"
                                         value={formData.dateOfBirth ? formData.dateOfBirth.split('T')[0] : ''}
                                         onChange={handleChange}
@@ -339,33 +342,113 @@ const ClientProfile: React.FC = () => {
             </div>
 
             {/* Membership Status Card */}
-            <div className="mt-6 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Membership Details</h3>
+            <div className="mt-6 bg-zinc-900 border border-zinc-800 rounded-xl p-4 sm:p-6 mb-6">
+                <h3 className="text-lg font-bold text-white mb-4">Membership Details</h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="bg-zinc-950/50 p-4 rounded-xl border border-zinc-800/50">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-zinc-500">Status</span>
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(client.membershipStatus)}`}>
-                                {client.membershipStatus}
-                            </span>
+                {!client.currentPlan || client.membershipStatus === 'None' ? (
+                    <div className="flex flex-col items-center justify-center py-12 bg-zinc-950/50 border border-zinc-800/50 rounded-xl text-center px-4">
+                        <Award className="w-12 h-12 text-zinc-600 mb-3" />
+                        <h4 className="text-base font-medium text-white mb-1">No Active Membership</h4>
+                        <p className="text-sm text-zinc-500 max-w-sm">This client hasn't been assigned a membership plan yet.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {/* Plan Name & Status */}
+                            <div className="bg-zinc-950/50 p-4 rounded-xl border border-zinc-800/50">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm font-medium text-zinc-500">Plan & Status</span>
+                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border uppercase tracking-wider ${getStatusColor(client.membershipStatus)}`}>
+                                        {client.membershipStatus}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2 text-zinc-300">
+                                    <Award className="w-4 h-4 text-emerald-400" />
+                                    <span className="text-sm font-medium truncate">{client.currentPlan}</span>
+                                </div>
+                                {client.planType && (
+                                    <div className="mt-1 pl-6 text-xs text-zinc-500">
+                                        Type: {client.planType.replace('_', ' ')}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Dates */}
+                            <div className="bg-zinc-950/50 p-4 rounded-xl border border-zinc-800/50">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm font-medium text-zinc-500">Duration</span>
+                                    {client.planType === 'DAY_BASED' && client.daysLeft !== undefined && client.daysLeft !== null && (
+                                        <span className="text-xs font-semibold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">{client.daysLeft} days left</span>
+                                    )}
+                                </div>
+                                <div className="flex flex-col gap-1 text-zinc-300 text-sm">
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                                        <span className="truncate">Start: {formatDate(client.startDate)}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-zinc-400 pl-6">
+                                        <span className="truncate">End: {formatDate(client.expiryDate)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Assigned Trainer */}
+                            <div className="bg-zinc-950/50 p-4 rounded-xl border border-zinc-800/50">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm font-medium text-zinc-500">Assigned Trainer</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-zinc-300">
+                                    <User className="w-4 h-4 text-emerald-400" />
+                                    <span className="text-sm truncate">
+                                        {client.assignedTrainer || 'No Trainer Assigned'}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2 text-zinc-300">
-                            <Award className="w-4 h-4 text-emerald-400" />
-                            <span className="text-sm">{client.currentPlan || 'No plan assigned'}</span>
+
+                        {/* Payments Section */}
+                        <div className="bg-zinc-950/50 rounded-xl border border-zinc-800/50 overflow-hidden">
+                            <div className="p-4 border-b border-zinc-800/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                <div className="flex items-center gap-2">
+                                    <CreditCard className="w-5 h-5 text-zinc-400" />
+                                    <h4 className="text-sm font-semibold text-white">Payment Information</h4>
+                                </div>
+                                {client.paymentStatus && (
+                                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${getPaymentStatusColor(client.paymentStatus)}`}>
+                                        {client.paymentStatus}
+                                    </span>
+                                )}
+                            </div>
+
+                            <div className="p-2 sm:p-4">
+                                {client.payments && client.payments.length > 0 ? (
+                                    <div className="flex flex-col gap-2">
+                                        {client.payments.map((payment, i) => (
+                                            <div key={i} className="flex justify-between items-center p-3 sm:p-4 rounded-lg bg-zinc-900 border border-zinc-800">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center">
+                                                        <Calendar className="w-4 h-4 text-zinc-400" />
+                                                    </div>
+                                                    <span className="text-sm text-zinc-300 font-medium">
+                                                        {formatDate(payment.date)}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-1 font-semibold text-emerald-400 text-sm sm:text-base">
+                                                    <IndianRupee className="w-4 h-4" />
+                                                    {payment.amount}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-6 text-sm text-zinc-500">
+                                        No payment records found
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
-
-                    <div className="bg-zinc-950/50 p-4 rounded-xl border border-zinc-800/50">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-zinc-500">Joined Date</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-zinc-300">
-                            <Calendar className="w-4 h-4 text-emerald-400" />
-                            <span className="text-sm">{formatDate(client.joinedDate)}</span>
-                        </div>
-                    </div>
-                </div>
+                )}
             </div>
 
             {/* Edit/Save Buttons (when editing) */}
@@ -382,7 +465,7 @@ const ClientProfile: React.FC = () => {
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="flex items-center gap-2 px-4 py-2 bg-emerald-400 text-black font-semibold rounded-lg text-sm hover:bg-emerald-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white font-semibold rounded-lg text-sm hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20"
                     >
                         {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                         Save Changes

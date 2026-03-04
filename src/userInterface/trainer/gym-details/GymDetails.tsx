@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, AlignLeft, Info } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { getClientGymDetails, type GymProfile } from '../../../api/client-profile.api';
+import { getTrainerGymDetails, type GymProfile } from '../../../api/trainer-profile.api';
+import { isAxiosError } from 'axios';
 
 const GymDetailsPage: React.FC = () => {
     const [gymProfile, setGymProfile] = useState<GymProfile | null>(null);
@@ -10,11 +11,16 @@ const GymDetailsPage: React.FC = () => {
     useEffect(() => {
         const fetchGymDetails = async () => {
             try {
-                const profileData = await getClientGymDetails();
+                const profileData = await getTrainerGymDetails();
                 setGymProfile(profileData);
-            } catch (error: any) {
-                console.error("Failed to fetch gym details", error);
-                toast.error(error.response?.data?.message || "Failed to load gym details");
+            } catch (error: unknown) {
+                if (isAxiosError(error)) {
+                    toast.error(error.response?.data?.message ?? "Failed to load gym details");
+                } else if (error instanceof Error) {
+                    toast.error(error.message);
+                } else {
+                    toast.error("Failed to load gym details");
+                }
             } finally {
                 setLoading(false);
             }

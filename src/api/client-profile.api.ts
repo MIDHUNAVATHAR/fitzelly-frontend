@@ -14,15 +14,19 @@ export interface ClientProfile {
 }
 
 export interface ClientMembership {
-    id?: string;
-    planName: string;
-    planType: 'category-based' | 'day-based';
+    currentPlan: string;
+    planType: string;
     startDate: string;
-    expiryDate?: string;
-    daysLeft?: number;
+    expiryDate: string | null;
+    status: 'ACTIVE' | 'EXPIRED';
+    daysLeft: number | null;
+    assignedTrainer: string | null;
+    assignedTrainerId: string | null;
+    paymentStatus?: 'PAID' | 'PARTIAL' | 'UNPAID' | null;
+    payments?: { date: string, amount: number }[];
 }
 
-export const getClientProfile = async (): Promise<ClientProfile> => {
+export const getClientProfile = async (): Promise<{ profile: ClientProfile; membership: ClientMembership | null }> => {
     const response = await axiosInstance.get('/api/client/profile');
     return response.data.data;
 };
@@ -44,18 +48,6 @@ export const uploadClientProfileImage = async (file: File): Promise<{ profileIma
     return response.data.data;
 };
 
-export const getClientMembership = async (): Promise<ClientMembership | null> => {
-    try {
-        const response = await axiosInstance.get('/api/client/membership/latest');
-        return response.data.data;
-    } catch (error: any) {
-        if (error.response?.status === 404) {
-            return null; // Return null if no membership found
-        }
-        throw error;
-    }
-};
-
 export interface GymProfile {
     logoUrl?: string;
     gymName?: string;
@@ -73,7 +65,7 @@ export interface GymProfile {
     expiryDate?: string;
 }
 
-export const getGymProfileById = async (gymId: string): Promise<GymProfile> => {
-    const response = await axiosInstance.get(`/api/gym/view/${gymId}`);
+export const getClientGymDetails = async (): Promise<GymProfile> => {
+    const response = await axiosInstance.get(`/api/client/gym-details`);
     return response.data.data;
 };

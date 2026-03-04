@@ -13,6 +13,13 @@ export interface ClientDTO {
     contactPerson: string;
     currentPlan: string;
     membershipStatus: string;
+    planType?: 'DAY_BASED' | 'CATEGORY_BASED';
+    daysLeft?: number;
+    startDate?: string;
+    expiryDate?: string;
+    assignedTrainer?: string;
+    paymentStatus?: 'PAID' | 'PARTIAL' | 'UNPAID';
+    payments?: { date: string, amount: number }[];
     joinedDate: string;
     isEmailVerified: boolean;
 }
@@ -32,9 +39,8 @@ export const softDeleteClient = async (id: string) => {
     return response.data;
 };
 
-
 export const sendWelcomeEmail = async (id: string) => {
-    const res = await axiosInstance.post(GYM.CLIENT_WELCOME(id));
+    const res = await axiosInstance.post(GYM.CLIENT_BY_ID(id) + `/send-welcome`);
     return res.data;
 };
 

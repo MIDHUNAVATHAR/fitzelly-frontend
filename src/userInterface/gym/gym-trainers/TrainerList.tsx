@@ -196,9 +196,13 @@ const TrainersList: React.FC = () => {
             <ReusableTable
                 data={trainers}
                 columns={columns}
-                isLoading={loading}
+                isLoading={loading && currentPage === 1}
                 onRowClick={(trainer) => navigate(`/gym/trainers/${trainer.id}`)}
             />
+
+            {loading && currentPage > 1 && (
+                <div className="text-center py-4 text-zinc-500">Loading more...</div>
+            )}
 
             {!isMobile && totalPages > 1 && (
                 <div className="flex justify-end">

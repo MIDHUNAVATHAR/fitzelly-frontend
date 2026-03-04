@@ -169,9 +169,8 @@ const Profile: React.FC = () => {
     return (
         <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header */}
-            <div className="mb-6 sm:mb-8">
-                <h1 className="text-2xl sm:text-3xl font-bold text-white">Gym Profile</h1>
-                <p className="text-zinc-400 mt-1 text-sm sm:text-base">Manage your gym's public information and settings.</p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <h1 className="text-2xl font-bold text-white">Gym Profile</h1>
             </div>
 
             {/* Approval Status Banner -not approved */}

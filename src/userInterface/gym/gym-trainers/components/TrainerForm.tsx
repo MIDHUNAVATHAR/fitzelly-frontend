@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import type { Trainer } from "../../../../api/gym-trainers.api";
+import DateInput from "../../../../components/ui/DateInput";
 
 interface TrainerFormProps {
     initialData?: Partial<Trainer>;
@@ -14,7 +15,7 @@ interface TrainerFormProps {
 const TrainerForm: React.FC<TrainerFormProps> = ({ initialData, onSubmit, isLoading, title }) => {
     const navigate = useNavigate();
 
-    const { register, handleSubmit, formState: { errors } } = useForm<Partial<Trainer>>({
+    const { register, handleSubmit, watch, formState: { errors } } = useForm<Partial<Trainer>>({
         defaultValues: {
             ...initialData,
             dateOfBirth: initialData?.dateOfBirth
@@ -118,9 +119,9 @@ const TrainerForm: React.FC<TrainerFormProps> = ({ initialData, onSubmit, isLoad
                         <label className="block text-sm font-medium text-zinc-400 mb-1">
                             Date of Birth
                         </label>
-                        <input
-                            type="date"
+                        <DateInput
                             {...register('dateOfBirth')}
+                            value={watch('dateOfBirth')}
                             className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                         />
                     </div>

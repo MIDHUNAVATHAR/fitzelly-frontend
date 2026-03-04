@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, LogOut, Activity } from 'lucide-react';
+import { LayoutDashboard, LogOut, Activity, User, Building } from 'lucide-react';
 import { useLogout } from '../../hooks/useLogout';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -13,6 +13,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
 
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/trainer/dashboard' },
+        { id: 'profile', label: 'Profile', icon: User, path: '/trainer/profile' },
+        { id: 'gym_details', label: 'Gym Details', icon: Building, path: '/trainer/gym-details' },
+        { id: 'clients', label: 'Clients', icon: User, path: '/trainer/clients' },
+
     ];
 
     const { handleLogout } = useLogout();

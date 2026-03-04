@@ -28,3 +28,8 @@ export const SUPER_ADMIN = {
     SUPER_ADMIN_GYMS: "/api/super-admin/gyms",
     GYM_BY_ID: (gymId: string) => `/api/super-admin/gyms/${gymId}`
 }
+
+
+export const TRAINER_ROUTES = {
+    TRAINER_CLIENTS: "/api/trainer/clients",
+}

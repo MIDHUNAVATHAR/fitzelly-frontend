@@ -4,9 +4,11 @@ import {
     User,
     Users,
     Dumbbell,
-    CreditCard,
     Settings,
     LogOut,
+    List,
+    ShieldCheck,
+    Box,
 } from 'lucide-react';
 import { useLogout } from '../../hooks/useLogout';
 import { Link, useLocation } from 'react-router-dom';
@@ -24,7 +26,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
         { id: 'profile', label: 'Profile', icon: User, path: '/gym/profile' },
         { id: 'clients', label: 'Clients', icon: Users, path: '/gym/clients' },
         { id: 'trainers', label: 'Trainers', icon: Dumbbell, path: '/gym/trainers' },
-        { id: 'payments', label: 'Payments', icon: CreditCard, path: '/gym/payments' },
+        { id: 'plans', label: 'Membership Plans', icon: List, path: '/gym/plans' },
+        { id: 'memberships', label: 'Memberships', icon: ShieldCheck, path: '/gym/memberships' },
+        { id: 'equipments', label: 'Gym Equipment', icon: Box, path: '/gym/equipments' },
         { id: 'settings', label: 'Settings', icon: Settings, path: '/gym/settings' },
     ];
 

@@ -23,6 +23,14 @@ const GymTrainers = lazyComponent(React.lazy(() => import("./userInterface/gym/g
 const AddTrainer = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-trainers/AddTrainer")));
 const TrainerProfile = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-trainers/TrainerProfile")))
 
+const GymPlans = lazyComponent(React.lazy(() => import("./userInterface/gym/plans/PlansPage")))
+const MembershipList = lazyComponent(React.lazy(() => import("./userInterface/gym/memberships/MembershipListPage")))
+const MembershipView = lazyComponent(React.lazy(() => import("./userInterface/gym/memberships/MembershipViewPage")))
+
+const EquipmentList = lazyComponent(React.lazy(() => import("./userInterface/gym/equipment/EquipmentList")));
+
+
+
 const SuperAdminLayout = lazyComponent(React.lazy(() => import("./userInterface/super-admin/SuperAdminLayout")));
 const SuperDashboardHome = lazyComponent(React.lazy(() => import("./userInterface/super-admin/dashboard/DashboardHome")));
 const SuperProfile = lazyComponent(React.lazy(() => import("./userInterface/super-admin/profile/SuperAdmin-Profile")))
@@ -45,6 +53,10 @@ const GymDetailsPage = lazyComponent(React.lazy(() => import("./userInterface/cl
  */
 const TrainerLayout = lazyComponent(React.lazy(() => import("./userInterface/trainer/TrainerLayout")));
 const TrainerDashboardHome = lazyComponent(React.lazy(() => import("./userInterface/trainer/dashboard/DashboardHome")));
+const TrainerProfilePage = lazyComponent(React.lazy(() => import("./userInterface/trainer/profile/TrainerProfile")));
+const TrainerGymDetailsPage = lazyComponent(React.lazy(() => import("./userInterface/trainer/gym-details/GymDetails")));
+const TrainerClientsPage = lazyComponent(React.lazy(() => import("./userInterface/trainer/clients/AssignedClientsPage")));
+const TrainerClientProfilePage = lazyComponent(React.lazy(() => import("./userInterface/trainer/clients/AssignedClientProfile")));
 
 
 
@@ -87,6 +99,13 @@ function App() {
             <Route path="trainers/:id" element={<TrainerProfile />} />
             <Route path="trainers/:id/edit" element={<TrainerProfile />} />
 
+            <Route path="plans" element={<GymPlans />} />
+
+            <Route path="memberships" element={<MembershipList />} />
+            <Route path="memberships/:id" element={<MembershipView />} />
+
+            <Route path="equipments" element={<EquipmentList />} />
+
 
           </Route >
         </Route>
@@ -106,6 +125,10 @@ function App() {
           <Route path="/trainer" element={<TrainerLayout />}>
             <Route index element={<TrainerDashboardHome />} />
             <Route path="dashboard" element={<TrainerDashboardHome />} />
+            <Route path="profile" element={<TrainerProfilePage />} />
+            <Route path="gym-details" element={<TrainerGymDetailsPage />} />
+            <Route path="clients" element={<TrainerClientsPage />} />
+            <Route path="clients/:id" element={<TrainerClientProfilePage />} />
           </Route>
         </Route>
 

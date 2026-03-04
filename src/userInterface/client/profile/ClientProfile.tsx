@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mail, Phone, Calendar, Users, PhoneCall, Edit3, Camera, Save, CalendarDays, Activity } from 'lucide-react';
+import { Mail, Phone, Calendar, Users, PhoneCall, Edit3, Camera, Save, CalendarDays, Activity, Award, User, CreditCard, IndianRupee } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { getClientProfile, updateClientProfile, uploadClientProfileImage, getClientMembership, type ClientProfile, type ClientMembership } from "../../../api/client-profile.api";
+import { getClientProfile, updateClientProfile, uploadClientProfileImage, type ClientProfile, type ClientMembership } from "../../../api/client-profile.api";
 import { useImageCropper } from '../../../hooks/useImageCropper';
 import ImageCropperModal from '../../../components/ui/ImageCropperModal';
+import DateInput from '../../../components/ui/DateInput';
+import { useDateFormat } from '../../../hooks/useDateFormat';
 
 const ClientProfilePage: React.FC = () => {
     const [isEditing, setIsEditing] = useState(false);
@@ -12,6 +14,27 @@ const ClientProfilePage: React.FC = () => {
 
     const [profile, setProfile] = useState<ClientProfile | null>(null);
     const [membership, setMembership] = useState<ClientMembership | null>(null);
+    const { formatToGB } = useDateFormat();
+
+    // Get membership status color
+    const getStatusColor = (status: string | undefined) => {
+        if (!status) return 'text-zinc-400 bg-zinc-400/10 border-zinc-400/20';
+        switch (status.toUpperCase()) {
+            case 'ACTIVE': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+            case 'PENDING': return 'text-amber-400 bg-amber-400/10 border-amber-400/20';
+            case 'EXPIRED': return 'text-red-400 bg-red-400/10 border-red-400/20';
+            default: return 'text-zinc-400 bg-zinc-400/10 border-zinc-400/20';
+        }
+    };
+
+    const getPaymentStatusColor = (status: string | undefined) => {
+        switch (status) {
+            case 'PAID': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+            case 'PARTIAL': return 'text-amber-400 bg-amber-400/10 border-amber-400/20';
+            case 'UNPAID': return 'text-red-400 bg-red-400/10 border-red-400/20';
+            default: return 'text-zinc-400 bg-zinc-400/10 border-zinc-400/20';
+        }
+    };
     const [formData, setFormData] = useState<ClientProfile>({});
     const [isSaving, setIsSaving] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -59,24 +82,16 @@ const ClientProfilePage: React.FC = () => {
 
     const loadData = async () => {
         try {
-            const [profileData, membershipData] = await Promise.all([
-                getClientProfile().catch((e) => {
-                    console.error("Failed to fetch profile", e);
-                    toast.error("Failed to load profile");
-                    return null;
-                }),
-                getClientMembership().catch((e) => {
-                    console.error("Failed to fetch membership", e);
-                    return null;
-                })
-            ]);
+            const data = await getClientProfile().catch((e) => {
+                console.error("Failed to fetch profile", e);
+                toast.error("Failed to load profile");
+                return null;
+            });
 
-            if (profileData) {
-                setProfile(profileData);
-                setFormData(profileData);
-            }
-            if (membershipData) {
-                setMembership(membershipData);
+            if (data) {
+                setProfile(data.profile);
+                setFormData(data.profile);
+                setMembership(data.membership);
             }
         } finally {
             setLoadingProfile(false);
@@ -85,6 +100,8 @@ const ClientProfilePage: React.FC = () => {
     };
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!isEditing) return; // Only allow upload in edit mode
+
         if (e.target.files && e.target.files.length > 0) {
             const file = e.target.files[0];
 
@@ -170,8 +187,8 @@ const ClientProfilePage: React.FC = () => {
                                 onChange={handleFileChange}
                             />
                             <div
-                                onClick={() => fileInputRef.current?.click()}
-                                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-zinc-800 border-4 border-zinc-900 absolute -top-12 sm:-top-16 flex items-center justify-center group cursor-pointer overflow-hidden shadow-xl"
+                                onClick={() => isEditing && fileInputRef.current?.click()}
+                                className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-zinc-800 border-4 border-zinc-900 absolute -top-12 sm:-top-16 flex items-center justify-center group overflow-hidden shadow-xl ${isEditing ? 'cursor-pointer' : ''}`}
                             >
                                 {profile?.profileImage || formData.profileImage ? (
                                     <img
@@ -186,9 +203,11 @@ const ClientProfilePage: React.FC = () => {
                                 ) : (
                                     <span className="text-3xl font-bold text-zinc-600 group-hover:hidden">👤</span>
                                 )}
-                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                                </div>
+                                {isEditing && (
+                                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Camera className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                                    </div>
+                                )}
                             </div>
 
                             <div className="ml-28 sm:ml-40 pt-2 sm:pt-4">
@@ -280,18 +299,17 @@ const ClientProfilePage: React.FC = () => {
                                     {isEditing ? (
                                         <div className="relative">
                                             <Calendar className="w-5 h-5 text-emerald-400 absolute left-3 top-2.5 z-10" />
-                                            <input
-                                                type="date"
+                                            <DateInput
                                                 value={formData.dateOfBirth ? new Date(formData.dateOfBirth).toISOString().split('T')[0] : ''}
                                                 onChange={e => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                                                className="w-full pl-10 bg-zinc-950 border border-emerald-500/50 outline-none ring-2 ring-emerald-500/20 rounded-lg px-3 py-2 text-white transition-all [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert shadow-input"
+                                                className="w-full pl-10 bg-zinc-950 border border-emerald-500/50 outline-none ring-2 ring-emerald-500/20 rounded-lg px-3 py-2 text-white transition-all shadow-input"
                                             />
                                         </div>
                                     ) : (
                                         <div className="flex items-center gap-3 text-zinc-300 p-3 bg-zinc-950/40 rounded-lg border border-zinc-800/50 hover:bg-zinc-900 hover:border-zinc-700 transition-colors cursor-default">
                                             <Calendar className="w-5 h-5 text-emerald-400 flex-shrink-0" />
                                             <span className="truncate">
-                                                {profile?.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : "Not set"}
+                                                {profile?.dateOfBirth ? formatToGB(profile.dateOfBirth) : "Not set"}
                                             </span>
                                         </div>
                                     )}
@@ -388,35 +406,101 @@ const ClientProfilePage: React.FC = () => {
                                     <div className="w-6 h-6 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
                                 </div>
                             ) : membership ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 shadow-inner">
-                                        <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-1">Plan Name</p>
-                                        <p className="text-white font-bold text-lg">{membership.planName}</p>
-                                    </div>
-                                    <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 shadow-inner">
-                                        <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-1">Plan Type</p>
-                                        <p className="text-emerald-400 font-bold text-lg capitalize">{membership.planType.replace("-", " ")}</p>
-                                    </div>
-                                    <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 shadow-inner">
-                                        <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-1">Started On</p>
-                                        <p className="text-white font-bold text-lg">{new Date(membership.startDate).toLocaleDateString()}</p>
-                                    </div>
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        {/* Plan Name & Status */}
+                                        <div className="bg-zinc-950/50 p-4 rounded-xl border border-zinc-800/50">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-sm font-medium text-zinc-500">Plan & Status</span>
+                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border uppercase tracking-wider ${getStatusColor(membership.status)}`}>
+                                                    {membership.status}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-zinc-300">
+                                                <Award className="w-4 h-4 text-emerald-400" />
+                                                <span className="text-sm font-medium truncate">{membership.currentPlan}</span>
+                                            </div>
+                                            {membership.planType && (
+                                                <div className="mt-1 pl-6 text-xs text-zinc-500">
+                                                    Type: {membership.planType.replace('_', ' ')}
+                                                </div>
+                                            )}
+                                        </div>
 
-                                    {membership.planType === 'day-based' && membership.daysLeft !== undefined ? (
-                                        <div className="bg-emerald-950 p-4 rounded-xl border border-emerald-500/30 shadow-inner relative overflow-hidden">
-                                            <div className="absolute right-0 top-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl -translate-y-1/2 translate-x-1/2"></div>
-                                            <p className="text-xs text-emerald-400 uppercase tracking-wider font-semibold mb-1">Days Remaining</p>
-                                            <div className="flex items-baseline gap-1">
-                                                <p className="text-white font-bold text-2xl">{membership.daysLeft}</p>
-                                                <span className="text-emerald-400/80 text-sm font-medium">days</span>
+                                        {/* Dates */}
+                                        <div className="bg-zinc-950/50 p-4 rounded-xl border border-zinc-800/50">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-sm font-medium text-zinc-500">Duration</span>
+                                                {membership.planType === 'DAY_BASED' && membership.daysLeft !== undefined && membership.daysLeft !== null && (
+                                                    <span className="text-xs font-semibold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">{membership.daysLeft} days left</span>
+                                                )}
+                                            </div>
+                                            <div className="flex flex-col gap-1 text-zinc-300 text-sm">
+                                                <div className="flex items-center gap-2">
+                                                    <Calendar className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                                                    <span className="truncate">Start: {membership.startDate ? new Date(membership.startDate).toLocaleDateString() : 'N/A'}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-zinc-400 pl-6">
+                                                    <span className="truncate">End: {membership.expiryDate ? new Date(membership.expiryDate).toLocaleDateString() : 'N/A'}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    ) : membership.expiryDate ? (
-                                        <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 shadow-inner">
-                                            <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold mb-1">Expires On</p>
-                                            <p className="text-white font-bold text-lg">{new Date(membership.expiryDate).toLocaleDateString()}</p>
+
+                                        {/* Assigned Trainer */}
+                                        <div className="bg-zinc-950/50 p-4 rounded-xl border border-zinc-800/50">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-sm font-medium text-zinc-500">Assigned Trainer</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-zinc-300">
+                                                <User className="w-4 h-4 text-emerald-400" />
+                                                <span className="text-sm truncate">
+                                                    {membership.assignedTrainer || 'No Trainer Assigned'}
+                                                </span>
+                                            </div>
                                         </div>
-                                    ) : null}
+                                    </div>
+
+                                    {/* Payments Section */}
+                                    <div className="bg-zinc-950/50 rounded-xl border border-zinc-800/50 overflow-hidden">
+                                        <div className="p-4 border-b border-zinc-800/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                            <div className="flex items-center gap-2">
+                                                <CreditCard className="w-5 h-5 text-zinc-400" />
+                                                <h4 className="text-sm font-semibold text-white">Payment Information</h4>
+                                            </div>
+                                            {membership.paymentStatus && (
+                                                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${getPaymentStatusColor(membership.paymentStatus)}`}>
+                                                    {membership.paymentStatus}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="p-2 sm:p-4">
+                                            {membership.payments && membership.payments.length > 0 ? (
+                                                <div className="flex flex-col gap-2">
+                                                    {membership.payments.map((payment, i) => (
+                                                        <div key={i} className="flex justify-between items-center p-3 sm:p-4 rounded-lg bg-zinc-900 border border-zinc-800">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center">
+                                                                    <Calendar className="w-4 h-4 text-zinc-400" />
+                                                                </div>
+                                                                <span className="text-sm text-zinc-300 font-medium">
+                                                                    {new Date(payment.date).toLocaleDateString()}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1 font-semibold text-emerald-400 text-sm sm:text-base">
+                                                                <IndianRupee className="w-4 h-4" />
+                                                                {payment.amount}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="text-center py-6 text-sm text-zinc-500">
+                                                    No payment records found
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="text-center py-12 bg-zinc-950 rounded-xl border border-zinc-800 border-dashed">

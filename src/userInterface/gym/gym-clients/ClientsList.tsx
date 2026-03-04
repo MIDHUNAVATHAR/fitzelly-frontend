@@ -146,14 +146,21 @@ const ClientsList: React.FC = () => {
         { header: 'Phone', accessor: 'phoneNumber' },
         {
             header: 'Membership Status',
-            accessor: (client) => (
-                <span className={`px-2 py-1 rounded text-xs font-semibold
-          ${client.membershipStatus === 'Active' ? 'bg-green-500/20 text-green-400' :
-                        client.membershipStatus === 'Pending' ? 'bg-yellow-500/20 text-yellow-400' :
-                            'bg-red-500/20 text-red-400'}`}>
-                    {client.membershipStatus}
-                </span>
-            )
+            accessor: (client) => {
+                if (!client.membershipStatus) {
+                    return <span className="text-zinc-500">N/A</span>;
+                }
+                return (
+                    <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 rounded text-xs font-semibold
+                            ${client.membershipStatus.toUpperCase() === 'ACTIVE' ? 'bg-emerald-500/20 text-emerald-400' :
+                                client.membershipStatus.toUpperCase() === 'PENDING' ? 'bg-amber-500/20 text-amber-400' :
+                                    'bg-red-500/20 text-red-400'}`}>
+                            {client.membershipStatus}
+                        </span>
+                    </div>
+                );
+            }
         },
         {
             header: 'Actions',

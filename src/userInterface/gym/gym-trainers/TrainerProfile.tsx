@@ -8,6 +8,8 @@ import {
 import { toast } from 'react-hot-toast';
 import { getTrainerById, updateTrainer } from "../../../api/gym-trainers.api";
 import type { Trainer } from "../../../api/gym-trainers.api";
+import DateInput from "../../../components/ui/DateInput";
+import { useDateFormat } from "../../../hooks/useDateFormat";
 
 const TrainerProfile: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -22,6 +24,7 @@ const TrainerProfile: React.FC = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [trainer, setTrainer] = useState<Trainer | null>(null);
     const [formData, setFormData] = useState<Partial<Trainer>>({});
+    const { formatToShortMonth: formatDate } = useDateFormat();
 
     useEffect(() => {
         loadTrainer();
@@ -96,15 +99,7 @@ const TrainerProfile: React.FC = () => {
         navigate('/gym/trainers');
     };
 
-    // Format date for display
-    const formatDate = (dateString?: string) => {
-        if (!dateString) return 'N/A';
-        return new Date(dateString).toLocaleDateString('en-IN', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        });
-    };
+    // Removed local formatDate since we use hook
 
     if (loading) {
         return (
@@ -328,8 +323,7 @@ const TrainerProfile: React.FC = () => {
                             <span className="text-sm font-medium text-zinc-500">Date of Birth</span>
                         </div>
                         {isEditing ? (
-                            <input
-                                type="date"
+                            <DateInput
                                 name="dateOfBirth"
                                 value={formData.dateOfBirth ? formData.dateOfBirth.split('T')[0] : ''}
                                 onChange={handleChange}
