@@ -10,6 +10,7 @@ import { Plus, Mail, Eye, Edit, Trash2, Loader } from 'lucide-react';
 import { getTrainers, softDeleteTrainer, sendWelcomeEmail } from "../../../api/gym-trainers.api";
 import type { Trainer } from "../../../api/gym-trainers.api";
 import { toast } from 'react-hot-toast';
+import { isAxiosError } from 'axios';
 
 const TrainersList: React.FC = () => {
     const navigate = useNavigate();
@@ -17,27 +18,19 @@ const TrainersList: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-
-    // For infinite scroll
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+    const [limit, setLimit] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
 
     const [trainerToDelete, setTrainerToDelete] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [sendingEmailId, setSendingEmailId] = useState<string | null>(null);
 
-    useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 1024);
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
-
-    const loadTrainers = useCallback(async (page: number, searchTerm: string, append: boolean = false) => {
+    const loadTrainers = useCallback(async (page: number, currentLimit: number, searchTerm: string, append: boolean = false) => {
         try {
             setLoading(true);
-            const data = await getTrainers(page, searchTerm);
+            const data = await getTrainers(page, currentLimit, searchTerm);
             setTrainers(prev => append ? [...prev, ...data.trainers] : data.trainers);
-            setTotalPages(data?.totalPages);
+            setTotalItems(data?.pagination?.total || 0);
         } catch (error) {
             console.error(error);
             toast.error('Failed to load trainers');
@@ -48,40 +41,12 @@ const TrainersList: React.FC = () => {
 
     useEffect(() => {
         setCurrentPage(1); // Reset to page 1 on search change
-        loadTrainers(1, search, false);
-    }, [search, loadTrainers]);
+        loadTrainers(1, limit, search, false);
+    }, [search, limit, loadTrainers]);
 
     useEffect(() => {
-        if (!isMobile) {
-            loadTrainers(currentPage, search, false);
-        }
-    }, [currentPage, isMobile, loadTrainers, search]);
-
-
-    // Infinite Scroll Handler
-    const handleScroll = useCallback(() => {
-        if (!isMobile || loading || currentPage >= totalPages) return;
-
-        const container = document.getElementById('main-scroll-container');
-        if (!container) return;
-
-        const { scrollTop, scrollHeight, clientHeight } = container;
-
-        // Trigger when close to bottom
-        if (scrollTop + clientHeight >= scrollHeight - 50) {
-            const nextPage = currentPage + 1;
-            setCurrentPage(nextPage);
-            loadTrainers(nextPage, search, true);
-        }
-    }, [isMobile, loading, currentPage, totalPages, loadTrainers, search]);
-
-    useEffect(() => {
-        const container = document.getElementById('main-scroll-container');
-        if (container) {
-            container.addEventListener('scroll', handleScroll);
-            return () => container.removeEventListener('scroll', handleScroll);
-        }
-    }, [handleScroll]);
+        loadTrainers(currentPage, limit, search, false);
+    }, [currentPage, limit, loadTrainers, search]);
 
 
     const handleDelete = (id: string, e: React.MouseEvent) => {
@@ -96,7 +61,7 @@ const TrainersList: React.FC = () => {
         try {
             await softDeleteTrainer(trainerToDelete);
             toast.success("Trainer deleted");
-            loadTrainers(1, search, false); // Reload
+            loadTrainers(1, limit, search, false); // Reload
             setCurrentPage(1);
         } catch {
             toast.error("Failed to delete trainer");
@@ -117,8 +82,12 @@ const TrainersList: React.FC = () => {
         try {
             await sendWelcomeEmail(trainer.id!);
             toast.success("Welcome email sent");
-        } catch {
-            toast.error("Failed to send email");
+        } catch (error) {
+            if (isAxiosError(error)) {
+                toast.error(error?.response?.data.message);
+            } else {
+                toast.error("Failed to send email");
+            }
         } finally {
             setSendingEmailId(null);
         }
@@ -140,7 +109,7 @@ const TrainersList: React.FC = () => {
                 <div className="flex items-center gap-2">
                     <button
                         onClick={(e) => handleSendWelcome(trainer, e)}
-                        disabled={sendingEmailId === trainer.id}
+                        disabled={sendingEmailId === trainer.id || trainer.isEmailVerified}
                         className={`p-1.5 rounded transition ${trainer.isEmailVerified ? 'bg-zinc-800 text-zinc-600 cursor-not-allowed' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white'}`}
                         title={trainer.isEmailVerified ? "Already verified" : "Send Welcome Email"}
                     >
@@ -196,23 +165,24 @@ const TrainersList: React.FC = () => {
             <ReusableTable
                 data={trainers}
                 columns={columns}
-                isLoading={loading && currentPage === 1}
+                isLoading={loading}
                 onRowClick={(trainer) => navigate(`/gym/trainers/${trainer.id}`)}
             />
 
-            {loading && currentPage > 1 && (
-                <div className="text-center py-4 text-zinc-500">Loading more...</div>
-            )}
-
-            {!isMobile && totalPages > 1 && (
-                <div className="flex justify-end">
+            <div className="flex justify-end">
+                <div className="w-full mt-4">
                     <Pagination
                         currentPage={currentPage}
-                        totalPages={totalPages}
+                        totalItems={totalItems}
+                        limit={limit}
                         onPageChange={setCurrentPage}
+                        onLimitChange={(newLimit) => {
+                            setLimit(newLimit);
+                            setCurrentPage(1);
+                        }}
                     />
                 </div>
-            )}
+            </div>
 
             <ConfirmModal
                 isOpen={!!trainerToDelete}

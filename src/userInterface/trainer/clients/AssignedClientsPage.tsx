@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Eye, Activity } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { getAssignedClients } from "../../../api/trainer-clients.api";
-import type { ClientDTO } from "../../../api/trainer-clients.api";
+import type { ClientDTO } from "../../../api/gym-clients.api";
 import ReusableTable from "../../../components/ui/ReusableTable";
 import type { Column } from "../../../components/ui/ReusableTable";
 import SearchInput from "../../../components/ui/SearchInput";
@@ -25,32 +25,21 @@ const AssignedClientsPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [limit, setLimit] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
 
     const debouncedSearch = useDebounceValue(search, 500);
 
-    // Resize listener
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 768);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    const loadClients = useCallback(async (pageNum: number, searchQuery: string, append: boolean = false) => {
+    const loadClients = useCallback(async (pageNum: number, currentLimit: number, searchQuery: string) => {
         try {
             setLoading(true);
-            const data = await getAssignedClients(pageNum, searchQuery);
+            const data = await getAssignedClients(pageNum, currentLimit, searchQuery);
             if (data.status !== "success") {
                 toast.error('Failed to load assigned clients');
                 return;
             }
-            if (append) {
-                setClients(prev => [...prev, ...data.data.clients]);
-            } else {
-                setClients(data.data.clients);
-            }
-            setTotalPages(data.totalPages);
+            setClients(data.data.clients);
+            setTotalItems(data.totalItems);
         } catch (error) {
             console.error(error);
             toast.error('Failed to load clients');
@@ -62,37 +51,19 @@ const AssignedClientsPage: React.FC = () => {
     // Initial fetch and search
     useEffect(() => {
         setPage(1);
-        loadClients(1, debouncedSearch, false);
-    }, [debouncedSearch, loadClients]);
+        loadClients(1, limit, debouncedSearch);
+    }, [debouncedSearch, limit, loadClients]);
 
-    // Pagination (Desktop)
+    // Pagination
     const handlePageChange = (newPage: number) => {
         setPage(newPage);
-        loadClients(newPage, debouncedSearch, false);
+        loadClients(newPage, limit, debouncedSearch);
     };
 
-    // Infinite Scroll (Mobile)
-    const handleScroll = useCallback(() => {
-        if (!isMobile || loading || page >= totalPages) return;
-
-        const container = document.getElementById('main-scroll-container');
-        if (!container) return;
-
-        // Check if scrolled to bottom
-        if (container.scrollTop + container.clientHeight >= container.scrollHeight - 100) {
-            const nextPage = page + 1;
-            setPage(nextPage);
-            loadClients(nextPage, debouncedSearch, true);
-        }
-    }, [isMobile, loading, page, totalPages, debouncedSearch, loadClients]);
-
-    useEffect(() => {
-        const container = document.getElementById('main-scroll-container');
-        if (container) {
-            container.addEventListener('scroll', handleScroll);
-            return () => container.removeEventListener('scroll', handleScroll);
-        }
-    }, [handleScroll]);
+    const handleLimitChange = (newLimit: number) => {
+        setLimit(newLimit);
+        setPage(1);
+    };
 
     const handleWorkoutPlan = (e: React.MouseEvent, clientId: string) => {
         e.stopPropagation();
@@ -144,25 +115,19 @@ const AssignedClientsPage: React.FC = () => {
             <ReusableTable
                 columns={columns}
                 data={clients}
-                isLoading={loading && page === 1} // Only show full loader on first page/search
+                isLoading={loading}
                 onRowClick={(client) => navigate(`/trainer/clients/${client.id}`)}
             />
 
-            {loading && page > 1 && (
-                <div className="text-center py-4 text-zinc-500">Loading more...</div>
-            )}
-
-            {/* Pagination only for Desktop */}
-            {!isMobile && totalPages > 1 && (
-                <div className="flex justify-end">
-                    <Pagination
-                        currentPage={page}
-                        totalPages={totalPages}
-                        onPageChange={handlePageChange}
-                    />
-                </div>
-            )}
-
+            <div className="flex justify-end mt-4">
+                <Pagination
+                    currentPage={page}
+                    totalItems={totalItems}
+                    limit={limit}
+                    onPageChange={handlePageChange}
+                    onLimitChange={handleLimitChange}
+                />
+            </div>
         </div>
     );
 };

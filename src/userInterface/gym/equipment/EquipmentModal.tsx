@@ -67,12 +67,12 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, equipm
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     useEffect(() => {
-        getPlans().then(fetchedPlans => {
-            setPlans(fetchedPlans);
+        getPlans(1, 100, '').then(fetchedPlans => {
+            setPlans(fetchedPlans.plans);
             if (!equipment) {
                 setForm(prev => ({
                     ...prev,
-                    allowedPlans: fetchedPlans.map(p => p.id)
+                    allowedPlans: fetchedPlans.plans.map(p => p.id)
                 }));
             }
         }).catch(() => toast.error("Failed to load plans"));

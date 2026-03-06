@@ -10,17 +10,17 @@ const AddTrainer: React.FC = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = async (data: Partial<Trainer>) => {
+    const handleSubmit = async (data: Partial<Trainer> | FormData) => {
         try {
             setIsLoading(true);
             await addTrainer(data);
             toast.success('Trainer added successfully');
             navigate('/gym/trainers');
         } catch (error: unknown) {
-            if(isAxiosError(error)){
-            toast.error(error.response?.data?.message || 'Failed to add trainer');
+            if (isAxiosError(error)) {
+                toast.error(error.response?.data?.message || 'Failed to add trainer');
             }
-            
+
         } finally {
             setIsLoading(false);
         }

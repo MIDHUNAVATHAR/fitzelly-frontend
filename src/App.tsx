@@ -36,7 +36,6 @@ const SuperDashboardHome = lazyComponent(React.lazy(() => import("./userInterfac
 const SuperProfile = lazyComponent(React.lazy(() => import("./userInterface/super-admin/profile/SuperAdmin-Profile")))
 const GymList = lazyComponent(React.lazy(() => import("./userInterface/super-admin/gyms/GymList")));
 const GymView = lazyComponent(React.lazy(() => import("./userInterface/super-admin/gyms/ViewGym")));
-const EditGym = lazyComponent(React.lazy(() => import("./userInterface/super-admin/gyms/EditGym")));
 
 /**
  * client components
@@ -143,7 +142,6 @@ function App() {
             <Route path="profile" element={<SuperProfile />}></Route>
             <Route path="gyms" element={<GymList />}></Route>
             <Route path="gyms/:id" element={<GymView />} />
-            <Route path="gyms/:id/edit" element={<EditGym />} />
 
           </Route>
         </Route>

@@ -2,9 +2,9 @@ import { axiosInstance } from "./axios";
 import { GYM } from "../constants/routes";
 
 
-export const getTrainers = async (page: number, search: string) => {
+export const getTrainers = async (page: number, limit: number, search: string) => {
     const res = await axiosInstance.get(GYM.GET_TRAINERS, {
-        params: { page, search }
+        params: { page, limit, search }
     });
 
     return res.data.data;
@@ -30,13 +30,27 @@ export const getTrainerById = async (trainerId: string) => {
     return res.data.data;
 }
 
-export const updateTrainer = async (trainerId: string, data: Partial<Trainer>) => {
-    const res = await axiosInstance.put(GYM.TRAINER_BY_ID(trainerId), data);
+export const updateTrainer = async (trainerId: string, data: Partial<Trainer> | FormData) => {
+    let res;
+    if (data instanceof FormData) {
+        res = await axiosInstance.put(GYM.TRAINER_BY_ID(trainerId), data, {
+            headers: { "Content-Type": "multipart/form-data" }
+        });
+    } else {
+        res = await axiosInstance.put(GYM.TRAINER_BY_ID(trainerId), data);
+    }
     return res.data.data;
 }
 
-export const addTrainer = async (trainerData: Partial<Trainer>) => {
-    const result = await axiosInstance.post(GYM.ADD_TRAINER, trainerData);
+export const addTrainer = async (trainerData: Partial<Trainer> | FormData) => {
+    let result;
+    if (trainerData instanceof FormData) {
+        result = await axiosInstance.post(GYM.ADD_TRAINER, trainerData, {
+            headers: { "Content-Type": "multipart/form-data" }
+        });
+    } else {
+        result = await axiosInstance.post(GYM.ADD_TRAINER, trainerData);
+    }
     return result.data.data;
 }
 
@@ -52,5 +66,8 @@ export interface Trainer {
     dateOfBirth: string;
     joinedDate: string;
     profileUrl: string;
+    qualification?: string;
+    address?: string;
+    certificates?: string[];
     isEmailVerified: boolean
 }

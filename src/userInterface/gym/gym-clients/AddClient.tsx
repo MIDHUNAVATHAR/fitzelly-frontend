@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { addClient } from "../../../api/gym-clients.api";
 import type { ClientDTO } from "../../../api/gym-clients.api";
 import ClientForm from "./components/ClientForm"
+import { isAxiosError } from 'axios';
 
 const AddClient: React.FC = () => {
     const navigate = useNavigate();
@@ -16,13 +17,18 @@ const AddClient: React.FC = () => {
             if (response.status == "success") {
                 toast.success('Client added successfully');
             } else {
-                toast.error(response.message || 'Failed to add client');
+                toast.error(response?.response?.data?.message || 'Failed to add client');
                 return
             }
             navigate('/gym/clients');
         } catch (error) {
-            console.error(error);
-            toast.error('Failed to add client');
+            if (isAxiosError(error)) {
+                toast.error(error?.response?.data.message);
+
+            } else {
+                toast.error('Failed to add client');
+
+            }
         } finally {
             setIsLoading(false);
         }

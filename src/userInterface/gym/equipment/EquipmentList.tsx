@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from "react";
 import { Plus, Edit, Trash2, Image as ImageIcon } from "lucide-react";
 import { toast } from "react-hot-toast";
@@ -15,8 +16,8 @@ const EquipmentList: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+    const [limit, setLimit] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingEquipment, setEditingEquipment] = useState<Equipment | null>(null);
@@ -24,19 +25,13 @@ const EquipmentList: React.FC = () => {
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 1024);
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
-
-    const fetchEquipments = useCallback(async (page: number, q: string, append: boolean = false) => {
+    const fetchEquipments = useCallback(async (page: number, currentLimit: number, q: string, append: boolean = false) => {
         try {
             setLoading(true);
-            const data = await getEquipments(page, q);
-            setTotalPages(data.total > 0 ? Math.ceil(data.total / 10) : 1);
+            const data = await getEquipments(page, currentLimit, q);
+            setTotalItems(data.total || 0);
             setEquipments(prev => append ? [...prev, ...data.equipments] : data.equipments);
-        } catch (error) {
+        } catch {
             toast.error("Failed to load equipments");
         } finally {
             setLoading(false);
@@ -45,28 +40,8 @@ const EquipmentList: React.FC = () => {
 
     useEffect(() => {
         setCurrentPage(1);
-        fetchEquipments(1, search, false);
-    }, [search, fetchEquipments]);
-
-    // Infinite scroll
-    const handleScroll = useCallback(() => {
-        if (!isMobile || loading || currentPage >= totalPages) return;
-        const container = document.getElementById('main-scroll-container');
-        if (!container) return;
-        if (container.scrollTop + container.clientHeight >= container.scrollHeight - 50) {
-            const next = currentPage + 1;
-            setCurrentPage(next);
-            fetchEquipments(next, search, true);
-        }
-    }, [isMobile, loading, currentPage, totalPages, search, fetchEquipments]);
-
-    useEffect(() => {
-        const container = document.getElementById('main-scroll-container');
-        if (container) {
-            container.addEventListener('scroll', handleScroll);
-            return () => container.removeEventListener('scroll', handleScroll);
-        }
-    }, [handleScroll]);
+        fetchEquipments(1, limit, search, false);
+    }, [search, limit, fetchEquipments]);
 
     const handleAdd = () => {
         setEditingEquipment(null);
@@ -85,7 +60,7 @@ const EquipmentList: React.FC = () => {
             setIsDeleting(true);
             await deleteEquipment(deleteId);
             toast.success("Equipment deleted");
-            fetchEquipments(1, search, false);
+            fetchEquipments(1, limit, search, false);
             setCurrentPage(1);
         } catch {
             toast.error("Failed to delete equipment");
@@ -178,26 +153,27 @@ const EquipmentList: React.FC = () => {
             <ReusableTable
                 data={equipments}
                 columns={columns}
-                isLoading={loading && currentPage === 1}
+                isLoading={loading}
                 emptyMessage="No equipment configurations found."
             />
 
-            {loading && currentPage > 1 && (
-                <div className="text-center py-4 text-zinc-500">Loading more...</div>
-            )}
-
-            {!isMobile && totalPages > 1 && (
-                <div className="flex justify-end">
+            <div className="flex justify-end">
+                <div className="w-full mt-4">
                     <Pagination
                         currentPage={currentPage}
-                        totalPages={totalPages}
+                        totalItems={totalItems}
+                        limit={limit}
                         onPageChange={(page) => {
                             setCurrentPage(page);
-                            fetchEquipments(page, search, false);
+                            fetchEquipments(page, limit, search, false);
+                        }}
+                        onLimitChange={(newLimit) => {
+                            setLimit(newLimit);
+                            setCurrentPage(1);
                         }}
                     />
                 </div>
-            )}
+            </div>
 
             <ConfirmModal
                 isOpen={!!deleteId}
@@ -215,7 +191,7 @@ const EquipmentList: React.FC = () => {
                     equipment={editingEquipment}
                     onSave={() => {
                         setIsModalOpen(false);
-                        fetchEquipments(1, search, false);
+                        fetchEquipments(1, limit, search, false);
                         setCurrentPage(1);
                     }}
                 />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Mail, Phone, Calendar, User, PhoneCall, Tag, Award, ArrowLeft, Edit3, Save, X, Loader2, IndianRupee, CreditCard } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -22,11 +22,7 @@ const ClientProfile: React.FC = () => {
     const [formData, setFormData] = useState<Partial<ClientDTO>>({});
     const { formatToShortMonth: formatDate } = useDateFormat();
 
-    useEffect(() => {
-        loadClient();
-    }, [id]);
-
-    const loadClient = async () => {
+    const loadClient = useCallback(async () => {
         if (!id) return;
         try {
             setLoading(true);
@@ -40,7 +36,11 @@ const ClientProfile: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id, navigate]);
+
+    useEffect(() => {
+        loadClient();
+    }, [loadClient]);
 
     const handleSave = async () => {
         const { fullName, email, phoneNumber } = formData;

@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Search, Layers, CalendarRange, Edit3, Trash2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Layers, CalendarRange, Edit3, Trash2, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getPlans, createPlan, updatePlan, deletePlan } from '../../../api/plan.api';
 import type { Plan, CreatePlanDTO, UpdatePlanDTO } from '../../../api/plan.api';
+import Pagination from '../../../components/ui/Pagination';
 import PlanFormModal from './PlanFormModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import { isAxiosError } from 'axios';
@@ -12,7 +13,9 @@ const PlansPage: React.FC = () => {
     const [plans, setPlans] = useState<Plan[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-
+    const [currentPage, setCurrentPage] = useState(1);
+    const [limit, setLimit] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
     // Modal States
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -21,11 +24,12 @@ const PlansPage: React.FC = () => {
     const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const fetchPlans = async () => {
+    const fetchPlans = React.useCallback(async (page: number, currentLimit: number, q: string, append: boolean = false) => {
         setIsLoading(true);
         try {
-            const data = await getPlans();
-            setPlans(data);
+            const data = await getPlans(page, currentLimit, q);
+            setTotalItems(data.total || 0);
+            setPlans(prev => append ? [...prev, ...data.plans] : data.plans);
         } catch (error: unknown) {
             if (isAxiosError(error)) {
                 toast.error(error.response?.data?.message ?? 'Failed to load plans');
@@ -37,18 +41,16 @@ const PlansPage: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    };
-
-    useEffect(() => {
-        fetchPlans();
     }, []);
 
-    // Filter Logic
-    const filteredPlans = useMemo(() => {
-        return plans.filter(plan =>
-            plan.planName.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [plans, searchTerm]);
+    useEffect(() => {
+        setCurrentPage(1);
+        fetchPlans(1, limit, searchTerm, false);
+    }, [searchTerm, limit, fetchPlans]);
+
+    // Filter Logic - frontend filtering is no longer needed but kept for extra safety or we can remove it.
+    // Actually search is now backend so we just use `plans` directly.
+    const filteredPlans = plans;
 
     // Format Validity Display
     const formatValidity = (planType: string, validity: number) => {
@@ -83,7 +85,7 @@ const PlansPage: React.FC = () => {
                 await createPlan(data as CreatePlanDTO);
                 toast.success('Plan created successfully');
             }
-            fetchPlans(); // Refresh List
+            fetchPlans(currentPage, limit, searchTerm, false); // Refresh List
         } catch (error: unknown) {
             if (isAxiosError(error)) {
                 toast.error(error.response?.data?.message ?? 'Failed to save plan');
@@ -102,7 +104,7 @@ const PlansPage: React.FC = () => {
             await deletePlan(selectedPlan.id);
             toast.success('Plan deleted successfully');
             setIsDeleteModalOpen(false);
-            fetchPlans(); // Refresh List
+            fetchPlans(currentPage, limit, searchTerm, false); // Refresh List
         } catch (error: unknown) {
             if (isAxiosError(error)) {
                 toast.error(error.response?.data?.message ?? 'Failed to delete plan');
@@ -128,6 +130,14 @@ const PlansPage: React.FC = () => {
                     <Plus className="w-5 h-5" />
                     Add Plan
                 </button>
+            </div>
+
+            {/* Note */}
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                <p className="text-sm text-amber-200/80 leading-relaxed">
+                    <span className="font-bold text-amber-400">Note:</span> Changes made to this membership plan will only apply to new memberships. Existing memberships will not be affected.
+                </p>
             </div>
 
             {/* Search Bar */}
@@ -282,6 +292,25 @@ const PlansPage: React.FC = () => {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+
+                    {/* Pagination */}
+                    <div className="flex justify-end mt-4">
+                        <div className="w-full">
+                            <Pagination
+                                currentPage={currentPage}
+                                totalItems={totalItems}
+                                limit={limit}
+                                onPageChange={(page) => {
+                                    setCurrentPage(page);
+                                    fetchPlans(page, limit, searchTerm, false);
+                                }}
+                                onLimitChange={(newLimit) => {
+                                    setLimit(newLimit);
+                                    setCurrentPage(1);
+                                }}
+                            />
+                        </div>
                     </div>
                 </>
             )}

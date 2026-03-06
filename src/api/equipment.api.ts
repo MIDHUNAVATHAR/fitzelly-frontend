@@ -17,8 +17,8 @@ export interface Equipment {
     isActive: boolean;
 }
 
-export const getEquipments = async (page: number, search: string = '') => {
-    const response = await axiosInstance.get(`/api/gym/equipments?page=${page}&search=${search}`);
+export const getEquipments = async (page: number, limit: number, search: string = '') => {
+    const response = await axiosInstance.get(`/api/gym/equipments?page=${page}&limit=${limit}&search=${search}`);
     return response.data.data;
 };
 

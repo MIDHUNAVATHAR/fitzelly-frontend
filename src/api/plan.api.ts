@@ -30,10 +30,11 @@ export interface UpdatePlanDTO {
     description?: string;
 }
 
-export const getPlans = async (): Promise<Plan[]> => {
-    const response = await axiosInstance.get('/api/gym/plans');
+export const getPlans = async (page: number = 1, limit: number = 10, search: string = ''): Promise<{ plans: Plan[], total: number }> => {
+    const response = await axiosInstance.get(`/api/gym/plans?page=${page}&limit=${limit}&search=${search}`);
     return response.data.data;
 };
+
 
 export const createPlan = async (data: CreatePlanDTO): Promise<Plan> => {
     const response = await axiosInstance.post('/api/gym/plan', data);

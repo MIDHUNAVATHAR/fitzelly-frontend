@@ -1,16 +1,6 @@
 import { axiosInstance } from "./axios";
 import { TRAINER_ROUTES } from "../constants/routes";
-
-export interface ClientDTO {
-    id: string;
-    fullName: string;
-    email: string;
-    phoneNumber: string;
-    profileUrl?: string | null;
-    membershipStatus?: string;
-    currentPlan?: string;
-    isEmailVerified: boolean;
-}
+import type { ClientDTO } from "./gym-clients.api";
 
 interface ClientsResponse {
     status: string;
@@ -25,20 +15,18 @@ interface ClientsResponse {
     }
 }
 
-export const getAssignedClients = async (page: number = 1, search: string = ''): Promise<{ data: { clients: ClientDTO[] }, totalPages: number, status: string }> => {
+export const getAssignedClients = async (page: number = 1, limit: number = 10, search: string = ''): Promise<{ data: { clients: ClientDTO[] }, totalItems: number, status: string }> => {
     try {
         const response = await axiosInstance.get<ClientsResponse>(TRAINER_ROUTES.TRAINER_CLIENTS, {
-            params: { page, search }
+            params: { page, limit, search }
         });
-
-        const totalPages = Math.ceil(response.data.data.pagination.total / response.data.data.pagination.limit);
 
         return {
             status: response.data.status,
             data: {
                 clients: response.data.data.clients
             },
-            totalPages
+            totalItems: response.data.data.pagination.total
         };
     } catch (error) {
         console.error("Error fetching assigned clients:", error);
@@ -46,11 +34,7 @@ export const getAssignedClients = async (page: number = 1, search: string = ''):
     }
 };
 
-export const getAssignedClientById = async (id: string): Promise<any> => {
-    try {
-        const response = await axiosInstance.get(TRAINER_ROUTES.TRAINER_CLIENTS + `/${id}`);
-        return response.data.data;
-    } catch (error) {
-        throw error;
-    }
+export const getAssignedClientById = async (id: string): Promise<ClientDTO> => {
+    const response = await axiosInstance.get(TRAINER_ROUTES.TRAINER_CLIENTS + `/${id}`);
+    return response.data.data;
 };

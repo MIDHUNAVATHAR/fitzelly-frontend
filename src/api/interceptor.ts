@@ -1,4 +1,5 @@
 import { axiosInstance } from "./axios";
+import type { InternalAxiosRequestConfig } from "axios";
 
 type QueueItem = {
     resolve: (token: string) => void;
@@ -23,13 +24,17 @@ const processQueue = (error: Error | null, token: string | null) => {
     failedQueue = [];
 }
 
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+    _retry?: boolean;
+}
+
 
 export const setupInterceptors = (getAccessToken: () => string | null, setAccessToken: (token: string | null) => void) => {
 
     if (requestInterceptor !== null) axiosInstance.interceptors.request.eject(requestInterceptor);
     if (responseInterceptor !== null) axiosInstance.interceptors.response.eject(responseInterceptor);
 
-    requestInterceptor = axiosInstance.interceptors.request.use((config: any) => {
+    requestInterceptor = axiosInstance.interceptors.request.use((config: CustomAxiosRequestConfig) => {
         if (!config._retry) {
             const token = getAccessToken();  //take token from auth context. 
             if (token) {

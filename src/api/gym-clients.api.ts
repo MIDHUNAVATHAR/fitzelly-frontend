@@ -26,13 +26,14 @@ export interface ClientDTO {
 
 
 
-export const getClients = async (page: number, search: string) => {
+export const getClients = async (page: number, limit: number, search: string) => {
 
     const response = await axiosInstance.get(GYM.GET_CLIENTS, {
-        params: { page, search }
+        params: { page, limit, search }
     });
     return response.data;
 }
+
 
 export const softDeleteClient = async (id: string) => {
     const response = await axiosInstance.delete(GYM.CLIENT_BY_ID(id));

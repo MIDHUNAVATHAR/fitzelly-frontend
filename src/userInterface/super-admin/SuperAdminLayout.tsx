@@ -30,12 +30,10 @@ const SuperAdminLayout: React.FC = () => {
                     <div className="w-10" />
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 lg:p-8 custom-scrollbar w-full">
-                    <div className="w-full max-w-[1600px] mx-auto">
-                        <Suspense fallback={<Spinner />}>
-                            <Outlet />
-                        </Suspense>
-                    </div>
+                <div id="main-scroll-container" className="flex-1 overflow-y-auto p-4 lg:p-5 custom-scrollbar w-full">
+                    <Suspense fallback={<Spinner />}>
+                        <Outlet />
+                    </Suspense>
                 </div>
             </main>
         </div>

@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import { axiosInstance } from '../../api/axios';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 const CreatePassword = () => {
     const [searchParams] = useSearchParams();
@@ -51,8 +52,12 @@ const CreatePassword = () => {
             setTimeout(() => {
                 navigate('/');
             }, 3000);
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Failed to create password');
+        } catch (err: unknown) {
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.message || 'Failed to create password');
+            } else {
+                setError('An unexpected error occurred');
+            }
         } finally {
             setLoading(false);
         }

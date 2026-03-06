@@ -27,8 +27,8 @@ const ClientsList: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [limit, setLimit] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
 
     const [clientToDelete, setClientToDelete] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -36,17 +36,10 @@ const ClientsList: React.FC = () => {
 
     const debouncedSearch = useDebounceValue(search, 500);
 
-    // Resize listener
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 768);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    const loadClients = useCallback(async (pageNum: number, searchQuery: string, append: boolean = false) => {
+    const loadClients = useCallback(async (pageNum: number, currentLimit: number, searchQuery: string, append: boolean = false) => {
         try {
             setLoading(true);
-            const data = await getClients(pageNum, searchQuery);
+            const data = await getClients(pageNum, currentLimit, searchQuery);
             if (data.status != "success") {
                 toast.error('Failed to load clients');
                 return
@@ -56,7 +49,7 @@ const ClientsList: React.FC = () => {
             } else {
                 setClients(data.data.clients);
             }
-            setTotalPages(data.totalPages);
+            setTotalItems(data.data.pagination.total);
         } catch (error) {
             console.error(error);
             toast.error('Failed to load clients');
@@ -68,38 +61,19 @@ const ClientsList: React.FC = () => {
     // Initial fetch and search
     useEffect(() => {
         setPage(1);
-        loadClients(1, debouncedSearch, false);
-    }, [debouncedSearch, loadClients]);
+        loadClients(1, limit, debouncedSearch, false);
+    }, [debouncedSearch, limit, loadClients]);
 
     // Pagination (Desktop)
     const handlePageChange = (newPage: number) => {
         setPage(newPage);
-        loadClients(newPage, debouncedSearch, false);
+        loadClients(newPage, limit, debouncedSearch, false);
     };
 
-    // Infinite Scroll (Mobile)
-    const handleScroll = useCallback(() => {
-        if (!isMobile || loading || page >= totalPages) return;
-
-        const container = document.getElementById('main-scroll-container');
-        if (!container) return;
-
-        // Check if scrolled to bottom
-        if (container.scrollTop + container.clientHeight >= container.scrollHeight - 100) {
-            const nextPage = page + 1;
-            setPage(nextPage);
-            loadClients(nextPage, debouncedSearch, true);
-        }
-    }, [isMobile, loading, page, totalPages, debouncedSearch, loadClients]);
-
-    useEffect(() => {
-        const container = document.getElementById('main-scroll-container');
-        if (container) {
-            container.addEventListener('scroll', handleScroll);
-            return () => container.removeEventListener('scroll', handleScroll);
-        }
-    }, [handleScroll]);
-
+    const handleLimitChange = (newLimit: number) => {
+        setLimit(newLimit);
+        setPage(1);
+    };
 
     const handleDelete = (id: string) => {
         setClientToDelete(id);
@@ -112,7 +86,7 @@ const ClientsList: React.FC = () => {
         try {
             await softDeleteClient(clientToDelete);
             toast.success("Client deleted successfully");
-            loadClients(1, debouncedSearch, false); // Reload
+            loadClients(1, limit, debouncedSearch, false); // Reload
         } catch {
             toast.error("Failed to delete client");
         } finally {
@@ -230,24 +204,21 @@ const ClientsList: React.FC = () => {
             <ReusableTable
                 columns={columns}
                 data={clients}
-                isLoading={loading && page === 1} // Only show full loader on first page/search
+                isLoading={loading}
                 onRowClick={(client) => navigate(`/gym/clients/${client.id}`)}
             />
 
-            {loading && page > 1 && (
-                <div className="text-center py-4 text-zinc-500">Loading more...</div>
-            )}
-
-            {/* Pagination only for Desktop */}
-            {!isMobile && totalPages > 1 && (
-                <div className="flex justify-end">
+            <div className="flex justify-end">
+                <div className="w-full mt-4">
                     <Pagination
                         currentPage={page}
-                        totalPages={totalPages}
+                        totalItems={totalItems}
+                        limit={limit}
                         onPageChange={handlePageChange}
+                        onLimitChange={handleLimitChange}
                     />
                 </div>
-            )}
+            </div>
 
             <ConfirmModal
                 isOpen={!!clientToDelete}

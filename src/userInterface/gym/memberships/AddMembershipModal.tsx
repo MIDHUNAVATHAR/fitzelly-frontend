@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { X, Calendar, User, CalendarRange, CreditCard } from 'lucide-react';
 import { addMembership } from '../../../api/membership.api';
 import { getClients } from '../../../api/gym-clients.api';
@@ -38,6 +38,26 @@ const AddMembershipModal: React.FC<AddMembershipModalProps> = ({ isOpen, onClose
     const [assignedTrainerId, setAssignedTrainerId] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const fetchData = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const [clientsRes, plansData, trainersRes] = await Promise.all([
+                getClients(1, 100, ''),
+                getPlans(1, 100, ''),
+                getTrainers(1, 100, '')
+            ]);
+
+            // Depending on how getClients/getTrainers returns data, need to extract arrays
+            setClients(clientsRes.data?.clients || clientsRes.data || clientsRes || []);
+            setPlans(plansData.plans || plansData || []);
+            setTrainers(trainersRes.trainers || trainersRes.data?.trainers || trainersRes || []);
+        } catch {
+            toast.error('Failed to load form data');
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
     useEffect(() => {
         if (isOpen) {
             fetchData();
@@ -47,27 +67,7 @@ const AddMembershipModal: React.FC<AddMembershipModalProps> = ({ isOpen, onClose
             setStartDate(new Date().toISOString().split('T')[0]);
             setAssignedTrainerId('');
         }
-    }, [isOpen]);
-
-    const fetchData = async () => {
-        setIsLoading(true);
-        try {
-            const [clientsRes, plansData, trainersRes] = await Promise.all([
-                getClients(1, ''), 
-                getPlans(),
-                getTrainers(1, '')
-            ]);
-            
-            // Depending on how getClients/getTrainers returns data, need to extract arrays
-            setClients(clientsRes.data?.clients || clientsRes.data || clientsRes || []);
-            setPlans(plansData || []);
-            setTrainers(trainersRes.trainers || trainersRes.data?.trainers || trainersRes || []);
-        } catch {
-            toast.error('Failed to load form data');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    }, [isOpen, initialClientId, fetchData]);
 
     if (!isOpen) return null;
 
@@ -206,7 +206,7 @@ const AddMembershipModal: React.FC<AddMembershipModalProps> = ({ isOpen, onClose
                                 <option value="">No personal trainer</option>
                                 {trainers.map(trainer => (
                                     <option key={trainer.id} value={trainer.id}>
-                                        {trainer.fullName}
+                                        {trainer.fullName} - {trainer.specialization}
                                     </option>
                                 ))}
                             </select>

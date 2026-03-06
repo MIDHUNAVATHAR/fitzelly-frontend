@@ -76,12 +76,18 @@ const SuperAdmProfile: React.FC = () => {
 
     // Profile edit
     const handleSave = async () => {
-        const { appName, caption, contactEmail, phoneNumber, description } = formData;
-        if (!appName?.trim() || !caption?.trim() || !contactEmail?.trim() || !phoneNumber?.trim() || !description?.trim()) {
+        const { appName, caption, contactEmail, phoneNumber, description, trialDays } = formData;
+        if (!appName?.trim() || !caption?.trim() || !contactEmail?.trim() || !phoneNumber?.trim() || !description?.trim() || trialDays === undefined) {
             toast.error("All Fields are mandatory");
             return;
         }
-        if (appName.trim().length > 30 || caption.trim().length > 30 || contactEmail.trim().length > 30 || phoneNumber.trim().length > 30||description.trim().length>100) {
+
+        if (Number(trialDays) < 0) {
+            toast.error("Trial days cannot be negative");
+            return;
+        }
+
+        if (appName.trim().length > 30 || caption.trim().length > 30 || contactEmail.trim().length > 30 || phoneNumber.trim().length > 30 || description.trim().length > 200) {
             toast.error("Data too long....");
             return;
         }
@@ -258,6 +264,28 @@ const SuperAdmProfile: React.FC = () => {
                                         <div className="flex items-center gap-3 text-zinc-200 p-4 bg-zinc-950/80 rounded-xl border border-zinc-800 shadow-sm">
                                             <Phone className="w-5 h-5 text-emerald-400" />
                                             <span className="truncate text-sm sm:text-base">{profile?.phoneNumber || "Not configured"}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Global Trial Period (Days)</label>
+                                    {isEditing ? (
+                                        <div className="relative group">
+                                            <Building2 className="w-5 h-5 text-emerald-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                                            <input
+                                                type="number"
+                                                value={formData.trialDays || ''}
+                                                onChange={e => setFormData({ ...formData, trialDays: parseInt(e.target.value) || 0 })}
+                                                className="w-full pl-12 pr-4 bg-zinc-950 border border-zinc-700 rounded-xl py-3.5 text-white focus:outline-none focus:border-emerald-400 transition-all shadow-inner"
+                                                placeholder="28"
+                                                min="0"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-3 text-zinc-200 p-4 bg-zinc-950/80 rounded-xl border border-zinc-800 shadow-sm">
+                                            <Building2 className="w-5 h-5 text-emerald-400" />
+                                            <span className="truncate text-sm sm:text-base">{profile?.trialDays ?? 0} Days</span>
                                         </div>
                                     )}
                                 </div>

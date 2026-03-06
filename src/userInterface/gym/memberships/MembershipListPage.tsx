@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Edit3, Trash2, ChevronRight, Activity, ShieldCheck, Plus, Info, Clock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getMemberships, deleteMembership } from '../../../api/membership.api';
 import type { Membership } from '../../../api/membership.api';
+import Pagination from '../../../components/ui/Pagination';
 import { Link, useNavigate } from 'react-router-dom';
-import DeleteConfirmModal from '../plans/DeleteConfirmModal'; // Reusing this modal layout
+import DeleteConfirmModal from '../plans/DeleteConfirmModal';
 import EditMembershipModal from './EditMembershipModal';
 import AddMembershipModal from './AddMembershipModal';
 import { getTrainers } from '../../../api/gym-trainers.api';
@@ -16,6 +17,9 @@ const MembershipListPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'EXPIRED'>('ACTIVE');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [limit, setLimit] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
 
     // Modals
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -27,37 +31,27 @@ const MembershipListPage: React.FC = () => {
 
     const navigate = useNavigate();
 
-    const fetchData = async () => {
+    const fetchData = React.useCallback(async (page: number, currentLimit: number, q: string, status: string, append: boolean = false) => {
         setIsLoading(true);
         try {
             const [membershipsData, trainersData] = await Promise.all([
-                getMemberships(),
-                getTrainers(1, '')
+                getMemberships(page, currentLimit, q, status),
+                getTrainers(1, 100, '') // fetching trainers list for modal
             ]);
-            setMemberships(membershipsData);
+            setTotalItems(membershipsData.total || 0);
+            setMemberships(prev => append ? [...prev, ...membershipsData.memberships] : membershipsData.memberships);
             setTrainers(trainersData?.trainers || trainersData || []);
         } catch (error: unknown) {
             toast.error((error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to load data');
         } finally {
             setIsLoading(false);
         }
-    };
-
-    useEffect(() => {
-        fetchData();
     }, []);
 
-    // Filter Logic
-    const filteredMemberships = useMemo(() => {
-        return memberships.filter(m => {
-            const matchesSearch = m.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                m.planName.toLowerCase().includes(searchTerm.toLowerCase());
-
-            const matchesStatus = statusFilter === 'ALL' ? true : m.status === statusFilter;
-
-            return matchesSearch && matchesStatus;
-        });
-    }, [memberships, searchTerm, statusFilter]);
+    useEffect(() => {
+        setCurrentPage(1);
+        fetchData(1, limit, searchTerm, statusFilter, false);
+    }, [searchTerm, limit, statusFilter, fetchData]);
 
     // Format Date
     const formatDate = (dateString: string | null) => {
@@ -109,7 +103,7 @@ const MembershipListPage: React.FC = () => {
             await deleteMembership(selectedMembership.id);
             toast.success('Membership deleted successfully');
             setIsDeleteModalOpen(false);
-            fetchData();
+            fetchData(currentPage, limit, searchTerm, statusFilter, false);
         } catch (error: unknown) {
             toast.error((error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to delete membership');
         } finally {
@@ -118,10 +112,8 @@ const MembershipListPage: React.FC = () => {
     };
 
     const handleRowClick = (id: string, e: React.MouseEvent) => {
-        // Prevent clicking if user clicked action buttons
         if ((e.target as HTMLElement).closest('button')) return;
         if ((e.target as HTMLElement).closest('a')) return;
-
         navigate(`/gym/memberships/${id}`);
     };
 
@@ -157,7 +149,7 @@ const MembershipListPage: React.FC = () => {
                 <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value as 'ALL' | 'ACTIVE' | 'EXPIRED')}
-                    className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 transition-colors w-full sm:w-48 appearance-none"
+                    className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 transition-colors w-full sm:w-48 appearance-none cursor-pointer"
                     style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center' }}
                 >
                     <option value="ACTIVE">Active</option>
@@ -171,7 +163,7 @@ const MembershipListPage: React.FC = () => {
                 <div className="flex items-center justify-center py-20">
                     <div className="w-8 h-8 border-4 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
                 </div>
-            ) : filteredMemberships.length === 0 ? (
+            ) : memberships.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 bg-zinc-900 border border-zinc-800 rounded-xl text-center px-4">
                     <ShieldCheck className="w-12 h-12 text-zinc-600 mb-4" />
                     <h3 className="text-lg font-medium text-white mb-1">No memberships found</h3>
@@ -197,7 +189,7 @@ const MembershipListPage: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-800/50">
-                                {filteredMemberships.map((m) => (
+                                {memberships.map((m) => (
                                     <tr
                                         key={m.id}
                                         className="hover:bg-zinc-800/20 transition-colors group cursor-pointer"
@@ -285,7 +277,7 @@ const MembershipListPage: React.FC = () => {
 
                     {/* Mobile View */}
                     <div className="md:hidden flex flex-col gap-4 mt-4">
-                        {filteredMemberships.map((m) => (
+                        {memberships.map((m) => (
                             <div
                                 key={m.id}
                                 className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 hover:border-emerald-500/50 transition-colors cursor-pointer shadow-sm"
@@ -367,6 +359,25 @@ const MembershipListPage: React.FC = () => {
                             </div>
                         ))}
                     </div>
+
+                    {/* Pagination */}
+                    <div className="flex justify-end mt-4">
+                        <div className="w-full">
+                            <Pagination
+                                currentPage={currentPage}
+                                totalItems={totalItems}
+                                limit={limit}
+                                onPageChange={(page) => {
+                                    setCurrentPage(page);
+                                    fetchData(page, limit, searchTerm, statusFilter, false);
+                                }}
+                                onLimitChange={(newLimit) => {
+                                    setLimit(newLimit);
+                                    setCurrentPage(1);
+                                }}
+                            />
+                        </div>
+                    </div>
                 </>
             )}
 
@@ -379,7 +390,7 @@ const MembershipListPage: React.FC = () => {
                     onClose={() => setIsEditModalOpen(false)}
                     onSuccess={() => {
                         setIsEditModalOpen(false);
-                        fetchData();
+                        fetchData(currentPage, limit, searchTerm, statusFilter, false);
                     }}
                 />
             )}
@@ -395,7 +406,7 @@ const MembershipListPage: React.FC = () => {
                 onSuccess={() => {
                     setIsAddModalOpen(false);
                     setRenewClientId(null);
-                    fetchData();
+                    fetchData(currentPage, limit, searchTerm, statusFilter, false);
                 }}
             />
 

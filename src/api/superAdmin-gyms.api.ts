@@ -5,13 +5,25 @@ export interface Gym {
     _id: string;
     gymName: string;
     logoUrl: string;
+    caption: string;
+    description: string;
     email: string;
     phone: string;
     address: string;
     approvalStatus: 'Approved' | 'Pending' | 'Rejected';
     subscriptionStatus: 'Active' | 'Trial' | 'Expired' | 'Pending';
+    location: { latitude: number; longitude: number };
     createdAt: string;
     expiryDate?: string;
+    latestSubscription?: {
+        planName: string;
+        amount: number;
+        startDate: string;
+        endDate: string;
+        status: string;
+        paymentGateway: string | null;
+        gatewayPaymentId: string | null;
+    }
 }
 
 export interface GymsResponse {
@@ -48,5 +60,10 @@ export const getGymById = async (gymId: string): Promise<Gym> => {
 
 export const updateGymStatus = async (gymId: string, gymData: Partial<Gym>): Promise<Gym> => {
     const response = await axiosInstance.patch(SUPER_ADMIN.GYM_BY_ID(gymId), gymData);
-    return response.data.data; 
+    return response.data.data;
+};
+
+export const approveGym = async (gymId: string): Promise<Gym> => {
+    const response = await axiosInstance.post(SUPER_ADMIN.APPROVE_GYM(gymId));
+    return response.data.data;
 };

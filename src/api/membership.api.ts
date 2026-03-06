@@ -55,8 +55,8 @@ export interface UpdatePaymentDTO {
 }
 
 // MEMBERSHIP APIS
-export const getMemberships = async (): Promise<Membership[]> => {
-    const response = await axiosInstance.get('/api/gym/memberships');
+export const getMemberships = async (page: number = 1, limit: number = 10, search: string = '', status: string = ''): Promise<{ memberships: Membership[], total: number }> => {
+    const response = await axiosInstance.get(`/api/gym/memberships?page=${page}&limit=${limit}&search=${search}&status=${status}`);
     return response.data.data;
 };
 

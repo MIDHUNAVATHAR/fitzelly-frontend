@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, Calendar, CalendarRange, ShieldCheck, Dumbbell,
@@ -30,7 +30,7 @@ const MembershipViewPage: React.FC = () => {
     const [isAddPaymentModalOpen, setIsAddPaymentModalOpen] = useState(false);
     const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
 
-    const fetchMembershipData = async () => {
+    const fetchMembershipData = useCallback(async () => {
         if (!id) return;
         setIsLoading(true);
         try {
@@ -42,15 +42,16 @@ const MembershipViewPage: React.FC = () => {
                 toast.error(error.response?.data?.message || 'Failed to load membership details');
             } else {
                 toast.error('Failed to load membership details');
-            } navigate('/gym/memberships');
+            }
+            navigate('/gym/memberships');
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [id, navigate]);
 
     useEffect(() => {
         fetchMembershipData();
-    }, [id]);
+    }, [fetchMembershipData]);
 
     const handleEditPayment = (payment: Payment) => {
         setSelectedPayment(payment);

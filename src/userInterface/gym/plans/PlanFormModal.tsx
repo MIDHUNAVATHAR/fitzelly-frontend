@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { X, Calendar } from 'lucide-react';
@@ -10,107 +11,198 @@ interface PlanFormModalProps {
     initialData?: Plan | null;
 }
 
-const PlanFormModal: React.FC<PlanFormModalProps> = ({ isOpen, onClose, onSubmit, initialData }) => {
+const PlanFormModal: React.FC<PlanFormModalProps> = ({
+    isOpen,
+    onClose,
+    onSubmit,
+    initialData
+}) => {
+
     const isEditMode = !!initialData;
-    const { register, handleSubmit, formState: { errors }, watch, reset, setValue } = useForm<CreatePlanDTO>();
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        watch,
+        reset,
+        setValue
+    } = useForm<CreatePlanDTO>();
+
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const watchPlanType = watch('planType', isEditMode ? initialData.planType : 'CATEGORY_BASED');
+    const watchPlanType = watch('planType');
 
     useEffect(() => {
-        if (isOpen) {
-            if (initialData) {
-                setValue('planName', initialData.planName);
-                setValue('planType', initialData.planType);
-                setValue('validity', initialData.validity);
-                setValue('price', initialData.price);
-                setValue('windowPeriod', initialData.windowPeriod || 0);
-                setValue('description', initialData.description || '');
-            } else {
-                reset({
-                    planName: '',
-                    planType: 'CATEGORY_BASED',
-                    validity: undefined,
-                    price: undefined,
-                    windowPeriod: 0,
-                    description: ''
-                }); // default value for new form
-            }
-        }
-    }, [isOpen, initialData, setValue, reset]);
 
-    const submitHandler = async (data: CreatePlanDTO) => {
-        setIsSubmitting(true);
-        try {
-            // Ensure windowPeriod is 0 if CATEGORY_BASED
-            if (data.planType === 'CATEGORY_BASED') {
-                data.windowPeriod = 0;
-            }
-            await onSubmit(data);
+        if (!isOpen) {
             reset({
                 planName: '',
-                planType: 'CATEGORY_BASED',
+                planType: undefined,
                 validity: undefined,
                 price: undefined,
                 windowPeriod: 0,
                 description: ''
             });
-            onClose();
-        } finally {
-            setIsSubmitting(false);
+            return;
         }
+
+        if (initialData) {
+
+            setValue('planName', initialData.planName);
+            setValue('planType', initialData.planType);
+            setValue('validity', initialData.validity);
+            setValue('price', initialData.price);
+            setValue('windowPeriod', initialData.windowPeriod || 0);
+            setValue('description', initialData.description || '');
+
+        } else {
+
+            reset({
+                planName: '',
+                planType: undefined,
+                validity: undefined,
+                price: undefined,
+                windowPeriod: 0,
+                description: ''
+            });
+
+        }
+
+    }, [isOpen, initialData, setValue, reset]);
+
+    const submitHandler = async (data: CreatePlanDTO) => {
+
+        setIsSubmitting(true);
+
+        try {
+
+            if (data.planType === 'CATEGORY_BASED') {
+                data.windowPeriod = 0;
+            }
+
+            await onSubmit(data);
+
+            reset();
+
+            onClose();
+
+        } finally {
+
+            setIsSubmitting(false);
+
+        }
+
     };
 
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={!isSubmitting ? onClose : undefined} />
 
-            <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-                <div className="flex items-center justify-between p-6 border-b border-zinc-800/50 flex-shrink-0">
+            <div
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                onClick={!isSubmitting ? onClose : undefined}
+            />
+
+            <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl">
+
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+
                     <h2 className="text-xl font-semibold text-white">
                         {isEditMode ? 'Edit Plan' : 'Create New Plan'}
                     </h2>
+
                     <button
                         onClick={onClose}
                         disabled={isSubmitting}
-                        className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors disabled:opacity-50"
+                        className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg"
                     >
                         <X className="w-5 h-5" />
                     </button>
+
                 </div>
 
-                <form onSubmit={handleSubmit(submitHandler)} className="flex-1 overflow-y-auto p-6 space-y-5">
+                {/* Form */}
+                <form
+                    onSubmit={handleSubmit(submitHandler)}
+                    className="flex-1 overflow-y-auto p-6 space-y-5"
+                >
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
                         {/* Plan Name */}
                         <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-zinc-300 mb-2">Plan Name</label>
+
+                            <label className="block text-sm text-zinc-300 mb-2">
+                                Plan Name
+                            </label>
+
                             <input
-                                {...register('planName', { required: 'Plan name is required' })}
-                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500 transition-colors"
+                                {...register('planName', {
+                                    required: 'Plan name is required'
+                                })}
+                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white"
                                 placeholder="e.g. Premium Monthly Plan"
                             />
-                            {errors.planName && <span className="text-red-400 text-sm mt-1">{errors.planName.message}</span>}
+
+                            {errors.planName && (
+                                <span className="text-red-400 text-sm">
+                                    {errors.planName.message}
+                                </span>
+                            )}
+
                         </div>
 
                         {/* Plan Type */}
                         <div>
-                            <label className="block text-sm font-medium text-zinc-300 mb-2">Plan Type</label>
+
+                            <label className="block text-sm text-zinc-300 mb-2">
+                                Plan Type
+                            </label>
+
                             <select
-                                {...register('planType', { required: 'Plan type is required' })}
-                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors appearance-none"
+                                {...register('planType', {
+                                    required: 'Plan type is required'
+                                })}
+                                defaultValue=""
+                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white"
                             >
-                                <option value="CATEGORY_BASED">Category Based (Months)</option>
-                                <option value="DAY_BASED">Day Based (Days)</option>
+
+                                {!isEditMode && (
+                                    <option value="" disabled>
+                                        Choose Plan Type
+                                    </option>
+                                )}
+
+                                <option value="CATEGORY_BASED">
+                                    Category Based (Months)
+                                </option>
+
+                                <option value="DAY_BASED">
+                                    Day Based (Days)
+                                </option>
+
                             </select>
+
+                            {errors.planType && (
+                                <span className="text-red-400 text-sm">
+                                    {errors.planType.message}
+                                </span>
+                            )}
+
                         </div>
 
                         {/* Validity */}
                         <div>
-                            <label className="block text-sm font-medium text-zinc-300 mb-2">Validity Value</label>
+
+                            <label className="block text-sm text-zinc-300 mb-2">
+                                Validity
+                            </label>
+
                             <div className="relative">
+
                                 <input
                                     type="number"
                                     {...register('validity', {
@@ -118,90 +210,138 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({ isOpen, onClose, onSubmit
                                         valueAsNumber: true,
                                         min: { value: 1, message: 'Minimum validity is 1' }
                                     })}
-                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg pl-10 pr-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
-                                    placeholder={watchPlanType === 'CATEGORY_BASED' ? 'Enter number of months' : 'Enter number of days'}
+                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg pl-10 pr-4 py-3 text-white"
+                                    placeholder={
+                                        watchPlanType === 'CATEGORY_BASED'
+                                            ? 'Months'
+                                            : 'Days'
+                                    }
                                 />
+
                                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+
                             </div>
-                            {errors.validity && <span className="text-red-400 text-sm mt-1 block">{errors.validity.message}</span>}
-                            <p className="text-emerald-400/80 text-xs mt-2 font-medium">
-                                {watchPlanType === 'CATEGORY_BASED' ? "Validity will be considered in Months" : "Validity will be considered in Days"}
-                            </p>
+
+                            {watchPlanType && (
+                                <p className="text-xs text-amber-400/90 mt-1.5 font-medium">
+                                    * Validity is considered as {watchPlanType === 'CATEGORY_BASED' ? 'months' : 'days'}
+                                </p>
+                            )}
+
+                            {errors.validity && (
+                                <span className="text-red-400 text-sm">
+                                    {errors.validity.message}
+                                </span>
+                            )}
+
                         </div>
 
-                        {/* Plan Fee */}
+                        {/* Price */}
                         <div>
-                            <label className="block text-sm font-medium text-zinc-300 mb-2">Plan Fee</label>
+
+                            <label className="block text-sm text-zinc-300 mb-2">
+                                Plan Fee
+                            </label>
+
                             <input
                                 type="number"
                                 {...register('price', {
                                     required: 'Plan fee is required',
                                     valueAsNumber: true,
-                                    min: { value: 0, message: 'Minimum fee cannot be negative' }
+                                    min: { value: 0, message: 'Price cannot be negative' }
                                 })}
-                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
-                                placeholder="Enter plan fee amount"
+                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white"
+                                placeholder="Enter price"
                             />
-                            {errors.price && <span className="text-red-400 text-sm mt-1">{errors.price.message}</span>}
+
+                            {errors.price && (
+                                <span className="text-red-400 text-sm">
+                                    {errors.price.message}
+                                </span>
+                            )}
+
                         </div>
 
-                        {/* Window Period (Only for DAY_BASED) */}
+                        {/* Window Period */}
                         {watchPlanType === 'DAY_BASED' && (
-                            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                                <label className="block text-sm font-medium text-zinc-300 mb-2">Window Period (Days)</label>
+
+                            <div>
+
+                                <label className="block text-sm text-zinc-300 mb-2">
+                                    Window Period (Days)
+                                </label>
+
                                 <input
                                     type="number"
                                     {...register('windowPeriod', {
                                         required: 'Window period is required',
                                         valueAsNumber: true,
-                                        min: { value: 0, message: 'Minimum window period is 0' }
+                                        min: { value: 0, message: 'Minimum is 0' }
                                     })}
-                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors"
-                                    placeholder="Enter window period in days"
+                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white"
                                 />
-                                {errors.windowPeriod && <span className="text-red-400 text-sm mt-1">{errors.windowPeriod.message}</span>}
-                                <p className="text-zinc-500 text-xs mt-2 font-medium">
-                                    Extra days allowed for clients to renew their plan.
+
+                                <p className="text-xs text-amber-400/90 mt-1.5 font-medium">
+                                    * Window period is in days
                                 </p>
+
+                                {errors.windowPeriod && (
+                                    <span className="text-red-400 text-sm">
+                                        {errors.windowPeriod.message}
+                                    </span>
+                                )}
+
                             </div>
+
                         )}
 
                         {/* Description */}
                         <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-zinc-300 mb-2">Description <span className="text-zinc-500 text-xs font-normal">(Optional)</span></label>
+
+                            <label className="block text-sm text-zinc-300 mb-2">
+                                Description (Optional)
+                            </label>
+
                             <textarea
                                 {...register('description')}
-                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500 transition-colors resize-none"
-                                placeholder="Add any specific details here..."
                                 rows={2}
+                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white resize-none"
                             />
+
                         </div>
+
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-3 pt-4 border-t border-zinc-800/50 mt-4">
+                    {/* Buttons */}
+                    <div className="flex gap-3 pt-4 border-t border-zinc-800">
+
                         <button
                             type="button"
                             onClick={onClose}
                             disabled={isSubmitting}
-                            className="flex-1 px-4 py-2.5 rounded-lg border border-zinc-700 text-zinc-300 font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50"
+                            className="flex-1 border border-zinc-700 text-zinc-300 rounded-lg py-2"
                         >
                             Cancel
                         </button>
+
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg py-2"
                         >
-                            {isSubmitting ? (
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            ) : (
-                                isEditMode ? 'Update Plan' : 'Create Plan'
-                            )}
+                            {isSubmitting
+                                ? 'Saving...'
+                                : isEditMode
+                                    ? 'Update Plan'
+                                    : 'Create Plan'}
                         </button>
+
                     </div>
+
                 </form>
+
             </div>
+
         </div>
     );
 };

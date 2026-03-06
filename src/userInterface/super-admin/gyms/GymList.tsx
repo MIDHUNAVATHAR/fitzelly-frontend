@@ -6,7 +6,7 @@ import SearchInput from '../../../components/ui/SearchInput';
 import Pagination from '../../../components/ui/Pagination';
 import type { Gym } from "../../../api/superAdmin-gyms.api";
 import { fetchGyms } from "../../../api/superAdmin-gyms.api";
-import { Eye, Edit } from 'lucide-react';
+import { Eye } from 'lucide-react';
 
 interface GymWithId extends Gym {
     id: string;
@@ -18,23 +18,17 @@ const GymsList: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+    const [limit, setLimit] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
 
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 1024);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    const loadGyms = useCallback(async (page: number, searchTerm: string, append: boolean = false) => {
+    const loadGyms = useCallback(async (page: number, currentLimit: number, searchTerm: string) => {
         try {
             setLoading(true);
-            const data = await fetchGyms(page, searchTerm);
+            const data = await fetchGyms(page, searchTerm, currentLimit);
             // map _id to id for reusableTable
             const mappedGyms = data.gyms.map(g => ({ ...g, id: g._id }));
-            setGyms(prev => append ? [...prev, ...mappedGyms] : mappedGyms);
-            setTotalPages(data.totalPages);
+            setGyms(mappedGyms);
+            setTotalItems(data.totalGyms);
         } catch (error) {
             console.error('Failed to load gyms', error);
         } finally {
@@ -44,34 +38,18 @@ const GymsList: React.FC = () => {
 
     useEffect(() => {
         setCurrentPage(1);
-        loadGyms(1, search, false);
-    }, [search, loadGyms]);
+        loadGyms(1, limit, search);
+    }, [search, limit, loadGyms]);
 
-    useEffect(() => {
-        if (!isMobile) {
-            loadGyms(currentPage, search, false);
-        }
-    }, [currentPage, isMobile, loadGyms, search]);
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        loadGyms(page, limit, search);
+    };
 
-    const handleScroll = useCallback(() => {
-        if (!isMobile || loading || currentPage >= totalPages) return;
-        const container = document.getElementById('main-scroll-container');
-        if (!container) return;
-        const { scrollTop, scrollHeight, clientHeight } = container;
-        if (scrollTop + clientHeight >= scrollHeight - 50) {
-            const nextPage = currentPage + 1;
-            setCurrentPage(nextPage);
-            loadGyms(nextPage, search, true);
-        }
-    }, [isMobile, loading, currentPage, totalPages, loadGyms, search]);
-
-    useEffect(() => {
-        const container = document.getElementById('main-scroll-container');
-        if (container && isMobile) {
-            container.addEventListener('scroll', handleScroll);
-            return () => container.removeEventListener('scroll', handleScroll);
-        }
-    }, [handleScroll, isMobile]);
+    const handleLimitChange = (newLimit: number) => {
+        setLimit(newLimit);
+        setCurrentPage(1);
+    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -132,13 +110,6 @@ const GymsList: React.FC = () => {
                     >
                         <Eye className="w-4 h-4" />
                     </button>
-                    <button
-                        onClick={(e) => { e.stopPropagation(); navigate(`/super-admin/gyms/${gym._id}/edit`); }}
-                        className="p-1.5 bg-zinc-800 rounded hover:bg-zinc-700 text-amber-400 transition"
-                        title="Edit"
-                    >
-                        <Edit className="w-4 h-4" />
-                    </button>
                 </div>
             )
         }
@@ -164,15 +135,15 @@ const GymsList: React.FC = () => {
                 onRowClick={(gym) => navigate(`/super-admin/gyms/${gym._id}`)}
             />
 
-            {!isMobile && totalPages > 1 && (
-                <div className="flex justify-end">
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={setCurrentPage}
-                    />
-                </div>
-            )}
+            <div className="flex justify-end mt-4">
+                <Pagination
+                    currentPage={currentPage}
+                    totalItems={totalItems}
+                    limit={limit}
+                    onPageChange={handlePageChange}
+                    onLimitChange={handleLimitChange}
+                />
+            </div>
         </div>
     );
 };

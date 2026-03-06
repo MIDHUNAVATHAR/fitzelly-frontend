@@ -29,4 +29,5 @@ export interface SuperAdminProfile {
     phoneNumber?: string;
     description?: string;
     logoUrl?: string;
+    trialDays?: number;
 }

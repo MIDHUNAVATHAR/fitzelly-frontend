@@ -26,7 +26,8 @@ export const SUPER_ADMIN = {
     SUPER_ADMIN_PROFILE: "/api/super-admin/profile",
     UPLOAD_SUPER_ADMIN_LOGO: "/api/super-admin/profile/logo",
     SUPER_ADMIN_GYMS: "/api/super-admin/gyms",
-    GYM_BY_ID: (gymId: string) => `/api/super-admin/gyms/${gymId}`
+    GYM_BY_ID: (gymId: string) => `/api/super-admin/gyms/${gymId}`,
+    APPROVE_GYM: (gymId: string) => `/api/super-admin/gyms/${gymId}/approve`
 }
 
 

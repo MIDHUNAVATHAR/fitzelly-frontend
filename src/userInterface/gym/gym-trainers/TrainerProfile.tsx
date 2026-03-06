@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
     ArrowLeft, Edit3, Save, X, Loader2,
@@ -10,6 +10,19 @@ import { getTrainerById, updateTrainer } from "../../../api/gym-trainers.api";
 import type { Trainer } from "../../../api/gym-trainers.api";
 import DateInput from "../../../components/ui/DateInput";
 import { useDateFormat } from "../../../hooks/useDateFormat";
+import ImageCropperModal from "../../../components/ui/ImageCropperModal";
+import CertificatePreviewModal from "../../../components/ui/CertificatePreviewModal";
+import DeleteConfirmModal from "../plans/DeleteConfirmModal";
+import { Upload, FileText, Trash2, MapPin, GraduationCap } from 'lucide-react';
+import { useImageCropper } from "../../../hooks/useImageCropper";
+
+interface CertificateItem {
+    id: string;
+    url?: string;
+    file?: File;
+    type: 'image' | 'pdf';
+    name: string;
+}
 
 const TrainerProfile: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -26,17 +39,47 @@ const TrainerProfile: React.FC = () => {
     const [formData, setFormData] = useState<Partial<Trainer>>({});
     const { formatToShortMonth: formatDate } = useDateFormat();
 
-    useEffect(() => {
-        loadTrainer();
-    }, [id]);
+    // Certificates state
+    const [certificates, setCertificates] = useState<CertificateItem[]>([]);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [certToDelete, setCertToDelete] = useState<string | null>(null);
+    const [previewCert, setPreviewCert] = useState<CertificateItem | null>(null);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-    const loadTrainer = async () => {
+    const handleCroppedImage = async (croppedImageBlob: Blob) => {
+        const fileName = `certificate-${Date.now()}.jpg`;
+        const file = new File([croppedImageBlob], fileName, { type: "image/jpeg" });
+        setCertificates(prev => [...prev, { id: `new-${Date.now()}`, file, type: 'image', name: file.name }]);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const {
+        imageSrc, crop, zoom, isCropping, isUploadingImage, setCrop, setZoom,
+        handleFileSelect, handleUploadCroppedImage, onCropComplete, cancelCropping
+    } = useImageCropper({
+        onCropComplete: handleCroppedImage,
+        aspectRatio: 4 / 3
+    });
+
+    const loadTrainer = useCallback(async () => {
         if (!id) return;
         try {
             setLoading(true);
             const data = await getTrainerById(id);
             setTrainer(data);
             setFormData(data);
+
+            if (data.certificates && Array.isArray(data.certificates)) {
+                setCertificates(data.certificates.map((url: string, i: number) => {
+                    const isPdf = url.toLowerCase().endsWith('.pdf');
+                    return {
+                        id: `existing-${i}`,
+                        url,
+                        type: isPdf ? 'pdf' : 'image',
+                        name: url.split('/').pop() || `Certificate ${i + 1}`
+                    };
+                }));
+            }
         } catch (error) {
             console.error(error);
             toast.error("Failed to load trainer details");
@@ -44,7 +87,11 @@ const TrainerProfile: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id, navigate]);
+
+    useEffect(() => {
+        loadTrainer();
+    }, [loadTrainer]);
 
     const handleSave = async () => {
         const { fullName, email, phoneNumber } = formData;
@@ -66,7 +113,24 @@ const TrainerProfile: React.FC = () => {
         setIsSaving(true);
         try {
             if (!id) return;
-            const updatedTrainer = await updateTrainer(id, formData);
+            const submitData = new FormData();
+            Object.entries(formData).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    submitData.append(key, value.toString());
+                }
+            });
+
+            const existingCerts = certificates.filter(c => c.url).map(c => c.url);
+            const newCerts = certificates.filter(c => c.file).map(c => c.file);
+
+            if (existingCerts.length > 0) {
+                submitData.append('certificates', JSON.stringify(existingCerts));
+            } else {
+                submitData.append('certificates', JSON.stringify([]));
+            }
+            newCerts.forEach(file => { if (file) submitData.append('certificates', file); });
+
+            const updatedTrainer = await updateTrainer(id, submitData);
             if (trainer && updatedTrainer) {
                 setTrainer(Object.assign({}, trainer, updatedTrainer) as Trainer);
             }
@@ -85,14 +149,43 @@ const TrainerProfile: React.FC = () => {
 
     const handleCancel = () => {
         setFormData(trainer || {});
+        if (trainer?.certificates && Array.isArray(trainer.certificates)) {
+            setCertificates(trainer.certificates.map((url: string, i: number) => ({
+                id: `existing-${i}`,
+                url,
+                type: url.toLowerCase().endsWith('.pdf') ? 'pdf' : 'image',
+                name: url.split('/').pop() || `Certificate ${i + 1}`
+            })));
+        } else {
+            setCertificates([]);
+        }
         setIsEditing(false);
-        // Navigate to view mode (remove /edit)
         navigate(`/gym/trainers/${id}`, { replace: true });
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0];
+            if (file.type === 'application/pdf') {
+                setCertificates(prev => [...prev, { id: `new-${Date.now()}`, file, type: 'pdf', name: file.name }]);
+                if (fileInputRef.current) fileInputRef.current.value = '';
+            } else if (file.type.startsWith('image/')) {
+                await handleFileSelect(file);
+            }
+        }
+    };
+
+    const handleDeleteConfirm = () => {
+        if (certToDelete) {
+            setCertificates(prev => prev.filter(c => c.id !== certToDelete));
+            setCertToDelete(null);
+        }
+        setIsDeleteModalOpen(false);
     };
 
     const handleBack = () => {
@@ -333,7 +426,107 @@ const TrainerProfile: React.FC = () => {
                             <p className="text-white text-lg">{formatDate(trainer.dateOfBirth)}</p>
                         )}
                     </div>
+
+                    {/* Qualification */}
+                    <div className="bg-zinc-950/50 p-4 rounded-xl border border-zinc-800/50">
+                        <div className="flex items-center gap-2 mb-2">
+                            <GraduationCap className="w-4 h-4 text-emerald-400" />
+                            <span className="text-sm font-medium text-zinc-500">Qualification</span>
+                        </div>
+                        {isEditing ? (
+                            <input
+                                name="qualification"
+                                value={formData.qualification || ''}
+                                onChange={handleChange}
+                                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-emerald-400 transition-colors text-base mt-0.5"
+                                placeholder="Enter qualification"
+                            />
+                        ) : (
+                            <p className="text-white text-lg">{trainer.qualification || 'Not specified'}</p>
+                        )}
+                    </div>
+
+                    {/* Address */}
+                    <div className="bg-zinc-950/50 p-4 rounded-xl border border-zinc-800/50">
+                        <div className="flex items-center gap-2 mb-2">
+                            <MapPin className="w-4 h-4 text-emerald-400" />
+                            <span className="text-sm font-medium text-zinc-500">Address</span>
+                        </div>
+                        {isEditing ? (
+                            <textarea
+                                name="address"
+                                value={formData.address || ''}
+                                onChange={handleChange}
+                                rows={2}
+                                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-emerald-400 transition-colors text-base mt-0.5 resize-none"
+                                placeholder="Enter address"
+                            />
+                        ) : (
+                            <p className="text-white text-lg">{trainer.address || 'Not specified'}</p>
+                        )}
+                    </div>
                 </div>
+            </div>
+
+            {/* Certificates Card */}
+            <div className="mt-6 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-6">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-white">Certificates</h3>
+                    {isEditing && (
+                        <div>
+                            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".jpg,.jpeg,.png,.pdf" className="hidden" />
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 transition rounded-lg text-white text-sm"
+                            >
+                                <Upload className="w-4 h-4" />
+                                Add
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {certificates.length === 0 ? (
+                    <div className="text-center py-8 text-zinc-500 text-sm">
+                        No certificates uploaded yet.
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        {certificates.map((cert) => (
+                            <div key={cert.id} className="relative group bg-zinc-800 border border-zinc-700 rounded-lg overflow-hidden flex flex-col cursor-pointer transition-shadow hover:shadow-lg" onClick={() => setPreviewCert(cert)}>
+                                {isEditing && (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setCertToDelete(cert.id);
+                                            setIsDeleteModalOpen(true);
+                                        }}
+                                        className="absolute top-2 right-2 p-1.5 bg-black/50 hover:bg-red-500/80 rounded-md text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                )}
+
+                                <div className="h-32 w-full flex items-center justify-center bg-zinc-950 border-b border-zinc-800">
+                                    {cert.type === 'pdf' ? (
+                                        <FileText className="w-12 h-12 text-zinc-500" />
+                                    ) : (
+                                        <img
+                                            src={cert.url || (cert.file ? URL.createObjectURL(cert.file) : '')}
+                                            alt={cert.name}
+                                            className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+                                        />
+                                    )}
+                                </div>
+                                <div className="p-2 truncate text-xs text-zinc-300 text-center font-medium bg-zinc-800">
+                                    {cert.name}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
 
@@ -358,6 +551,46 @@ const TrainerProfile: React.FC = () => {
                         Save Changes
                     </button>
                 </div>
+            )}
+            {/* Modals */}
+            {isCropping && imageSrc && (
+                <ImageCropperModal
+                    imageSrc={imageSrc}
+                    crop={crop}
+                    zoom={zoom}
+                    isUploading={isUploadingImage}
+                    onCropChange={setCrop}
+                    onZoomChange={setZoom}
+                    onCropComplete={onCropComplete}
+                    onUpload={handleUploadCroppedImage}
+                    onCancel={() => {
+                        cancelCropping();
+                        if (fileInputRef.current) fileInputRef.current.value = '';
+                    }}
+                    title="Crop Certificate"
+                    aspectRatio={4 / 3}
+                />
+            )}
+
+            {isDeleteModalOpen && (
+                <DeleteConfirmModal
+                    isOpen={isDeleteModalOpen}
+                    itemName="this certificate"
+                    onClose={() => {
+                        setIsDeleteModalOpen(false);
+                        setCertToDelete(null);
+                    }}
+                    onConfirm={handleDeleteConfirm}
+                />
+            )}
+
+            {previewCert && (
+                <CertificatePreviewModal
+                    fileUrl={previewCert.url || (previewCert.file ? URL.createObjectURL(previewCert.file) : '')}
+                    fileType={previewCert.type}
+                    fileName={previewCert.name}
+                    onClose={() => setPreviewCert(null)}
+                />
             )}
         </div>
     );

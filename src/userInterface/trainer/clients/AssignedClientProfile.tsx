@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Mail, Phone, Calendar, Tag, Award, ArrowLeft, Loader2, Activity } from 'lucide-react';
+import { Mail, Phone, Calendar, Tag, Award, ArrowLeft, Loader2, Activity, User, ShieldAlert } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import type { ClientDTO } from '../../../api/gym-clients.api';
 import { getAssignedClientById } from "../../../api/trainer-clients.api";
@@ -13,11 +13,7 @@ const AssignedClientProfile: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [client, setClient] = useState<null | ClientDTO>(null);
 
-    useEffect(() => {
-        loadClient();
-    }, [id]);
-
-    const loadClient = async () => {
+    const loadClient = useCallback(async () => {
         if (!id) return;
         try {
             setLoading(true);
@@ -30,7 +26,11 @@ const AssignedClientProfile: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id, navigate]);
+
+    useEffect(() => {
+        loadClient();
+    }, [loadClient]);
 
     const handleBack = () => {
         navigate('/trainer/clients');
@@ -168,6 +168,24 @@ const AssignedClientProfile: React.FC = () => {
                             <div className="flex items-center gap-3 text-zinc-300 p-3 bg-zinc-950/50 rounded-lg border border-zinc-800/50 text-sm sm:text-base">
                                 <Tag className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
                                 <span className="truncate">{client.currentPlan || 'No active plan'}</span>
+                            </div>
+                        </div>
+
+                        {/* Contact Person */}
+                        <div className="group">
+                            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">Contact Person</label>
+                            <div className="flex items-center gap-3 text-zinc-300 p-3 bg-zinc-950/50 rounded-lg border border-zinc-800/50 text-sm sm:text-base">
+                                <User className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
+                                <span className="truncate">{client.contactPerson || 'Not set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Emergency Contact */}
+                        <div className="group">
+                            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">Emergency Contact</label>
+                            <div className="flex items-center gap-3 text-zinc-300 p-3 bg-zinc-950/50 rounded-lg border border-zinc-800/50 text-sm sm:text-base">
+                                <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
+                                <span className="truncate">{client.emergencyContact || 'Not set'}</span>
                             </div>
                         </div>
                     </div>
