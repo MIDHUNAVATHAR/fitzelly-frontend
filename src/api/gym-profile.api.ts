@@ -17,7 +17,11 @@ export interface GymProfile {
     };
     approvalStatus?: string;
     subscriptionStatus?: string;
-    expiryDate?: string
+    startDate?: string;
+    expiryDate?: string;
+    paymentMethod?: string;
+    planName?: string;
+    amount?: number;
 }
 
 

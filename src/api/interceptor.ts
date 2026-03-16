@@ -79,7 +79,7 @@ export const setupInterceptors = (getAccessToken: () => string | null, setAccess
                 originalRequest.headers.Authorization = `Bearer ${newToken}`;
                 return axiosInstance(originalRequest);
             } catch (err) {
-                const errObj = err instanceof Error ? err : new Error("refresh token failed")
+                const errObj = err instanceof Error ? err : new Error("refresh token failed");
                 processQueue(errObj, null);
                 setAccessToken(null);
                 return Promise.reject(err);

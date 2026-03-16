@@ -69,3 +69,8 @@ export const getClientGymDetails = async (): Promise<GymProfile> => {
     const response = await axiosInstance.get(`/api/client/gym-details`);
     return response.data.data;
 };
+
+export const getClientAssignedTrainer = async (trainerId: string) => {
+    const response = await axiosInstance.get(`api/client/trainer/${trainerId}`);
+    return response.data.data;
+}

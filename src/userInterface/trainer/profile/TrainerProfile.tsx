@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mail, Phone, Calendar, Save, Camera, Edit3, DollarSign, CalendarDays, Briefcase } from 'lucide-react';
+import { Mail, Phone, Calendar, Save, Camera, Edit3, DollarSign, CalendarDays, Briefcase, MapPin, GraduationCap, FileText } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getTrainerProfile, updateTrainerProfile, uploadTrainerProfileImage, type TrainerProfile } from "../../../api/trainer-profile.api";
 import { useImageCropper } from '../../../hooks/useImageCropper';
@@ -89,9 +89,9 @@ const TrainerProfilePage: React.FC = () => {
     };
 
     const handleSave = async () => {
-        const { fullName, phoneNumber, specialization, dateOfBirth } = formData;
+        const { fullName, phoneNumber, specialization, dateOfBirth, qualification, address } = formData;
 
-        if (!fullName?.trim() || !phoneNumber?.trim() || !specialization?.trim() || !dateOfBirth?.trim()) {
+        if (!fullName?.trim() || !phoneNumber?.trim() || !specialization?.trim() || !dateOfBirth?.trim() || !qualification?.trim() || !address?.trim()) {
             toast.error("All editable fields are mandatory");
             return;
         }
@@ -102,7 +102,9 @@ const TrainerProfilePage: React.FC = () => {
                 fullName,
                 phoneNumber,
                 specialization,
-                dateOfBirth
+                dateOfBirth,
+                qualification,
+                address
             });
             setProfile({ ...updatedProfile });
             setFormData({ ...updatedProfile });
@@ -319,7 +321,93 @@ const TrainerProfilePage: React.FC = () => {
                                     )}
                                 </div>
 
+                                {/* Editable: Qualification */}
+                                <div className="group">
+                                    <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block flex justify-between">
+                                        Qualification {isEditing && <span className="text-[10px] text-emerald-400 lowercase normal-case tracking-normal font-normal">*Required</span>}
+                                    </label>
+                                    {isEditing ? (
+                                        <div className="relative">
+                                            <GraduationCap className="w-5 h-5 text-emerald-400 absolute left-3 top-2.5 z-10" />
+                                            <input
+                                                type="text"
+                                                value={formData.qualification || ''}
+                                                onChange={e => setFormData({ ...formData, qualification: e.target.value })}
+                                                className="w-full pl-10 bg-zinc-950 border border-emerald-500/50 outline-none ring-2 ring-emerald-500/20 rounded-lg px-3 py-2 text-white transition-all shadow-input"
+                                                placeholder="e.g. B.Sc Sports Science"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-3 text-zinc-300 p-3 bg-zinc-950/40 rounded-lg border border-zinc-800/50 hover:bg-zinc-900 hover:border-zinc-700 transition-colors cursor-default">
+                                            <GraduationCap className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                                            <span className="truncate">{profile?.qualification || "Not set"}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Editable: Address */}
+                                <div className="group md:col-span-2">
+                                    <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block flex justify-between">
+                                        Address {isEditing && <span className="text-[10px] text-emerald-400 lowercase normal-case tracking-normal font-normal">*Required</span>}
+                                    </label>
+                                    {isEditing ? (
+                                        <div className="relative">
+                                            <MapPin className="w-5 h-5 text-emerald-400 absolute left-3 top-3 z-10" />
+                                            <textarea
+                                                value={formData.address || ''}
+                                                onChange={e => setFormData({ ...formData, address: e.target.value })}
+                                                className="w-full pl-10 bg-zinc-950 border border-emerald-500/50 outline-none ring-2 ring-emerald-500/20 rounded-lg px-3 py-2 text-white transition-all shadow-input resize-none h-24"
+                                                placeholder="Enter full address"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-start gap-3 text-zinc-300 p-3 bg-zinc-950/40 rounded-lg border border-zinc-800/50 hover:bg-zinc-900 hover:border-zinc-700 transition-colors cursor-default min-h-[5rem]">
+                                            <MapPin className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                                            <span className="whitespace-pre-wrap">{profile?.address || "Not set"}</span>
+                                        </div>
+                                    )}
+                                </div>
+
                             </div>
+
+                            {/* Certificates Section */}
+                            {profile?.certificates && profile.certificates.length > 0 && (
+                                <div className="mt-8">
+                                    <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3 block flex justify-between items-center">
+                                        <span>Certificates</span>
+                                        <span className="text-[10px] bg-zinc-800 px-2 py-0.5 rounded text-zinc-500 uppercase tracking-wider font-semibold shadow-inner border border-zinc-700/50">View Only</span>
+                                    </label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                        {profile.certificates.map((certUrl, idx) => {
+                                            const isPdf = certUrl.toLowerCase().endsWith('.pdf');
+                                            return (
+                                                <div key={idx} className="relative group rounded-xl overflow-hidden bg-zinc-950 border border-zinc-800 aspect-square flex flex-col items-center justify-center hover:border-zinc-700 transition-all">
+                                                    {isPdf ? (
+                                                        <>
+                                                            <FileText className="w-12 h-12 text-zinc-500 mb-2" />
+                                                            <span className="text-xs text-zinc-400">PDF Document</span>
+                                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                                                                <a href={certUrl} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-emerald-400 text-black text-xs font-bold rounded-lg shadow-lg hover:bg-emerald-300 transition-colors">
+                                                                    View
+                                                                </a>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <img src={certUrl} alt={`Certificate ${idx + 1}`} className="w-full h-full object-cover" />
+                                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                                                                <a href={certUrl} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-emerald-400 text-black text-xs font-bold rounded-lg shadow-lg hover:bg-emerald-300 transition-colors">
+                                                                    View
+                                                                </a>
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Action Buttons */}
                             {isEditing && (

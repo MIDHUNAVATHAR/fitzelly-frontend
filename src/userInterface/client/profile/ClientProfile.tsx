@@ -6,11 +6,13 @@ import { useImageCropper } from '../../../hooks/useImageCropper';
 import ImageCropperModal from '../../../components/ui/ImageCropperModal';
 import DateInput from '../../../components/ui/DateInput';
 import { useDateFormat } from '../../../hooks/useDateFormat';
+import TrainerProfileModal from './TrainerProfileModal';
 
 const ClientProfilePage: React.FC = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [loadingProfile, setLoadingProfile] = useState(true);
     const [loadingMembership, setLoadingMembership] = useState(true);
+    const [isTrainerModalOpen, setIsTrainerModalOpen] = useState(false);
 
     const [profile, setProfile] = useState<ClientProfile | null>(null);
     const [membership, setMembership] = useState<ClientMembership | null>(null);
@@ -450,6 +452,14 @@ const ClientProfilePage: React.FC = () => {
                                         <div className="bg-zinc-950/50 p-4 rounded-xl border border-zinc-800/50">
                                             <div className="flex items-center justify-between mb-2">
                                                 <span className="text-sm font-medium text-zinc-500">Assigned Trainer</span>
+                                                {membership.assignedTrainerId && (
+                                                    <button
+                                                        onClick={() => setIsTrainerModalOpen(true)}
+                                                        className="px-3 py-1 bg-emerald-400/10 text-emerald-400 hover:bg-emerald-400/20 rounded-md text-xs font-semibold transition-colors border border-emerald-400/20"
+                                                    >
+                                                        View
+                                                    </button>
+                                                )}
                                             </div>
                                             <div className="flex items-center gap-2 text-zinc-300">
                                                 <User className="w-4 h-4 text-emerald-400" />
@@ -531,6 +541,12 @@ const ClientProfilePage: React.FC = () => {
                     onCancel={cancelCropping}
                     title="Adjust Profile Picture"
                     aspectRatio={1}
+                />
+            )}
+            {isTrainerModalOpen && membership?.assignedTrainerId && (
+                <TrainerProfileModal
+                    trainerId={membership.assignedTrainerId}
+                    onClose={() => setIsTrainerModalOpen(false)}
                 />
             )}
 

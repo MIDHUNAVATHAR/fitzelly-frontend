@@ -22,6 +22,10 @@ export interface ClientDTO {
     payments?: { date: string, amount: number }[];
     joinedDate: string;
     isEmailVerified: boolean;
+    clientId?: string;
+    height?: number;
+    weight?: number;
+    gender?: 'MALE' | 'FEMALE' | 'OTHER';
 }
 
 

@@ -67,7 +67,7 @@ const AssignedClientsPage: React.FC = () => {
 
     const handleWorkoutPlan = (e: React.MouseEvent, clientId: string) => {
         e.stopPropagation();
-        toast.success(`Workout plan feature coming soon! (Client ID: ${clientId})`);
+        navigate(`/trainer/clients/${clientId}/workout-plan`);
     };
 
     const columns: Column<ClientDTO>[] = [

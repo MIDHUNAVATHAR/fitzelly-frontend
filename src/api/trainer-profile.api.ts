@@ -11,6 +11,9 @@ export interface TrainerProfile {
     dateOfBirth?: string;
     profileUrl?: string;
     joinedDate?: string;
+    qualification?: string;
+    address?: string;
+    certificates?: string[];
 }
 
 export const getTrainerProfile = async (): Promise<TrainerProfile> => {

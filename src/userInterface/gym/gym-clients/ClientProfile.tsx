@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { Mail, Phone, Calendar, User, PhoneCall, Tag, Award, ArrowLeft, Edit3, Save, X, Loader2, IndianRupee, CreditCard } from 'lucide-react';
+import { Mail, Phone, Calendar, User, PhoneCall, Tag, Award, ArrowLeft, Edit3, Save, X, Loader2, IndianRupee, CreditCard, Ruler, Scale, IdCard } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getClientById, updateClient } from "../../../api/gym-clients.api";
 import type { ClientDTO } from "../../../api/gym-clients.api";
@@ -84,9 +84,12 @@ const ClientProfile: React.FC = () => {
         navigate(`/gym/clients/${id}`, { replace: true, state: {} });
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value, type } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'number' ? (value ? Number(value) : undefined) : value
+        }));
     };
 
     const handleBack = () => {
@@ -334,6 +337,101 @@ const ClientProfile: React.FC = () => {
                                 <div className="flex items-center gap-3 text-zinc-300 p-3 bg-zinc-950/50 rounded-lg border border-zinc-800/50 text-sm sm:text-base">
                                     <User className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
                                     <span className="truncate">{client.contactPerson || 'Not set'}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Client ID - Editable */}
+                        <div className="group">
+                            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">Client ID</label>
+                            {isEditing ? (
+                                <div className="relative">
+                                    <IdCard className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 absolute left-3 top-2.5 z-10" />
+                                    <input
+                                        type="text"
+                                        name="clientId"
+                                        value={formData.clientId || ''}
+                                        onChange={handleChange}
+                                        className="w-full pl-10 bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-400 transition-colors text-sm sm:text-base"
+                                        placeholder="Enter client ID"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-3 text-zinc-300 p-3 bg-zinc-950/50 rounded-lg border border-zinc-800/50 text-sm sm:text-base">
+                                    <IdCard className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
+                                    <span className="truncate">{client.clientId || 'Not set'}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Gender - Editable */}
+                        <div className="group">
+                            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">Gender</label>
+                            {isEditing ? (
+                                <div className="relative">
+                                    <User className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 absolute left-3 top-2.5 z-10" />
+                                    <select
+                                        name="gender"
+                                        value={formData.gender || ''}
+                                        onChange={handleChange}
+                                        className="w-full pl-10 bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-400 transition-colors text-sm sm:text-base"
+                                    >
+                                        <option value="">Select Gender</option>
+                                        <option value="MALE">Male</option>
+                                        <option value="FEMALE">Female</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-3 text-zinc-300 p-3 bg-zinc-950/50 rounded-lg border border-zinc-800/50 text-sm sm:text-base">
+                                    <User className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
+                                    <span className="truncate capitalize">{client.gender?.toLowerCase() || 'Not set'}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Height - Editable */}
+                        <div className="group">
+                            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">Height (cm)</label>
+                            {isEditing ? (
+                                <div className="relative">
+                                    <Ruler className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 absolute left-3 top-2.5 z-10" />
+                                    <input
+                                        type="number"
+                                        name="height"
+                                        value={formData.height || ''}
+                                        onChange={handleChange}
+                                        className="w-full pl-10 bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-400 transition-colors text-sm sm:text-base"
+                                        placeholder="Enter height"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-3 text-zinc-300 p-3 bg-zinc-950/50 rounded-lg border border-zinc-800/50 text-sm sm:text-base">
+                                    <Ruler className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
+                                    <span className="truncate">{client.height ? `${client.height} cm` : 'Not set'}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Weight - Editable */}
+                        <div className="group">
+                            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">Weight (kg)</label>
+                            {isEditing ? (
+                                <div className="relative">
+                                    <Scale className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 absolute left-3 top-2.5 z-10" />
+                                    <input
+                                        type="number"
+                                        name="weight"
+                                        value={formData.weight || ''}
+                                        onChange={handleChange}
+                                        className="w-full pl-10 bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-400 transition-colors text-sm sm:text-base"
+                                        placeholder="Enter weight"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-3 text-zinc-300 p-3 bg-zinc-950/50 rounded-lg border border-zinc-800/50 text-sm sm:text-base">
+                                    <Scale className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
+                                    <span className="truncate">{client.weight ? `${client.weight} kg` : 'Not set'}</span>
                                 </div>
                             )}
                         </div>

@@ -10,7 +10,9 @@ import { ROLES } from "./constants/roles";
 import { lazyComponent } from "./components/wrapper/lazyLoad";
 
 
-
+/**
+ * only lazy loading layouts, no need to small pages
+ */
 const GymLayout = lazyComponent(React.lazy(() => import("./userInterface/gym/GymLayout")));
 const DashboardHome = lazyComponent(React.lazy(() => import("./userInterface/gym/DashboardHome")));
 const GymProfile = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-profile/Profile")));
@@ -28,7 +30,7 @@ const MembershipList = lazyComponent(React.lazy(() => import("./userInterface/gy
 const MembershipView = lazyComponent(React.lazy(() => import("./userInterface/gym/memberships/MembershipViewPage")))
 
 const EquipmentList = lazyComponent(React.lazy(() => import("./userInterface/gym/equipment/EquipmentList")));
-
+const AttendanceManagement = lazyComponent(React.lazy(() => import("./userInterface/gym/attendance/AttendanceManagement")));
 
 
 const SuperAdminLayout = lazyComponent(React.lazy(() => import("./userInterface/super-admin/SuperAdminLayout")));
@@ -43,8 +45,9 @@ const GymView = lazyComponent(React.lazy(() => import("./userInterface/super-adm
  */
 const ClientLayout = lazyComponent(React.lazy(() => import("./userInterface/client/ClientLayout")));
 const ClientDashboardHome = lazyComponent(React.lazy(() => import("./userInterface/client/dashboard/DashboardHome")));
-const ClientProfilePage = lazyComponent(React.lazy(() => import("./userInterface/client/profile/ClientProfile")))
+const ClientProfilePage = lazyComponent(React.lazy(() => import("./userInterface/client/profile/ClientProfile")));
 const GymDetailsPage = lazyComponent(React.lazy(() => import("./userInterface/client/gym-details/GymDetails")));
+const ClientWorkoutPlanPage = lazyComponent(React.lazy(() => import("./userInterface/client/workout-plan/WorkoutPlan")));
 
 /**
  * trainer components 
@@ -56,6 +59,7 @@ const TrainerProfilePage = lazyComponent(React.lazy(() => import("./userInterfac
 const TrainerGymDetailsPage = lazyComponent(React.lazy(() => import("./userInterface/trainer/gym-details/GymDetails")));
 const TrainerClientsPage = lazyComponent(React.lazy(() => import("./userInterface/trainer/clients/AssignedClientsPage")));
 const TrainerClientProfilePage = lazyComponent(React.lazy(() => import("./userInterface/trainer/clients/AssignedClientProfile")));
+const TrainerWorkoutPlanPage = lazyComponent(React.lazy(() => import("./userInterface/trainer/clients/WorkoutPlanPage")));
 
 
 
@@ -104,6 +108,7 @@ function App() {
             <Route path="memberships/:id" element={<MembershipView />} />
 
             <Route path="equipments" element={<EquipmentList />} />
+            <Route path="attendance" element={<AttendanceManagement />} />
 
 
           </Route >
@@ -116,6 +121,8 @@ function App() {
             <Route path="dashboard" element={<ClientDashboardHome />} />
             <Route path="profile" element={<ClientProfilePage />} />
             <Route path="gym-details" element={<GymDetailsPage />} />
+            <Route path="workout-plan" element={<ClientWorkoutPlanPage />} />
+
           </Route>
         </Route>
 
@@ -128,6 +135,8 @@ function App() {
             <Route path="gym-details" element={<TrainerGymDetailsPage />} />
             <Route path="clients" element={<TrainerClientsPage />} />
             <Route path="clients/:id" element={<TrainerClientProfilePage />} />
+            <Route path="clients/:id/workout-plan" element={<TrainerWorkoutPlanPage />} />
+
           </Route>
         </Route>
 

@@ -5,6 +5,8 @@ import { getGymProfile, updateGymProfile, uploadGymLogo, type GymProfile } from 
 import { useImageCropper } from '../../../hooks/useImageCropper';
 import ImageCropperModal from '../../../components/ui/ImageCropperModal';
 import { useLocation } from '../../../hooks/useLocation';
+import Spinner from '../../../components/ui/Spinner';
+
 
 const Profile: React.FC = () => {
     const [isEditing, setIsEditing] = useState(false);
@@ -166,6 +168,18 @@ const Profile: React.FC = () => {
         }
     };
 
+
+
+    if (loadingProfile) {
+        return (
+            <div className="w-full animate-in fade-in duration-500">
+                <Spinner />
+            </div>
+        );
+    }
+
+
+
     return (
         <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header */}
@@ -201,21 +215,7 @@ const Profile: React.FC = () => {
                 </div>
             )}
 
-            {/* Simple Subscription Status Banner */}
-            {profile?.subscriptionStatus !== "Pending" && !loadingProfile && (
 
-                <div className={`mb-4 px-4 py-3 rounded-lg border ${getStatusColor(profile?.subscriptionStatus)} flex items-center justify-between`}>
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">Subscription Status:</span>
-                        <span className="text-sm font-semibold capitalize">{profile?.subscriptionStatus || 'Pending'}</span>
-                    </div>
-                    {profile?.expiryDate && profile?.subscriptionStatus !== 'Pending' && (
-                        <span className="text-xs text-zinc-400">
-                            Expires: {new Date(profile.expiryDate).toLocaleDateString('en-IN')}
-                        </span>
-                    )}
-                </div>
-            )}
 
 
 
@@ -428,41 +428,95 @@ const Profile: React.FC = () => {
 
 
 
+                    {/* Subscription Details Section */}
+                    {profile?.subscriptionStatus && profile.subscriptionStatus !== "Pending" && (
+                        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-6 mt-6">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                                <div className="flex-1">
+                                    <h3 className="text-lg font-semibold text-white">Subscription Details</h3>
+                                    <p className="text-zinc-400 text-sm mt-1">Manage and view your gym's current subscription plan.</p>
+                                </div>
+                                <div className={`self-start sm:self-center px-4 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wider ${getStatusColor(profile?.subscriptionStatus)}`}>
+                                    {profile?.subscriptionStatus}
+                                </div>
+                            </div>
 
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 bg-zinc-950/50 p-4 sm:p-6 rounded-xl border border-zinc-800/50">
+                                <div className="space-y-1">
+                                    <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Plan Name</p>
+                                    <p className="text-white font-medium">{profile?.planName || 'N/A'}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Amount Paid</p>
+                                    <p className="text-emerald-400 font-bold">₹{profile?.amount?.toLocaleString() || '0'}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Payment Method</p>
+                                    <p className="text-zinc-300 font-medium capitalize">{profile?.paymentMethod || 'N/A'}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Start Date</p>
+                                    <div className="flex items-center gap-2 text-zinc-300">
+                                        <Clock className="w-4 h-4 text-zinc-500" />
+                                        <span className="font-medium">
+                                            {profile?.startDate ? new Date(profile.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Expiry Date</p>
+                                    <div className="flex items-center gap-2 text-zinc-300">
+                                        <Clock className="w-4 h-4 text-zinc-500" />
+                                        <span className="font-medium text-red-400/90">
+                                            {profile?.expiryDate ? new Date(profile.expiryDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Days Remaining</p>
+                                    {profile?.expiryDate && (
+                                        <p className="text-blue-400 font-bold">
+                                            {Math.max(0, Math.ceil((new Date(profile.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))} Days
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Image Cropper Modal */}
+                    {isCropping && imageSrc && (
+                        <ImageCropperModal
+                            imageSrc={imageSrc}
+                            crop={crop}
+                            zoom={zoom}
+                            isUploading={isUploadingImage}
+                            onCropChange={setCrop}
+                            onZoomChange={setZoom}
+                            onCropComplete={onCropComplete}
+                            onUpload={handleUploadCroppedImage}
+                            onCancel={cancelCropping}
+                            title="Adjust Gym Logo"
+                            aspectRatio={1}
+                        />
+                    )}
+
+                    {/* Location Warning Modal */}
+                    {showLocationWarning && (
+                        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                            <div className="bg-zinc-900 rounded-2xl w-full max-w-md overflow-hidden border border-red-500/30 p-6 text-center">
+                                <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                                <h3 className="text-xl font-bold text-white mb-2">Are you at the gym?</h3>
+                                <p className="text-zinc-400 mb-6">Please ensure you are physically standing at your gym's location for accuracy.</p>
+                                <div className="flex gap-3">
+                                    <button onClick={() => setShowLocationWarning(false)} className="flex-1 px-4 py-3 bg-zinc-800 text-white font-semibold rounded-xl">Cancel</button>
+                                    <button onClick={confirmUpdateLocation} className="flex-1 px-4 py-3 bg-emerald-400 text-black font-semibold rounded-xl">Yes, I'm here</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
-
-            {/* Image Cropper Modal */}
-            {isCropping && imageSrc && (
-                <ImageCropperModal
-                    imageSrc={imageSrc}
-                    crop={crop}
-                    zoom={zoom}
-                    isUploading={isUploadingImage}
-                    onCropChange={setCrop}
-                    onZoomChange={setZoom}
-                    onCropComplete={onCropComplete}
-                    onUpload={handleUploadCroppedImage}
-                    onCancel={cancelCropping}
-                    title="Adjust Gym Logo"
-                    aspectRatio={1}
-                />
-            )}
-
-            {/* Location Warning Modal */}
-            {showLocationWarning && (
-                <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="bg-zinc-900 rounded-2xl w-full max-w-md overflow-hidden border border-red-500/30 p-6 text-center">
-                        <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold text-white mb-2">Are you at the gym?</h3>
-                        <p className="text-zinc-400 mb-6">Please ensure you are physically standing at your gym's location for accuracy.</p>
-                        <div className="flex gap-3">
-                            <button onClick={() => setShowLocationWarning(false)} className="flex-1 px-4 py-3 bg-zinc-800 text-white font-semibold rounded-xl">Cancel</button>
-                            <button onClick={confirmUpdateLocation} className="flex-1 px-4 py-3 bg-emerald-400 text-black font-semibold rounded-xl">Yes, I'm here</button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

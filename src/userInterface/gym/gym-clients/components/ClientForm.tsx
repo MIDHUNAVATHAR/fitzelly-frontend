@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Calendar } from 'lucide-react';
 import type { ClientDTO } from "../../../../api/gym-clients.api"
+import DateInput from '../../../../components/ui/DateInput';
 
 
 interface ClientFormProps {
@@ -23,11 +24,11 @@ const ClientForm: React.FC<ClientFormProps> = ({ initialData, onSubmit, isLoadin
     const [formData, setFormData] = useState<Partial<ClientDTO>>(initialData || {});
     const [errors, setErrors] = useState<FormErrors>({});
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value, type } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: type === 'number' ? (value ? Number(value) : undefined) : value
         }));
         // Clear error when user starts typing
         if (errors[name as keyof FormErrors]) {
@@ -120,13 +121,15 @@ const ClientForm: React.FC<ClientFormProps> = ({ initialData, onSubmit, isLoadin
 
                     <div>
                         <label className="block text-sm font-medium text-zinc-400 mb-1">Date of Birth</label>
-                        <input
-                            name="dateOfBirth"
-                            type="date"
-                            value={formData.dateOfBirth || ''}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                        />
+                        <div className="relative">
+                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 z-10" />
+                            <DateInput
+                                name="dateOfBirth"
+                                value={formData.dateOfBirth || ''}
+                                onChange={handleChange}
+                                className="w-full pl-10 px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            />
+                        </div>
                     </div>
 
                     <div>
@@ -144,6 +147,54 @@ const ClientForm: React.FC<ClientFormProps> = ({ initialData, onSubmit, isLoadin
                         <input
                             name="contactPerson"
                             value={formData.contactPerson || ''}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-zinc-400 mb-1">Client ID</label>
+                        <input
+                            name="clientId"
+                            value={formData.clientId || ''}
+                            onChange={handleChange}
+                            placeholder="e.g. GYM-101"
+                            className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-zinc-400 mb-1">Gender</label>
+                        <select
+                            name="gender"
+                            value={formData.gender || ''}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        >
+                            <option value="">Select Gender</option>
+                            <option value="MALE">Male</option>
+                            <option value="FEMALE">Female</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-zinc-400 mb-1">Height (cm)</label>
+                        <input
+                            name="height"
+                            type="number"
+                            value={formData.height || ''}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-zinc-400 mb-1">Weight (kg)</label>
+                        <input
+                            name="weight"
+                            type="number"
+                            value={formData.weight || ''}
                             onChange={handleChange}
                             className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                         />
