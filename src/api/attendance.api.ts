@@ -1,4 +1,6 @@
 import { axiosInstance } from "./axios";
+import { COMMON } from "../constants/routes";
+
 
 export interface AttendanceLog {
     checkIn: string;
@@ -20,12 +22,12 @@ export const markAttendance = async (data: {
     latitude?: number,
     longitude?: number
 }) => {
-    const response = await axiosInstance.post("/api/attendance/mark", data);
+    const response = await axiosInstance.post(COMMON.MARK_ATTENDANCE, data);
     return response.data;
 };
 
 export const getTodayAttendance = async () => {
-    const response = await axiosInstance.get("/api/attendance/today");
+    const response = await axiosInstance.get(COMMON.GET_TODAY_ATTENDANCE);
     return response.data;
 };
 
@@ -44,7 +46,7 @@ export interface DailyAttendanceRecord {
 }
 
 export const getDailyAttendanceReport = async (date: string, userType: 'CLIENT' | 'TRAINER'): Promise<{ status: string, data: { report: DailyAttendanceRecord[], gymId: string } }> => {
-    const response = await axiosInstance.get(`/api/attendance/report?date=${date}&userType=${userType}`);
+    const response = await axiosInstance.get(COMMON.GET_DAILY_ATTENDANCE_REPORT(date, userType));
     return response.data;
 };
 
@@ -54,7 +56,7 @@ export const markManualAttendance = async (data: {
     status: 'PRESENT' | 'ABSENT';
     userType: 'CLIENT' | 'TRAINER';
 }) => {
-    const response = await axiosInstance.post("/api/attendance/mark-manual", data);
+    const response = await axiosInstance.post(COMMON.MARK_ATTENDANCE_MANUAL, data);
     return response.data;
 };
 

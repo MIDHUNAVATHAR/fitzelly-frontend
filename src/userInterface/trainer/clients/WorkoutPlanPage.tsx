@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Plus, Trash2, Save, Loader2, Dumbbell, X, Edit2, NotebookPen, Quote, AlertTriangle } from 'lucide-react';
-import { toast } from 'react-hot-toast';
-// import { getClientWorkoutPlan, createOrUpdateWorkoutPlan } from '../../../api/workout-plan.api';
-import  { getClientWorkoutPlan,createOrUpdateWorkoutPlan } from '../../../api/workout-plan.api';
+import { ChevronLeft, Plus, Trash2, Loader2, Dumbbell, X, Edit2, NotebookPen, Quote, AlertTriangle } from 'lucide-react';
+import { toast, } from 'react-hot-toast';
+import { getClientWorkoutPlan, createOrUpdateWorkoutPlan } from '../../../api/workout-plan.api';
 import type { IDayPlan, IExercise } from '../../../api/workout-plan.api';
 
+
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
 
 const WorkoutPlanPage: React.FC = () => {
     const { id: clientId } = useParams<{ id: string }>();
@@ -119,7 +120,8 @@ const WorkoutPlanPage: React.FC = () => {
         newPlan[dayIdx].exercises.splice(exIdx, 1);
         setWeeklyPlan(newPlan);
         setConfirmModal(prev => ({ ...prev, show: false }));
-        toast.info("Exercise removed");
+        toast.success("Exercise removed");
+
         await saveChanges(newPlan, notes);
     };
 
@@ -169,7 +171,7 @@ const WorkoutPlanPage: React.FC = () => {
         setNotes("");
         setConfirmModal(prev => ({ ...prev, show: false }));
         await saveChanges(weeklyPlan, "");
-        toast.info("Instructions cleared");
+        toast.success("Instructions cleared");
     };
 
     if (loading) {

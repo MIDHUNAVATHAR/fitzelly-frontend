@@ -111,7 +111,15 @@ const Profile: React.FC = () => {
         }
         setIsSaving(true);
         try {
-            const updatedProfile = await updateGymProfile(formData);
+            const updateData = {
+                gymName,
+                caption,
+                phoneNumber,
+                address,
+                description,
+                logoUrl: formData.logoUrl
+            };
+            const updatedProfile = await updateGymProfile(updateData);
             setProfile({ ...updatedProfile });
             setIsEditing(false);
             toast.success("Profile updated successfully");

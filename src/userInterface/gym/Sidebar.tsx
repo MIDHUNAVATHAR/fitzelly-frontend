@@ -9,7 +9,9 @@ import {
     List,
     ShieldCheck,
     Box,
-    UserCheck
+    UserCheck,
+    MessageSquare,
+    Receipt
 } from 'lucide-react';
 import { useLogout } from '../../hooks/useLogout';
 import { Link, useLocation } from 'react-router-dom';
@@ -31,6 +33,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
         { id: 'memberships', label: 'Memberships', icon: ShieldCheck, path: '/gym/memberships' },
         { id: 'equipments', label: 'Gym Equipment', icon: Box, path: '/gym/equipments' },
         { id: 'attendance', label: 'Attendance', icon: UserCheck, path: '/gym/attendance' },
+        { id: 'enquiries', label: 'Enquiries', icon: MessageSquare, path: '/gym/enquiries' },
+        { id: 'expenses', label: 'Expenses', icon: Receipt, path: '/gym/expenses' },
         { id: 'settings', label: 'Settings', icon: Settings, path: '/gym/settings' },
     ];
 

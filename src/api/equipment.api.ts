@@ -1,4 +1,5 @@
 import { axiosInstance } from "./axios";
+import { GYM } from "../constants/routes";
 
 export interface Equipment {
     id: string;
@@ -17,26 +18,37 @@ export interface Equipment {
     isActive: boolean;
 }
 
-export const getEquipments = async (page: number, limit: number, search: string = '') => {
-    const response = await axiosInstance.get(`/api/gym/equipments?page=${page}&limit=${limit}&search=${search}`);
+// export const getEquipments = async (page: number, limit: number, search: string = '') => {
+//     const response = await axiosInstance.get(`/api/gym/equipments?page=${page}&limit=${limit}&search=${search}`);
+//     return response.data.data;
+// };
+export const getEquipments = async (
+    page: number,
+    limit: number,
+    search: string = ''
+) => {
+    const response = await axiosInstance.get(GYM.GET_EQUIPMENTS, {
+        params: { page, limit, search }
+    });
     return response.data.data;
 };
 
+
 export const addEquipment = async (data: FormData) => {
-    const response = await axiosInstance.post(`/api/gym/equipment`, data, {
+    const response = await axiosInstance.post(GYM.ADD_EQUIPMENT, data, {
         headers: { 'Content-Type': 'multipart/form-data' }
     });
     return response.data.data;
 };
 
 export const updateEquipment = async (id: string, data: FormData) => {
-    const response = await axiosInstance.put(`/api/gym/equipment/${id}`, data, {
+    const response = await axiosInstance.put(GYM.EQUIPMENT_BY_ID(id), data, {
         headers: { 'Content-Type': 'multipart/form-data' }
     });
     return response.data.data;
 };
 
 export const deleteEquipment = async (id: string) => {
-    const response = await axiosInstance.delete(`/api/gym/equipment/${id}`);
+    const response = await axiosInstance.delete(GYM.EQUIPMENT_BY_ID(id));
     return response.data.data;
 };

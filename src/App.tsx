@@ -14,53 +14,56 @@ import { lazyComponent } from "./components/wrapper/lazyLoad";
  * only lazy loading layouts, no need to small pages
  */
 const GymLayout = lazyComponent(React.lazy(() => import("./userInterface/gym/GymLayout")));
-const DashboardHome = lazyComponent(React.lazy(() => import("./userInterface/gym/DashboardHome")));
-const GymProfile = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-profile/Profile")));
-
-const GymClients = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-clients/ClientsList")));
-const AddClient = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-clients/AddClient")));
-const ClientProfile = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-clients/ClientProfile")));
-
-const GymTrainers = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-trainers/TrainerList")));
-const AddTrainer = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-trainers/AddTrainer")));
-const TrainerProfile = lazyComponent(React.lazy(() => import("./userInterface/gym/gym-trainers/TrainerProfile")))
-
-const GymPlans = lazyComponent(React.lazy(() => import("./userInterface/gym/plans/PlansPage")))
-const MembershipList = lazyComponent(React.lazy(() => import("./userInterface/gym/memberships/MembershipListPage")))
-const MembershipView = lazyComponent(React.lazy(() => import("./userInterface/gym/memberships/MembershipViewPage")))
-
-const EquipmentList = lazyComponent(React.lazy(() => import("./userInterface/gym/equipment/EquipmentList")));
-const AttendanceManagement = lazyComponent(React.lazy(() => import("./userInterface/gym/attendance/AttendanceManagement")));
-
-
 const SuperAdminLayout = lazyComponent(React.lazy(() => import("./userInterface/super-admin/SuperAdminLayout")));
-const SuperDashboardHome = lazyComponent(React.lazy(() => import("./userInterface/super-admin/dashboard/DashboardHome")));
-const SuperProfile = lazyComponent(React.lazy(() => import("./userInterface/super-admin/profile/SuperAdmin-Profile")))
-const GymList = lazyComponent(React.lazy(() => import("./userInterface/super-admin/gyms/GymList")));
-const GymView = lazyComponent(React.lazy(() => import("./userInterface/super-admin/gyms/ViewGym")));
+const ClientLayout = lazyComponent(React.lazy(() => import("./userInterface/client/ClientLayout")));
+const TrainerLayout = lazyComponent(React.lazy(() => import("./userInterface/trainer/TrainerLayout")));
+
+import DashboardHome from "./userInterface/gym/DashboardHome";
+import GymProfile from "./userInterface/gym/gym-profile/Profile"
+
+import GymClients from "./userInterface/gym/gym-clients/ClientsList";
+import AddClient from "./userInterface/gym/gym-clients/AddClient";
+import ClientProfile from "./userInterface/gym/gym-clients/ClientProfile";
+
+import GymTrainers from "./userInterface/gym/gym-trainers/TrainerList";
+import AddTrainer from "./userInterface/gym/gym-trainers/AddTrainer";
+import TrainerProfile from "./userInterface/gym/gym-trainers/TrainerProfile";
+
+import GymPlans from "./userInterface/gym/plans/PlansPage";
+import MembershipList from "./userInterface/gym/memberships/MembershipListPage";
+import MembershipView from "./userInterface/gym/memberships/MembershipViewPage";
+
+import EquipmentList from "./userInterface/gym/equipment/EquipmentList";
+import AttendanceManagement from "./userInterface/gym/attendance/AttendanceManagement";
+import EnquiriesList from "./userInterface/gym/enquiries/EnquiriesList";
+import ExpensesList from "./userInterface/gym/expenses/ExpensesList";
+
+
+import SuperDashboardHome from "./userInterface/super-admin/dashboard/DashboardHome";
+import SuperProfile from "./userInterface/super-admin/profile/SuperAdmin-Profile";
+import GymList from "./userInterface/super-admin/gyms/GymList";
+import GymView from "./userInterface/super-admin/gyms/ViewGym";
+
 
 /**
  * client components
  * @returns 
  */
-const ClientLayout = lazyComponent(React.lazy(() => import("./userInterface/client/ClientLayout")));
-const ClientDashboardHome = lazyComponent(React.lazy(() => import("./userInterface/client/dashboard/DashboardHome")));
-const ClientProfilePage = lazyComponent(React.lazy(() => import("./userInterface/client/profile/ClientProfile")));
-const GymDetailsPage = lazyComponent(React.lazy(() => import("./userInterface/client/gym-details/GymDetails")));
-const ClientWorkoutPlanPage = lazyComponent(React.lazy(() => import("./userInterface/client/workout-plan/WorkoutPlan")));
+import ClientDashboardHome from "./userInterface/client/dashboard/DashboardHome";
+import ClientProfilePage from "./userInterface/client/profile/ClientProfile";
+import GymDetailsPage from "./userInterface/client/gym-details/GymDetails";
+import ClientWorkoutPlanPage from "./userInterface/client/workout-plan/WorkoutPlan";
 
 /**
  * trainer components 
  * @returns 
  */
-const TrainerLayout = lazyComponent(React.lazy(() => import("./userInterface/trainer/TrainerLayout")));
-const TrainerDashboardHome = lazyComponent(React.lazy(() => import("./userInterface/trainer/dashboard/DashboardHome")));
-const TrainerProfilePage = lazyComponent(React.lazy(() => import("./userInterface/trainer/profile/TrainerProfile")));
-const TrainerGymDetailsPage = lazyComponent(React.lazy(() => import("./userInterface/trainer/gym-details/GymDetails")));
-const TrainerClientsPage = lazyComponent(React.lazy(() => import("./userInterface/trainer/clients/AssignedClientsPage")));
-const TrainerClientProfilePage = lazyComponent(React.lazy(() => import("./userInterface/trainer/clients/AssignedClientProfile")));
-const TrainerWorkoutPlanPage = lazyComponent(React.lazy(() => import("./userInterface/trainer/clients/WorkoutPlanPage")));
-
+import TrainerDashboardHome from "./userInterface/trainer/dashboard/DashboardHome";
+import TrainerProfilePage from "./userInterface/trainer/profile/TrainerProfile";
+import TrainerGymDetailsPage from "./userInterface/trainer/gym-details/GymDetails";
+import TrainerClientsPage from "./userInterface/trainer/clients/AssignedClientsPage";
+import TrainerClientProfilePage from "./userInterface/trainer/clients/AssignedClientProfile";
+import TrainerWorkoutPlanPage from "./userInterface/trainer/clients/WorkoutPlanPage";
 
 
 function App() {
@@ -109,6 +112,8 @@ function App() {
 
             <Route path="equipments" element={<EquipmentList />} />
             <Route path="attendance" element={<AttendanceManagement />} />
+            <Route path="enquiries" element={<EnquiriesList />} />
+            <Route path="expenses" element={<ExpensesList />} />
 
 
           </Route >

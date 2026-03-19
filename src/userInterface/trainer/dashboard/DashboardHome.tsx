@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { getTrainerProfile } from '../../../api/trainer-profile.api';
 import AttendanceCard from '../../../components/ui/AttendanceCard';
 import { Loader2, AlertCircle } from 'lucide-react';
+import { isAxiosError } from 'axios';
+
 
 const DashboardHome: React.FC = () => {
     const [gymId, setGymId] = useState<string | null>(null);
@@ -15,15 +17,19 @@ const DashboardHome: React.FC = () => {
                 console.log("trainer data : ", data);
 
                 if (data?.gymId) {
-                    
+
                     setGymId(data.gymId);
                     setError(null);
                 } else {
                     setError("No gym assigned to this trainer");
                 }
-            } catch (error: any) {
-                console.error("Error fetching trainer profile:", error);
-                setError(error?.message || "Failed to load trainer profile");
+            } catch (error) {
+                if (isAxiosError(error)) {
+                    console.error("Error fetching trainer profile:", error);
+                    setError(error?.message || "Failed to load trainer profile");
+                } else {
+                    setError("Failed to load trainer profile");
+                }
             } finally {
                 setIsLoading(false);
             }

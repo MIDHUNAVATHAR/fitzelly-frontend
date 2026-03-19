@@ -6,6 +6,7 @@ interface PaginationProps {
     totalPages?: number;
     totalItems?: number;
     limit?: number;
+    limitOptions?: (number | 'all')[];
     onPageChange: (page: number) => void;
     onLimitChange?: (limit: number) => void;
 }
@@ -15,6 +16,7 @@ const Pagination: React.FC<PaginationProps> = ({
     totalPages: propTotalPages,
     totalItems,
     limit = 10,
+    limitOptions = [10, 30, 50],
     onPageChange,
     onLimitChange,
 }) => {
@@ -64,13 +66,20 @@ const Pagination: React.FC<PaginationProps> = ({
                     <div className="flex items-center gap-2">
                         <span className="text-sm text-zinc-400">Rows per page:</span>
                         <select
-                            value={limit}
-                            onChange={(e) => onLimitChange(Number(e.target.value))}
+                            value={limit > 1000 ? 'all' : limit}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (val === 'all') {
+                                    onLimitChange(9999); // Use a large number for 'all'
+                                } else {
+                                    onLimitChange(Number(val));
+                                }
+                            }}
                             className="bg-zinc-800 border border-zinc-700 text-white text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block p-2 outline-none cursor-pointer"
                         >
-                            <option value={10}>10</option>
-                            <option value={30}>30</option>
-                            <option value={50}>50</option>
+                            {limitOptions.map(opt => (
+                                <option key={opt} value={opt}>{opt === 'all' ? 'All' : opt}</option>
+                            ))}
                         </select>
                     </div>
                 )}
