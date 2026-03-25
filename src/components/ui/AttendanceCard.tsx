@@ -104,73 +104,76 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({ gymId }) => {
 
     return (
         <>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm text-white overflow-hidden transition-all hover:border-zinc-700">
-                <div className="p-5 flex flex-col md:flex-row items-center justify-between gap-5">
-                    {/* Left side: Header & Status */}
-                    <div className="flex items-center gap-4 w-full md:w-auto">
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-inner transition-colors duration-300 ${isCheckedIn ? 'bg-emerald-500/10 text-emerald-400' : 'bg-zinc-800 text-zinc-500'}`}>
-                            <Clock className={`w-6 h-6 ${isCheckedIn ? 'animate-pulse' : ''}`} />
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl shadow-sm text-white overflow-hidden transition-all hover:border-zinc-700">
+                <div className="p-5 flex flex-col gap-5">
+                    {/* Status Header */}
+                    <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-inner transition-colors duration-300 flex-shrink-0 ${isCheckedIn ? 'bg-emerald-500/10 text-emerald-400' : 'bg-zinc-800 text-zinc-500'}`}>
+                            <Clock className={`w-5 h-5 ${isCheckedIn ? 'animate-pulse' : ''}`} />
                         </div>
-                        <div>
-                            <h3 className="text-lg font-bold tracking-tight">Today's Attendance</h3>
+                        <div className="min-w-0">
+                            <h3 className="text-sm font-bold tracking-tight text-zinc-300 uppercase tracking-widest">Attendance Status</h3>
                             <div className="flex items-center mt-0.5">
                                 {isCheckedIn ? (
-                                    <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 uppercase tracking-wide">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                                        Active Session
+                                    <span className="flex items-center gap-1.5 text-[10px] font-black text-emerald-400 uppercase tracking-widest">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                        Active
                                     </span>
                                 ) : (
-                                    <span className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 uppercase tracking-wide">
+                                    <span className="flex items-center gap-1.5 text-[10px] font-black text-zinc-500 uppercase tracking-widest">
                                         <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
-                                        Not Checked In
+                                        Off Duty
                                     </span>
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Right side: Actions */}
-                    <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-                        {/* Session Timeline Summary */}
-                        {attendance && attendance.logs.length > 0 && (
-                            <div className="flex flex-wrap items-center justify-center md:justify-end gap-2 overflow-hidden px-2">
-                                <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mr-1 hidden sm:inline">Timeline:</span>
-                                {attendance.logs.slice(-2).map((log, index) => (
-                                    <div key={index} className="flex items-center gap-1.5 text-[11px] font-medium bg-zinc-800/50 border border-zinc-700/50 px-2 py-1 rounded-md text-zinc-400">
-                                        <span>{new Date(log.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                        <span className="text-zinc-600">→</span>
+                    {/* Timeline Activity */}
+                    {attendance && attendance.logs.length > 0 && (
+                        <div className="px-1">
+                             <div className="flex flex-col gap-1.5">
+                                {attendance.logs.slice(-1).map((log, index) => (
+                                    <div key={index} className="flex items-center justify-between text-[11px] font-medium bg-zinc-950/40 border border-zinc-800/50 px-3 py-2 rounded-xl text-zinc-400">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-zinc-600">IN:</span>
+                                            <span className="text-white font-bold">{new Date(log.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                        </div>
                                         {log.checkOut ? (
-                                            <span>{new Date(log.checkOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-zinc-600">OUT:</span>
+                                                <span className="text-white font-bold">{new Date(log.checkOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                            </div>
                                         ) : (
-                                            <span className="text-emerald-500 text-[10px] font-bold">Now</span>
+                                            <span className="px-2 py-0.5 bg-emerald-400/10 text-emerald-400 rounded-md text-[9px] font-black uppercase tracking-tighter">Ongoing</span>
                                         )}
                                     </div>
-                                )).reverse()}
-                                {attendance.logs.length > 2 && <span className="text-xs text-zinc-600 font-bold">+{attendance.logs.length - 2}</span>}
-                            </div>
-                        )}
-
-                        <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                            {!isCheckedIn ? (
-                                <button
-                                    onClick={() => triggerAction('CHECK_IN')}
-                                    disabled={isActionLoading}
-                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50"
-                                >
-                                    {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
-                                    Check In
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={() => triggerAction('CHECK_OUT')}
-                                    disabled={isActionLoading}
-                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-zinc-100 hover:bg-white text-black text-sm font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50"
-                                >
-                                    {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
-                                    Check Out
-                                </button>
-                            )}
+                                ))}
+                             </div>
                         </div>
+                    )}
+
+                    {/* Action Region */}
+                    <div className="pt-1">
+                        {!isCheckedIn ? (
+                            <button
+                                onClick={() => triggerAction('CHECK_IN')}
+                                disabled={isActionLoading}
+                                className="w-full h-11 flex items-center justify-center gap-2 px-6 bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black rounded-xl transition-all active:scale-[0.97] disabled:opacity-50 uppercase tracking-widest shadow-lg shadow-emerald-500/10"
+                            >
+                                {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
+                                Begin Session
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => triggerAction('CHECK_OUT')}
+                                disabled={isActionLoading}
+                                className="w-full h-11 flex items-center justify-center gap-2 px-6 bg-zinc-100 hover:bg-white text-black text-xs font-black rounded-xl transition-all active:scale-[0.97] disabled:opacity-50 uppercase tracking-widest"
+                            >
+                                {isActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                                End Session
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mail, Phone, MapPin, Edit3, Camera, Save, Crosshair, AlertTriangle, Clock } from 'lucide-react';
+import { Mail, Phone, MapPin, Edit3, Camera, Save, AlertTriangle, Clock, FileText, Trash2, Plus, Eye } from 'lucide-react';
+
 import { toast } from 'react-hot-toast';
-import { getGymProfile, updateGymProfile, uploadGymLogo, type GymProfile } from "../../../api/gym-profile.api";
+import { getGymProfile, updateGymProfile, uploadGymLogo, uploadGymCertificate, deleteGymCertificate, type GymProfile } from "../../../api/gym-profile.api";
 import { useImageCropper } from '../../../hooks/useImageCropper';
 import ImageCropperModal from '../../../components/ui/ImageCropperModal';
 import { useLocation } from '../../../hooks/useLocation';
 import Spinner from '../../../components/ui/Spinner';
+import ConfirmModal from '../../../components/ui/ConfirmModal';
 
 
 const Profile: React.FC = () => {
@@ -17,6 +19,15 @@ const Profile: React.FC = () => {
     const [showLocationWarning, setShowLocationWarning] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const certInputRef = useRef<HTMLInputElement>(null);
+
+    // Certificate states
+    const [croppingType, setCroppingType] = useState<'logo' | 'certificate'>('logo');
+    const [certName, setCertName] = useState('');
+    const [isUploadingCert, setIsUploadingCert] = useState(false);
+    const [certToDelete, setCertToDelete] = useState<string | null>(null);
+    const [showCertNameModal, setShowCertNameModal] = useState(false);
+    const [pendingCertFile, setPendingCertFile] = useState<File | null>(null);
 
     // Location hook
     const { getCurrentLocation, loadingLocation } = useLocation();
@@ -24,16 +35,24 @@ const Profile: React.FC = () => {
     // Handle cropped image
     const handleCroppedImage = async (croppedImageBlob: Blob) => {
         try {
-            const fileName = `logo-${Date.now()}.jpg`;
+            const fileName = `${croppingType}-${Date.now()}.jpg`;
             const file = new File([croppedImageBlob], fileName, { type: "image/jpeg" });
 
-            const toastId = toast.loading("Uploading image...");
-            const { logoUrl } = await uploadGymLogo(file);
+            const toastId = toast.loading(`Uploading ${croppingType === 'logo' ? 'logo' : 'certificate'}...`);
 
-            setProfile(prev => prev ? ({ ...prev, logoUrl }) : null);
-            setFormData(prev => ({ ...prev, logoUrl }));
+            if (croppingType === 'logo') {
+                const { logoUrl } = await uploadGymLogo(file);
+                setProfile(prev => prev ? ({ ...prev, logoUrl }) : null);
+                setFormData(prev => ({ ...prev, logoUrl }));
+                toast.success("Profile picture updated!");
+            } else {
+                const updatedGym = await uploadGymCertificate(file, certName || 'Certificate');
+                setProfile(updatedGym);
+                setFormData(updatedGym);
+                toast.success("Certificate uploaded successfully!");
+                setCertName('');
+            }
             toast.dismiss(toastId);
-            toast.success("Profile picture updated!");
         } catch (error) {
             console.error('Error uploading cropped image:', error);
             toast.error("Failed to upload image");
@@ -91,8 +110,75 @@ const Profile: React.FC = () => {
                 return;
             }
 
+            setCroppingType('logo');
             await handleFileSelect(file);
             e.target.value = '';
+        }
+    };
+
+    const handleCertFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0];
+
+            // Validate size
+            if (file.size > 10 * 1024 * 1024) {
+                toast.error("File size should be less than 10MB");
+                return;
+            }
+
+            const isPdf = file.type === 'application/pdf';
+            const isImage = file.type.startsWith('image/');
+
+            if (!isPdf && !isImage) {
+                toast.error("Only PDF and image files are allowed");
+                return;
+            }
+
+            setPendingCertFile(file);
+            setShowCertNameModal(true);
+            e.target.value = '';
+        }
+    };
+
+    const confirmCertUpload = async () => {
+        if (!pendingCertFile || !certName.trim()) {
+            toast.error("Please enter a name for the certificate");
+            return;
+        }
+
+        const file = pendingCertFile;
+        const name = certName.trim();
+        setShowCertNameModal(false);
+        setPendingCertFile(null);
+
+        try {
+            const toastId = toast.loading(`Uploading ${file.type === 'application/pdf' ? 'PDF' : 'image'} certificate...`);
+            const updatedGym = await uploadGymCertificate(file, name);
+            setProfile(updatedGym);
+            setFormData(updatedGym);
+            toast.dismiss(toastId);
+            toast.success("Certificate uploaded successfully!");
+            setCertName('');
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to upload certificate");
+        }
+    };
+
+    const handleDeleteCert = async () => {
+        if (!certToDelete) return;
+        try {
+            setIsUploadingCert(true);
+            const updatedGym = await deleteGymCertificate(certToDelete);
+            setProfile(updatedGym);
+            setFormData(updatedGym);
+            toast.success("Certificate deleted successfully");
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to delete certificate");
+        } finally {
+            setIsUploadingCert(false);
+            setCertToDelete(null);
         }
     };
 
@@ -410,28 +496,78 @@ const Profile: React.FC = () => {
                                 <span>Important: Only update this when you are physically standing at the gym location.</span>
                             </div>
                         </div>
+                    </div>
 
-                        <div className="flex flex-col gap-4 bg-zinc-950/50 p-4 rounded-xl border border-zinc-800/50">
-                            <div>
-                                <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">Current Coordinates</label>
-                                <div className="flex items-center gap-3 text-zinc-300 font-mono text-sm bg-zinc-900/50 p-3 rounded-lg border border-zinc-800/50">
-                                    <MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                                    {profile?.location?.latitude ? (
-                                        <span className="truncate">{profile.location.latitude.toFixed(6)}, {profile.location.longitude.toFixed(6)}</span>
-                                    ) : (
-                                        <span className="text-zinc-500 italic">No coordinates stored</span>
-                                    )}
-                                </div>
+
+                    {/* Certificates Section */}
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                            <div className="flex-1">
+                                <h3 className="text-lg font-semibold text-white">Certificates & Licenses</h3>
+                                <p className="text-zinc-400 text-sm mt-1">Upload and manage your gym's official verification documents.</p>
                             </div>
                             <button
-                                onClick={handleGetLocation}
-                                disabled={loadingLocation}
-                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50 border border-zinc-700 text-sm sm:text-base"
+                                onClick={() => certInputRef.current?.click()}
+                                className="flex items-center gap-2 px-4 py-2 bg-emerald-400 text-black font-bold rounded-xl text-sm hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-500/10"
                             >
-                                {loadingLocation ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Crosshair className="w-4 h-4" />}
-                                {loadingLocation ? "Fetching Location..." : "Update to Current Location"}
+                                <Plus className="w-4 h-4" />
+                                Add New
                             </button>
+                            <input
+                                type="file"
+                                ref={certInputRef}
+                                className="hidden"
+                                onChange={handleCertFileChange}
+                                accept="application/pdf,image/*"
+                            />
                         </div>
+
+                        {profile?.certificates && profile.certificates.length > 0 ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                                {profile.certificates.map((cert) => (
+                                    <div key={cert.key} className="group bg-zinc-950/50 border border-zinc-800/30 rounded-xl overflow-hidden hover:border-emerald-500/30 transition-all duration-300">
+                                        <div className="aspect-[3/4] bg-zinc-900 flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-zinc-900 to-black">
+                                            {cert.type === 'PDF' ? (
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <FileText className="w-8 h-8 text-zinc-700" />
+                                                    <span className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest">PDF</span>
+                                                </div>
+                                            ) : (
+                                                <img src={cert.url} alt={cert.name} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                                            )}
+
+                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2">
+                                                <a
+                                                    href={cert.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="p-2 bg-white text-black rounded-full hover:scale-110 transition-transform"
+                                                    title="View Document"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                </a>
+                                                <button
+                                                    onClick={() => setCertToDelete(cert.key)}
+                                                    className="p-2 bg-red-500/20 backdrop-blur-md text-red-500 border border-red-500/30 rounded-full hover:bg-red-500 hover:text-white transition-all hover:scale-110"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="p-2 bg-zinc-900/50">
+                                            <h4 className="text-[10px] font-bold text-zinc-300 truncate text-center">{cert.name}</h4>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="p-10 rounded-2xl bg-zinc-950/30 border border-dashed border-zinc-800 flex flex-col items-center justify-center text-center">
+                                <FileText className="w-12 h-12 text-zinc-700 mb-4" />
+                                <p className="text-zinc-500 font-medium text-sm">No verification documents added yet.</p>
+                                <p className="text-zinc-600 text-[11px] mt-1 max-w-[200px]">Upload certificates or licenses to verify your business and build trust.</p>
+                            </div>
+                        )}
                     </div>
 
 
@@ -523,6 +659,55 @@ const Profile: React.FC = () => {
                             </div>
                         </div>
                     )}
+
+
+                    {/* Certificate Name Modal */}
+                    {showCertNameModal && (
+                        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                            <div className="bg-zinc-900 rounded-2xl w-full max-w-sm overflow-hidden border border-zinc-800 p-6 flex flex-col items-center text-center shadow-2xl animate-in zoom-in-95 duration-200">
+                                <div className="w-16 h-16 bg-emerald-400/10 rounded-full flex items-center justify-center mb-6">
+                                    <FileText className="w-8 h-8 text-emerald-400" />
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-2">Certificate Name</h3>
+                                <p className="text-zinc-500 text-sm mb-6">Enter a descriptive name for this document.</p>
+                                <input
+                                    type="text"
+                                    value={certName}
+                                    onChange={(e) => setCertName(e.target.value)}
+                                    placeholder="e.g. Health License 2024"
+                                    className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-400 mb-6 transition-all"
+                                    autoFocus
+                                />
+                                <div className="flex gap-3 w-full">
+                                    <button
+                                        onClick={() => { setShowCertNameModal(false); setCertName(''); setPendingCertFile(null); }}
+                                        className="flex-1 px-4 py-3 bg-zinc-800 text-white font-bold rounded-xl hover:bg-zinc-700 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={confirmCertUpload}
+                                        disabled={!certName.trim()}
+                                        className="flex-1 px-4 py-3 bg-emerald-400 text-black font-bold rounded-xl hover:bg-emerald-500 transition-colors disabled:opacity-50"
+                                    >
+                                        Continue
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Certificate Delete Modal */}
+                    <ConfirmModal
+                        isOpen={!!certToDelete}
+                        onClose={() => setCertToDelete(null)}
+                        onConfirm={handleDeleteCert}
+                        title="Delete Certificate?"
+                        message="This process cannot be undone. The document will be permanently removed from our servers."
+                        variant="danger"
+                        confirmText="Delete Document"
+                        isProcessing={isUploadingCert}
+                    />
                 </div>
             </div>
         </div>

@@ -1,6 +1,13 @@
 import { axiosInstance } from "./axios";
 import { SUPER_ADMIN } from "../constants/routes";
 
+export interface IGymCertificate {
+    url: string;
+    type: 'IMAGE' | 'PDF';
+    name: string;
+    key: string;
+}
+
 export interface Gym {
     _id: string;
     gymName: string;
@@ -15,6 +22,7 @@ export interface Gym {
     location: { latitude: number; longitude: number };
     createdAt: string;
     expiryDate?: string;
+    certificates?: IGymCertificate[];
     latestSubscription?: {
         planName: string;
         amount: number;
@@ -59,7 +67,12 @@ export const getGymById = async (gymId: string): Promise<Gym> => {
 
 
 export const updateGymStatus = async (gymId: string, gymData: Partial<Gym>): Promise<Gym> => {
+    console.log("updaing aprrove steart");
+    console.log(gymId);
+    console.log(gymData);
+
     const response = await axiosInstance.patch(SUPER_ADMIN.GYM_BY_ID(gymId), gymData);
+    console.log("update gym res : ", response)
     return response.data.data;
 };
 

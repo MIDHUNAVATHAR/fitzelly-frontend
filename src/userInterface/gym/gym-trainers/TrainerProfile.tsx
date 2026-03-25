@@ -124,9 +124,9 @@ const TrainerProfile: React.FC = () => {
             const newCerts = certificates.filter(c => c.file).map(c => c.file);
 
             if (existingCerts.length > 0) {
-                submitData.append('certificates', JSON.stringify(existingCerts));
+                submitData.append('existingCertificates', JSON.stringify(existingCerts));
             } else {
-                submitData.append('certificates', JSON.stringify([]));
+                submitData.append('existingCertificates', JSON.stringify([]));
             }
             newCerts.forEach(file => { if (file) submitData.append('certificates', file); });
 

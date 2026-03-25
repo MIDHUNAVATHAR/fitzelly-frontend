@@ -32,12 +32,14 @@ import TrainerProfile from "./userInterface/gym/gym-trainers/TrainerProfile";
 import GymPlans from "./userInterface/gym/plans/PlansPage";
 import MembershipList from "./userInterface/gym/memberships/MembershipListPage";
 import MembershipView from "./userInterface/gym/memberships/MembershipViewPage";
+import PaymentCollectionPage from "./userInterface/gym/memberships/PaymentCollectionPage";
 
 import EquipmentList from "./userInterface/gym/equipment/EquipmentList";
 import AttendanceManagement from "./userInterface/gym/attendance/AttendanceManagement";
 import EnquiriesList from "./userInterface/gym/enquiries/EnquiriesList";
 import ExpensesList from "./userInterface/gym/expenses/ExpensesList";
-
+import TrainerPayoutsPage from "./userInterface/gym/trainer-payouts/TrainerPayoutsPage";
+import GymAnalyticsPage from "./userInterface/gym/analytics/AnalyticsPage";
 
 import SuperDashboardHome from "./userInterface/super-admin/dashboard/DashboardHome";
 import SuperProfile from "./userInterface/super-admin/profile/SuperAdmin-Profile";
@@ -53,6 +55,7 @@ import ClientDashboardHome from "./userInterface/client/dashboard/DashboardHome"
 import ClientProfilePage from "./userInterface/client/profile/ClientProfile";
 import GymDetailsPage from "./userInterface/client/gym-details/GymDetails";
 import ClientWorkoutPlanPage from "./userInterface/client/workout-plan/WorkoutPlan";
+import EquipmentBookingPage from "./userInterface/client/equipment-booking/EquipmentBookingPage";
 
 /**
  * trainer components 
@@ -64,6 +67,8 @@ import TrainerGymDetailsPage from "./userInterface/trainer/gym-details/GymDetail
 import TrainerClientsPage from "./userInterface/trainer/clients/AssignedClientsPage";
 import TrainerClientProfilePage from "./userInterface/trainer/clients/AssignedClientProfile";
 import TrainerWorkoutPlanPage from "./userInterface/trainer/clients/WorkoutPlanPage";
+import ExerciseLibraryPage from "./userInterface/super-admin/exercise-library/ExerciseLibraryPage";
+import MyEarningsPage from "./userInterface/trainer/earnings/MyEarningsPage";
 
 
 function App() {
@@ -109,10 +114,13 @@ function App() {
 
             <Route path="memberships" element={<MembershipList />} />
             <Route path="memberships/:id" element={<MembershipView />} />
+            <Route path="payment-collection" element={<PaymentCollectionPage />} />
 
             <Route path="equipments" element={<EquipmentList />} />
             <Route path="attendance" element={<AttendanceManagement />} />
+            <Route path="analytics" element={<GymAnalyticsPage />} />
             <Route path="enquiries" element={<EnquiriesList />} />
+            <Route path="payouts" element={<TrainerPayoutsPage />} />
             <Route path="expenses" element={<ExpensesList />} />
 
 
@@ -127,6 +135,7 @@ function App() {
             <Route path="profile" element={<ClientProfilePage />} />
             <Route path="gym-details" element={<GymDetailsPage />} />
             <Route path="workout-plan" element={<ClientWorkoutPlanPage />} />
+            <Route path="equipment-booking" element={<EquipmentBookingPage />} />
 
           </Route>
         </Route>
@@ -141,6 +150,7 @@ function App() {
             <Route path="clients" element={<TrainerClientsPage />} />
             <Route path="clients/:id" element={<TrainerClientProfilePage />} />
             <Route path="clients/:id/workout-plan" element={<TrainerWorkoutPlanPage />} />
+            <Route path="earnings" element={<MyEarningsPage />} />
 
           </Route>
         </Route>
@@ -156,6 +166,7 @@ function App() {
             <Route path="profile" element={<SuperProfile />}></Route>
             <Route path="gyms" element={<GymList />}></Route>
             <Route path="gyms/:id" element={<GymView />} />
+            <Route path="exercise-library" element={<ExerciseLibraryPage />} />
 
           </Route>
         </Route>

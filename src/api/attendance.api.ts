@@ -60,4 +60,9 @@ export const markManualAttendance = async (data: {
     return response.data;
 };
 
+export const getYearlyAttendanceCount = async (year: number): Promise<{ status: string, data: number }> => {
+    const response = await axiosInstance.get(`${COMMON.GET_YEARLY_ATTENDANCE_COUNT}?year=${year}`);
+    return response.data;
+};
+
 

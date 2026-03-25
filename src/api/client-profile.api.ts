@@ -11,6 +11,7 @@ export interface ClientProfile {
     contactPerson?: string;
     dateOfBirth?: string;
     profileImage?: string;
+    profileUrl?: string;
     joinedDate?: string;
 }
 

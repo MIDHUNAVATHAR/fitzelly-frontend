@@ -124,10 +124,10 @@ const TrainerForm: React.FC<TrainerFormProps> = ({ initialData, onSubmit, isLoad
         const newCerts = certificates.filter(c => c.file).map(c => c.file);
 
         if (existingCerts.length > 0) {
-            formData.append('certificates', JSON.stringify(existingCerts));
+            formData.append('existingCertificates', JSON.stringify(existingCerts));
         } else {
             // we must send empty array if all deleted
-            formData.append('certificates', JSON.stringify([]));
+            formData.append('existingCertificates', JSON.stringify([]));
         }
 
         newCerts.forEach(file => {

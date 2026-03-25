@@ -7,12 +7,10 @@ export interface Equipment {
     name: string;
     description: string;
     image: string;
-    startBookingTime: number;
     availableDays: string[];
     availableFrom: string;
     availableTo: string;
     allowedPlans: string[];
-    maxUsageMinutes: number;
     capacity: number;
     slotIntervalMinutes: number;
     isActive: boolean;
@@ -25,10 +23,11 @@ export interface Equipment {
 export const getEquipments = async (
     page: number,
     limit: number,
-    search: string = ''
+    search: string = '',
+    gymId?: string
 ) => {
     const response = await axiosInstance.get(GYM.GET_EQUIPMENTS, {
-        params: { page, limit, search }
+        params: { page, limit, search, gymId }
     });
     return response.data.data;
 };

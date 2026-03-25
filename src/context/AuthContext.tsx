@@ -7,6 +7,7 @@ export interface User {
     id: string;
     email: string;
     role: UserRole;
+    gymId?: string;
 }
 
 interface AuthContextType {

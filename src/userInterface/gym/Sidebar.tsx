@@ -11,7 +11,10 @@ import {
     Box,
     UserCheck,
     MessageSquare,
-    Receipt
+    Receipt,
+    Wallet,
+    HandCoins,
+    LineChart
 } from 'lucide-react';
 import { useLogout } from '../../hooks/useLogout';
 import { Link, useLocation } from 'react-router-dom';
@@ -26,14 +29,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
 
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/gym/dashboard' },
+        { id: 'analytics', label: 'Analytics', icon: LineChart, path: '/gym/analytics' },
         { id: 'profile', label: 'Profile', icon: User, path: '/gym/profile' },
         { id: 'clients', label: 'Clients', icon: Users, path: '/gym/clients' },
         { id: 'trainers', label: 'Trainers', icon: Dumbbell, path: '/gym/trainers' },
         { id: 'plans', label: 'Membership Plans', icon: List, path: '/gym/plans' },
         { id: 'memberships', label: 'Memberships', icon: ShieldCheck, path: '/gym/memberships' },
+        { id: 'payment-collection', label: 'Collections', icon: HandCoins, path: '/gym/payment-collection' },
         { id: 'equipments', label: 'Gym Equipment', icon: Box, path: '/gym/equipments' },
         { id: 'attendance', label: 'Attendance', icon: UserCheck, path: '/gym/attendance' },
         { id: 'enquiries', label: 'Enquiries', icon: MessageSquare, path: '/gym/enquiries' },
+        { id: 'payouts', label: 'Trainer Payouts', icon: Wallet, path: '/gym/payouts' },
         { id: 'expenses', label: 'Expenses', icon: Receipt, path: '/gym/expenses' },
         { id: 'settings', label: 'Settings', icon: Settings, path: '/gym/settings' },
     ];

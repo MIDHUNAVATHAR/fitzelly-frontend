@@ -53,12 +53,10 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, equipm
     const [form, setForm] = useState({
         name: equipment?.name || "",
         description: equipment?.description || "",
-        startBookingTime: equipment?.startBookingTime ?? 60,
         availableDays: equipment?.availableDays || ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
         availableFrom: equipment?.availableFrom || "06:00",
         availableTo: equipment?.availableTo || "22:00",
         allowedPlans: equipment?.allowedPlans || [],
-        maxUsageMinutes: equipment?.maxUsageMinutes ?? 60,
         capacity: equipment?.capacity ?? 1,
         slotIntervalMinutes: equipment?.slotIntervalMinutes ?? 30,
         isActive: equipment ? equipment.isActive : true,
@@ -116,12 +114,6 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, equipm
         }
         if (form.capacity < 1) newErrors.capacity = "Capacity must be at least 1";
         if (form.slotIntervalMinutes < 5) newErrors.slotIntervalMinutes = "Minimum slot is 5 min";
-        if (form.maxUsageMinutes < form.slotIntervalMinutes) {
-            newErrors.maxUsageMinutes = "Usage must be >= slot interval";
-        }
-        if (form.maxUsageMinutes % form.slotIntervalMinutes !== 0) {
-            newErrors.maxUsageMinutes = `Max usage must be a multiple of slot interval (${form.slotIntervalMinutes})`;
-        }
         if (form.availableDays.length === 0) newErrors.availableDays = "Select at least one day";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -136,12 +128,10 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, equipm
             const formData = new FormData();
             formData.append('name', form.name);
             formData.append('description', form.description);
-            formData.append('startBookingTime', String(form.startBookingTime));
             formData.append('availableDays', JSON.stringify(form.availableDays));
             formData.append('availableFrom', form.availableFrom);
             formData.append('availableTo', form.availableTo);
             formData.append('allowedPlans', JSON.stringify(form.allowedPlans));
-            formData.append('maxUsageMinutes', String(form.maxUsageMinutes));
             formData.append('capacity', String(form.capacity));
             formData.append('slotIntervalMinutes', String(form.slotIntervalMinutes));
             formData.append('isActive', String(form.isActive));
@@ -212,7 +202,7 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, equipm
                         </div>
 
                         {/* Basic Details */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-zinc-300 mb-1">Equipment Name <span className="text-red-500">*</span></label>
                                 <input
@@ -223,16 +213,6 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, equipm
                                     onChange={e => setForm({ ...form, name: e.target.value })}
                                 />
                                 {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-zinc-300 mb-1">Start Booking Time (mins before)</label>
-                                <input
-                                    type="number"
-                                    className="w-full bg-zinc-800 text-white rounded-lg p-3 border border-zinc-700 focus:border-emerald-500 focus:outline-none"
-                                    value={form.startBookingTime}
-                                    onChange={e => setForm({ ...form, startBookingTime: parseInt(e.target.value) || 0 })}
-                                />
                             </div>
                         </div>
 
@@ -290,7 +270,7 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, equipm
                         </div>
 
                         {/* Config Rules */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-zinc-800 pt-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-zinc-800 pt-6">
                             <div>
                                 <label className="block text-sm font-medium text-zinc-300 mb-1">Slot Interval (mins)</label>
                                 <input
@@ -301,18 +281,7 @@ const EquipmentModal: React.FC<EquipmentModalProps> = ({ isOpen, onClose, equipm
                                 />
                                 {errors.slotIntervalMinutes && <p className="text-red-400 text-xs mt-1">{errors.slotIntervalMinutes}</p>}
                             </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-zinc-300 mb-1">Max Usage (mins)</label>
-                                <input
-                                    type="number"
-                                    className="w-full bg-zinc-800 text-white rounded-lg p-3 border border-zinc-700 focus:border-emerald-500 focus:outline-none"
-                                    value={form.maxUsageMinutes}
-                                    onChange={e => setForm({ ...form, maxUsageMinutes: parseInt(e.target.value) || 0 })}
-                                />
-                                {errors.maxUsageMinutes && <p className="text-red-400 text-xs mt-1">{errors.maxUsageMinutes}</p>}
-                            </div>
-
+ 
                             <div>
                                 <label className="block text-sm font-medium text-zinc-300 mb-1">Capacity (simultaneous)</label>
                                 <input

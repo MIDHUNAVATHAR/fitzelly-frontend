@@ -1,4 +1,5 @@
 import { axiosInstance } from './axios';
+import { GYM } from '../constants/routes';
 
 export interface Plan {
     id: string;
@@ -30,22 +31,28 @@ export interface UpdatePlanDTO {
     description?: string;
 }
 
-export const getPlans = async (page: number = 1, limit: number = 10, search: string = ''): Promise<{ plans: Plan[], total: number }> => {
-    const response = await axiosInstance.get(`/api/gym/plans?page=${page}&limit=${limit}&search=${search}`);
+export const getPlans = async (
+    page: number = 1,
+    limit: number = 10,
+    search: string = ''
+): Promise<{ plans: Plan[], total: number }> => {
+
+    const params = `page=${page}&limit=${limit}&search=${search}`;
+
+    const response = await axiosInstance.get(GYM.GET_PLANS(params));
     return response.data.data;
 };
 
-
 export const createPlan = async (data: CreatePlanDTO): Promise<Plan> => {
-    const response = await axiosInstance.post('/api/gym/plan', data);
+    const response = await axiosInstance.post(GYM.ADD_PLAN, data);
     return response.data.data;
 };
 
 export const updatePlan = async (id: string, data: UpdatePlanDTO): Promise<Plan> => {
-    const response = await axiosInstance.patch(`/api/gym/plan/${id}`, data);
+    const response = await axiosInstance.patch(GYM.UPDATE_PLAN(id), data);
     return response.data.data;
 };
 
 export const deletePlan = async (id: string): Promise<void> => {
-    await axiosInstance.delete(`/api/gym/plan/${id}`);
+    await axiosInstance.delete(GYM.DELETE_PLAN(id));
 };

@@ -7,6 +7,7 @@ import { verifyGymSignupOtp } from '../../../api/gym-registration.api';
 import { initiateGoogleLogin } from '../../../api/google-login.api';
 import axios from 'axios';
 import type React from 'react';
+import Timer from '../../../components/ui/Timer';
 
 
 interface SignUpModalProps {
@@ -23,6 +24,8 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToSignIn }: SignU
     const [step, setStep] = useState('DETAILS'); // 'DETAILS' or 'OTP'
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [isTimerActive, setIsTimerActive] = useState(true);
+    const [timerKey, setTimerKey] = useState(0);
 
     // Prevent background scrolling and reset form on close
     useEffect(() => {
@@ -45,6 +48,8 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToSignIn }: SignU
         setStep('DETAILS');
         setError('');
         setIsLoading(false);
+        setIsTimerActive(true);
+        setTimerKey(0);
     };
 
     const handleInitiateSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -102,6 +107,27 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToSignIn }: SignU
         } catch (err) {
             if (axios.isAxiosError(err)) {
                 setError(err?.response?.data?.message)
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    const handleResendOtp = async () => {
+        setError('');
+        setIsLoading(true);
+        try {
+            const response = await initiateGymSignup({ email });
+            if (response.status === "success") {
+                setOtp('');
+                setIsTimerActive(true);
+                setTimerKey(prev => prev + 1);
+            } else {
+                setError(response.message || "Failed to resend verification code");
+            }
+        } catch (err) {
+            if (axios.isAxiosError(err)) {
+                setError(err?.response?.data?.message || "Failed to resend verification code");
             }
         } finally {
             setIsLoading(false);
@@ -204,32 +230,61 @@ export default function SignUpModal({ isOpen, onClose, onSwitchToSignIn }: SignU
 
                 {/* STEP 2: OTP Form */}
                 {step === 'OTP' && (
-                    <form className="space-y-6" onSubmit={handleCompleteSignUp}>
-                        <div>
-                            <label className="block text-sm font-semibold text-zinc-300 mb-2 text-center">Enter 6-Digit Code</label>
-                            <input
-                                type="text"
-                                value={otp}
-                                onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                placeholder="123456"
-                                maxLength={6}
-                                className="w-full px-4 py-4 bg-black border border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent text-white placeholder:text-zinc-700 transition-all text-center text-2xl font-bold tracking-widest"
-                                required
-                            />
-                        </div>
+                    <div className="space-y-6">
+                        <form className="space-y-6" onSubmit={handleCompleteSignUp}>
+                            <div>
+                                <label className="block text-sm font-semibold text-zinc-300 mb-2 text-center">
+                                    Enter 6-Digit Code
+                                </label>
+                                <input
+                                    type="text"
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                    placeholder="123456"
+                                    maxLength={6}
+                                    className="w-full px-4 py-4 bg-black border border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent text-white placeholder:text-zinc-700 transition-all text-center text-2xl font-bold tracking-widest"
+                                    required
+                                />
+                                <div className="mt-3 text-center">
+                                    <p className="text-sm text-zinc-500">
+                                        {isTimerActive ? (
+                                            <>Valid for <span className="text-emerald-400 font-mono"><Timer key={timerKey} initialMinutes={5} onTimeUp={() => setIsTimerActive(false)} /></span></>
+                                        ) : (
+                                            <span className="text-red-400">OTP Expired</span>
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
 
-                        <button
-                            type="submit"
-                            disabled={isLoading}
-                            className={`w-full bg-emerald-400 hover:bg-emerald-500 text-black font-bold py-3.5 rounded-xl transition-all shadow-[0_0_10px_rgba(52,211,153,0.3)] hover:shadow-[0_0_20px_rgba(52,211,153,0.5)] transform hover:-translate-y-0.5 cursor-pointer flex items-center justify-center ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                        >
-                            {isLoading ? (
-                                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                            ) : (
-                                "Verify & Create Account"
+                            {isTimerActive && (
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className={`w-full bg-emerald-400 hover:bg-emerald-500 text-black font-bold py-3.5 rounded-xl transition-all shadow-[0_0_10px_rgba(52,211,153,0.3)] hover:shadow-[0_0_20px_rgba(52,211,153,0.5)] transform hover:-translate-y-0.5 cursor-pointer flex items-center justify-center ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                >
+                                    {isLoading ? (
+                                        <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                                    ) : (
+                                        "Verify & Create Account"
+                                    )}
+                                </button>
                             )}
-                        </button>
-                    </form>
+                        </form>
+
+                        {!isTimerActive && (
+                            <button
+                                onClick={handleResendOtp}
+                                disabled={isLoading}
+                                className={`w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3.5 rounded-xl transition-all border border-zinc-700 transform hover:-translate-y-0.5 cursor-pointer flex items-center justify-center ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            >
+                                {isLoading ? (
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                ) : (
+                                    "Resend OTP"
+                                )}
+                            </button>
+                        )}
+                    </div>
                 )}
 
                 <div className="my-6 flex items-center gap-4">

@@ -3,7 +3,7 @@ import { isAxiosError } from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getGymById, approveGym } from "../../../api/superAdmin-gyms.api";
 import type { Gym } from "../../../api/superAdmin-gyms.api";
-import { Loader2, ArrowLeft, Mail, Phone, MapPin, Building2, Calendar, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Loader2, ArrowLeft, Mail, Phone, MapPin, Building2, Calendar, ShieldCheck, CheckCircle2, FileText, Eye, Download } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import ConfirmModal from '../../../components/ui/ConfirmModal';
 
@@ -64,6 +64,24 @@ const ViewGym: React.FC = () => {
             });
         } catch {
             return 'Invalid Date';
+        }
+    };
+
+    const handleDownload = async (url: string, fileName: string) => {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error('Download failed:', error);
+            toast.error("Failed to download file");
         }
     };
 
@@ -212,6 +230,54 @@ const ViewGym: React.FC = () => {
                         <p className="text-zinc-400 text-base leading-relaxed whitespace-pre-line bg-zinc-950/30 rounded-2xl p-6 border border-zinc-800/30">
                             {gym.description || "The gym has not provided a platform description yet."}
                         </p>
+                    </div>
+
+                    {/* Verification Documents Section */}
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 shadow-xl">
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="w-1.5 h-6 bg-emerald-400 rounded-full"></div>
+                            <h3 className="text-xl font-bold text-white">Verification Certificates</h3>
+                        </div>
+
+                        {gym.certificates && gym.certificates.length > 0 ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                                 {gym.certificates.map((cert) => (
+                                     <div key={cert.key} className="group bg-zinc-950/50 border border-zinc-800/30 rounded-xl overflow-hidden hover:border-emerald-500/30 transition-all duration-300">
+                                         <div className="aspect-[3/4] bg-zinc-900 flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-zinc-900 to-black">
+                                             {cert.type === 'PDF' ? (
+                                                 <div className="flex flex-col items-center gap-1">
+                                                     <FileText className="w-8 h-8 text-zinc-700" />
+                                                     <span className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest">PDF</span>
+                                                 </div>
+                                             ) : (
+                                                 <img src={cert.url} alt={cert.name} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                                             )}
+                                             
+                                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
+                                                 <a 
+                                                     href={cert.url} 
+                                                     target="_blank" 
+                                                     rel="noopener noreferrer"
+                                                     className="p-2 bg-white text-black rounded-full hover:scale-110 transition-transform"
+                                                     title="View Document"
+                                                 >
+                                                     <Eye className="w-4 h-4" />
+                                                 </a>
+                                             </div>
+                                         </div>
+                                         <div className="p-2 bg-zinc-900/50">
+                                             <h4 className="text-[10px] font-bold text-zinc-300 truncate text-center">{cert.name}</h4>
+                                         </div>
+                                     </div>
+                                 ))}
+                            </div>
+                        ) : (
+                            <div className="p-10 rounded-2xl bg-zinc-950/20 border border-dashed border-zinc-800/50 flex flex-col items-center justify-center text-center">
+                                <ShieldCheck className="w-12 h-12 text-zinc-800 mb-4" />
+                                <p className="text-zinc-500 font-medium">No verification documents uploaded yet.</p>
+                                <p className="text-zinc-600 text-xs mt-1">Gyms can upload their licenses or certificates for verification.</p>
+                            </div>
+                        )}
                     </div>
 
                     {/* Subscription Details Section */}

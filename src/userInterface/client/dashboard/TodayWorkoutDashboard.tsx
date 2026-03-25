@@ -8,7 +8,11 @@ import {
     Trophy,
     Calendar,
     Loader2,
-    ArrowRight
+    ArrowRight,
+    Video,
+    X,
+    Play,
+    Plus
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getMyWorkoutPlan, trackWorkoutProgress, getWorkoutProgress, getWorkoutStreak } from '../../../api/workout-plan.api';
@@ -24,6 +28,7 @@ const TodayWorkoutDashboard: React.FC = () => {
     const [isCelebrating, setIsCelebrating] = useState(false);
     const [recentExercise, setRecentExercise] = useState<string | null>(null);
     const [showTaskCongrats, setShowTaskCongrats] = useState(false);
+    const [activeVideo, setActiveVideo] = useState<{ url: string, name: string } | null>(null);
 
     const today = DAYS[new Date().getDay()];
     const todayDateStr = new Date().toISOString().split('T')[0];
@@ -125,6 +130,25 @@ const TodayWorkoutDashboard: React.FC = () => {
             console.error("Error updating progress:", error);
             toast.error("Failed to update progress");
         }
+    };
+
+    const getEmbedUrl = (url: string) => {
+        if (!url) return null;
+        if (url.includes('youtube.com/watch?v=')) {
+            return url.replace('watch?v=', 'embed/').split('&')[0];
+        }
+        if (url.includes('youtube.com/shorts/')) {
+            return url.replace('shorts/', 'embed/');
+        }
+        if (url.includes('youtu.be/')) {
+            const id = url.split('youtu.be/')[1].split('?')[0];
+            return `https://www.youtube.com/embed/${id}`;
+        }
+        if (url.includes('vimeo.com/')) {
+            const id = url.split('vimeo.com/')[1].split('?')[0];
+            return `https://player.vimeo.com/video/${id}`;
+        }
+        return null;
     };
 
     if (loading) {
@@ -301,6 +325,18 @@ const TodayWorkoutDashboard: React.FC = () => {
                                     </div>
                                 </div>
 
+                                {exercise.videoUrl && !isCompleted && (
+                                    <motion.button 
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={(e) => { e.stopPropagation(); setActiveVideo({ url: exercise.videoUrl!, name: exercise.name }); }}
+                                        className="relative z-20 w-12 h-12 rounded-2xl bg-emerald-500 text-black flex items-center justify-center shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 transition-colors"
+                                        title="Watch Demo"
+                                    >
+                                        <Play size={20} fill="currentColor" />
+                                    </motion.button>
+                                )}
+
                                 {/* Background Pattern for Completed */}
                                 {isCompleted && (
                                     <motion.div
@@ -428,6 +464,57 @@ const TodayWorkoutDashboard: React.FC = () => {
                 </div>
                 <ArrowRight className="text-zinc-600" size={24} />
             </motion.div>
+
+            {/* Video Modal */}
+            <AnimatePresence>
+                {activeVideo && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setActiveVideo(null)}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+                    >
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="relative bg-zinc-900 border border-zinc-800 w-full max-w-2xl rounded-[2.5rem] overflow-hidden shadow-2xl"
+                        >
+                            <div className="p-6 border-b border-zinc-800 bg-zinc-950/50 flex items-center justify-between">
+                                <h3 className="font-black text-white flex items-center gap-3 uppercase tracking-widest text-[10px]">
+                                    <Video className="w-4 h-4 text-emerald-400" />
+                                    {activeVideo.name} — Execution
+                                </h3>
+                                <button onClick={() => setActiveVideo(null)} className="text-zinc-500 hover:text-white transition-colors bg-zinc-800 rounded-full p-2">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <div className="aspect-video bg-black rounded-b-[2.5rem] overflow-hidden">
+                                {getEmbedUrl(activeVideo.url) ? (
+                                    <iframe 
+                                        src={getEmbedUrl(activeVideo.url)!} 
+                                        className="w-full h-full"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                        allowFullScreen
+                                        referrerPolicy="strict-origin-when-cross-origin"
+                                        title="Exercise Demo Video"
+                                    />
+                                ) : (
+                                    <video 
+                                        src={activeVideo.url} 
+                                        className="w-full h-full object-contain" 
+                                        controls 
+                                        autoPlay
+                                        crossOrigin="anonymous"
+                                    />
+                                )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

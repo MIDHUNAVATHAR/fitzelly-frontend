@@ -97,7 +97,6 @@ const EquipmentList: React.FC = () => {
             )
         },
         { header: "Time Range", accessor: (eq) => `${eq.availableFrom} - ${eq.availableTo}` },
-        { header: "Max Usage", accessor: (eq) => `${eq.maxUsageMinutes}m` },
         { header: "Capacity", accessor: "capacity" },
         { header: "Slot Interval", accessor: (eq) => `${eq.slotIntervalMinutes}m` },
         {

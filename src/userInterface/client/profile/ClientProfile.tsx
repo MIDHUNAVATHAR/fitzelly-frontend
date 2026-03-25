@@ -192,9 +192,9 @@ const ClientProfilePage: React.FC = () => {
                                 onClick={() => isEditing && fileInputRef.current?.click()}
                                 className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-zinc-800 border-4 border-zinc-900 absolute -top-12 sm:-top-16 flex items-center justify-center group overflow-hidden shadow-xl ${isEditing ? 'cursor-pointer' : ''}`}
                             >
-                                {profile?.profileImage || formData.profileImage ? (
+                                {profile?.profileUrl || profile?.profileImage || formData.profileImage || formData.profileUrl ? (
                                     <img
-                                        src={profile?.profileImage || formData.profileImage}
+                                        src={profile?.profileUrl || profile?.profileImage || formData.profileImage || formData.profileUrl}
                                         alt="Profile"
                                         className="w-full h-full object-cover"
                                         onError={(e) => {

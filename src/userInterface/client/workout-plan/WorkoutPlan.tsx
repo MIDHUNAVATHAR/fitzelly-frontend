@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, Dumbbell, CheckCircle2, Circle, Calendar, Info } from 'lucide-react';
+import { Loader2, Dumbbell, CheckCircle2, Circle, Calendar, Info, Play, Video, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { getMyWorkoutPlan, trackWorkoutProgress, getWorkoutProgress } from '../../../api/workout-plan.api';
-import type { IWorkoutPlan, IWorkoutProgress } from '../../../api/workout-plan.api';
+import type { IWorkoutPlan, IWorkoutProgress, IExercise } from '../../../api/workout-plan.api';
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -10,38 +11,60 @@ const ClientWorkoutPlan: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [plan, setPlan] = useState<IWorkoutPlan | null>(null);
     const [progress, setProgress] = useState<IWorkoutProgress | null>(null);
+    const [activeVideo, setActiveVideo] = useState<{ url: string, name: string } | null>(null);
     const todayName = DAYS[new Date().getDay()];
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const planResponse = await getMyWorkoutPlan();
-                setPlan(planResponse.data);
+    const fetchData = async () => {
+        try {
+            const todayDateStr = new Date().toISOString().split('T')[0];
+            const [planRes, progressRes] = await Promise.all([
+                getMyWorkoutPlan(),
+                getWorkoutProgress(todayDateStr)
+            ]);
+            
+            const fetchedPlan = planRes.data;
+            const fetchedProgress = progressRes.data;
 
-                // Fetch progress for today
-                const todayDateStr = new Date().toISOString().split('T')[0];
-                const progressResponse = await getWorkoutProgress(todayDateStr);
-                setProgress(progressResponse.data);
-            } catch (error) {
-                console.error("Error fetching workout data:", error);
-            } finally {
-                setLoading(false);
+            // Sync: Dashboard and Plan page must use the same Name-based tracking
+            if (fetchedPlan && fetchedProgress?.completedExercises) {
+                const todayNameLocal = DAYS[new Date().getDay()];
+                const exercisesForToday = fetchedPlan.weeklyPlan.find(d => d.day === todayNameLocal)?.exercises || [];
+                
+                const sanitized = fetchedProgress.completedExercises.map(item => {
+                    const matching = exercisesForToday.find(ex => ex.id === item || ex.name === item);
+                    return matching ? matching.name : null;
+                }).filter((name): name is string => name !== null);
+
+                fetchedProgress.completedExercises = [...new Set(sanitized)];
             }
-        };
+
+            setPlan(fetchedPlan);
+            setProgress(fetchedProgress);
+        } catch (error) {
+            console.error("Error fetching workout data:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchData();
+        // Set up an interval or listener if you want live updates between dashboard and plan tab
+        const interval = setInterval(fetchData, 10000); // Poll every 10s for sync
+        return () => clearInterval(interval);
     }, []);
 
-    const handleToggleExercise = async (exerciseId: string) => {
+    const handleToggleExercise = async (exercise: IExercise) => {
         if (!plan) return;
 
         const todayDateStr = new Date().toISOString().split('T')[0];
         const currentCompleted = progress?.completedExercises || [];
 
         let newCompleted: string[];
-        if (currentCompleted.includes(exerciseId)) {
-            newCompleted = currentCompleted.filter(id => id !== exerciseId);
+        if (currentCompleted.includes(exercise.name)) {
+            newCompleted = currentCompleted.filter(name => name !== exercise.name);
         } else {
-            newCompleted = [...currentCompleted, exerciseId];
+            newCompleted = [...currentCompleted, exercise.name];
         }
 
         try {
@@ -55,6 +78,25 @@ const ClientWorkoutPlan: React.FC = () => {
             console.error("Error updating progress:", error);
             toast.error("Failed to update progress");
         }
+    };
+
+    const getEmbedUrl = (url: string) => {
+        if (!url) return null;
+        if (url.includes('youtube.com/watch?v=')) {
+            return url.replace('watch?v=', 'embed/').split('&')[0];
+        }
+        if (url.includes('youtube.com/shorts/')) {
+            return url.replace('shorts/', 'embed/');
+        }
+        if (url.includes('youtu.be/')) {
+            const id = url.split('youtu.be/')[1].split('?')[0];
+            return `https://www.youtube.com/embed/${id}`;
+        }
+        if (url.includes('vimeo.com/')) {
+            const id = url.split('vimeo.com/')[1].split('?')[0];
+            return `https://player.vimeo.com/video/${id}`;
+        }
+        return null;
     };
 
     if (loading) {
@@ -142,24 +184,25 @@ const ClientWorkoutPlan: React.FC = () => {
                                 ) : (
                                     <div className="space-y-3">
                                         {dayPlan.exercises.map((exercise) => {
-                                            const isCompleted = progress?.completedExercises.includes(exercise.id);
+                                            const isTodayOfTarget = day === todayName;
+                                            const isCompleted = isTodayOfTarget && progress?.completedExercises.includes(exercise.name);
                                             return (
                                                 <div
                                                     key={exercise.id}
-                                                    onClick={() => isToday && handleToggleExercise(exercise.id)}
                                                     className={`
                                                         group flex items-center gap-3 p-3 rounded-2xl border transition-all
-                                                        ${isToday ? 'cursor-pointer hover:border-emerald-500/30' : 'cursor-default'}
                                                         ${isCompleted
                                                             ? 'bg-emerald-500/5 border-emerald-500/20'
                                                             : 'bg-zinc-950/40 border-zinc-800/50'}
                                                     `}
                                                 >
-                                                    <div className={`
-                                                        flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all
+                                                    <div
+                                                        onClick={() => isToday && handleToggleExercise(exercise)}
+                                                        className={`
+                                                        flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer
                                                         ${isCompleted
-                                                            ? 'bg-emerald-500 text-black shadow-[0_0_10px_rgba(16,185,129,0.3)]'
-                                                            : isToday ? 'bg-zinc-800 text-zinc-500 group-hover:bg-zinc-700' : 'bg-zinc-800 text-zinc-600'}
+                                                                ? 'bg-emerald-500 text-black shadow-[0_0_10px_rgba(16,185,129,0.3)]'
+                                                                : isToday ? 'bg-zinc-800 text-zinc-500 hover:bg-zinc-700' : 'bg-zinc-800 text-zinc-600'}
                                                     `}>
                                                         {isCompleted ? <CheckCircle2 size={18} /> : <Circle size={18} />}
                                                     </div>
@@ -172,10 +215,19 @@ const ClientWorkoutPlan: React.FC = () => {
                                                             <span className="text-[10px] font-bold text-zinc-500 uppercase">Sets: <span className="text-emerald-400/70">{exercise.sets || '—'}</span></span>
                                                             <span className="text-[10px] font-bold text-zinc-500 uppercase">Reps: <span className="text-emerald-400/70">{exercise.reps || '—'}</span></span>
                                                         </div>
+                                                        {exercise.instructions && !isCompleted && (
+                                                            <p className="text-[10px] text-zinc-500 mt-1 line-clamp-1 italic">{exercise.instructions}</p>
+                                                        )}
                                                     </div>
 
-                                                    {!isToday && isCompleted && (
-                                                        <CheckCircle2 size={14} className="text-emerald-500/20" />
+                                                    {exercise.videoUrl && (
+                                                        <button
+                                                            onClick={() => setActiveVideo({ url: exercise.videoUrl!, name: exercise.name })}
+                                                            className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-emerald-400 hover:bg-emerald-400 hover:text-black transition-all"
+                                                            title="Watch Demo"
+                                                        >
+                                                            <Play size={14} fill="currentColor" />
+                                                        </button>
                                                     )}
                                                 </div>
                                             );
@@ -188,12 +240,63 @@ const ClientWorkoutPlan: React.FC = () => {
                 })}
             </div>
 
+            {/* Video Modal */}
+            <AnimatePresence>
+                {activeVideo && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setActiveVideo(null)}
+                        className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+                    >
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="relative bg-zinc-900 border border-zinc-800 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl"
+                        >
+                            <div className="p-4 border-b border-zinc-800 bg-zinc-950/50 flex items-center justify-between">
+                                <h3 className="font-bold text-white flex items-center gap-2 uppercase tracking-widest text-xs">
+                                    <Video className="w-4 h-4 text-emerald-400" />
+                                    {activeVideo.name} — Demo
+                                </h3>
+                                <button onClick={() => setActiveVideo(null)} className="text-zinc-500 hover:text-white transition-colors p-1">
+                                    <X size={20} />
+                                </button>
+                            </div>
+                            <div className="aspect-video bg-black rounded-b-3xl overflow-hidden">
+                                {getEmbedUrl(activeVideo.url) ? (
+                                    <iframe
+                                        src={getEmbedUrl(activeVideo.url)!}
+                                        className="w-full h-full"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        referrerPolicy="strict-origin-when-cross-origin"
+                                        title="Exercise Demo Video"
+                                    />
+                                ) : (
+                                    <video
+                                        src={activeVideo.url}
+                                        className="w-full h-full object-contain"
+                                        controls
+                                        autoPlay
+                                        crossOrigin="anonymous"
+                                    />
+                                )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
                     <Info size={20} className="text-emerald-400" />
                 </div>
                 <p className="text-xs text-zinc-400 leading-relaxed">
-                    Progress tracking is active for <strong className="text-emerald-400">{todayName}</strong>. Tap exercises in today's card to mark them as done. Your trainer will see your completions.
+                    Progress tracking is active for <strong className="text-emerald-400">{todayName}</strong>. Tap status icon to mark as done. View <Play size={10} className="inline inline-block" /> demo videos for any exercise if available.
                 </p>
             </div>
         </div>

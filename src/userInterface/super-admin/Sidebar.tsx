@@ -5,7 +5,8 @@ import {
     User,
     Building2,
     LogOut,
-    Shield
+    Shield,
+    Dumbbell
 } from 'lucide-react';
 import { useLogout } from '../../hooks/useLogout';
 
@@ -24,6 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/super-admin/dashboard' },
         { id: 'profile', label: 'Profile', icon: User, path: '/super-admin/profile' },
         { id: 'gyms', label: 'Gyms', icon: Building2, path: '/super-admin/gyms' },
+        { id: 'exercise_library', label: 'Exercise Library', icon: Dumbbell, path: '/super-admin/exercise-library' },
     ];
 
 
