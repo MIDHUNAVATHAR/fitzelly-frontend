@@ -490,6 +490,14 @@ const Profile: React.FC = () => {
                                 <div className={`self-start sm:self-center px-3 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap ${profile?.location?.latitude ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
                                     {profile?.location?.latitude ? 'Location Configured' : 'Location Not Set'}
                                 </div>
+                                <button
+                                    onClick={handleGetLocation}
+                                    disabled={loadingLocation}
+                                    className="flex items-center gap-2 px-4 py-2 bg-emerald-400 text-black font-bold rounded-xl text-sm hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-500/10 mt-3 sm:mt-0 disabled:opacity-50"
+                                >
+                                    <MapPin className="w-4 h-4" />
+                                    {loadingLocation ? "Updating..." : "Update Location"}
+                                </button>
                             </div>
                             <div className="text-xs text-amber-500/90 bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-lg flex gap-2 items-start">
                                 <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />

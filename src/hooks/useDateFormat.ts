@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
 export const useDateFormat = () => {
-    // Shows like "8 Sept 2000"
+    // -> "8 Sept 2000"
     const formatToShortMonth = useCallback((dateString?: string | Date | null) => {
         if (!dateString) return 'N/A';
         const date = new Date(dateString);
@@ -13,7 +13,7 @@ export const useDateFormat = () => {
         });
     }, []);
 
-    // Shows like "09/12/2000"
+    // -> "09/12/2000"
     const formatToGB = useCallback((dateString?: string | Date | null) => {
         if (!dateString) return '';
         const date = new Date(dateString);
@@ -30,7 +30,7 @@ export const useDateFormat = () => {
         if (!dateString) return '';
         const date = new Date(dateString);
         if (isNaN(date.getTime())) return '';
-        // toISOString uses UTC which might shift the date by timezone. Better to extract local date
+        
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');

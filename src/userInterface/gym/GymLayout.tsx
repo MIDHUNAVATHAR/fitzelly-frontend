@@ -1,21 +1,23 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Outlet } from "react-router-dom";
-import { Menu, Dumbbell, Bell, Check, Trash2, Inbox } from "lucide-react";
+import { Menu, Bell, Check, Inbox } from "lucide-react";
 import Sidebar from "./Sidebar";
 import { useAuth } from "../../context/useAuth";
 import { socket } from "../../config/socket";
 import toast from "react-hot-toast";
-import { 
-    getUnreadNotifications, 
-    getReadNotifications, 
-    markNotificationAsRead, 
+import {
+    getUnreadNotifications,
+    getReadNotifications,
+    markNotificationAsRead,
     markAllNotificationsAsRead
 } from "../../api/notification.api";
 import type { NotificationItem } from "../../api/notification.api";
 
+
+
 const GymLayout: React.FC = () => {
     const [isMobileOpen, setIsMobileOpen] = useState(false);
-    
+
     // Notifications state
     const [unreadNotifications, setUnreadNotifications] = useState<NotificationItem[]>([]);
     const [readNotifications, setReadNotifications] = useState<NotificationItem[]>([]);
@@ -44,7 +46,7 @@ const GymLayout: React.FC = () => {
         try {
             const data = await getReadNotifications(pageNum);
             if (data.length < 10) setHasMore(false);
-            
+
             if (append) {
                 setReadNotifications(prev => {
                     const existingIds = new Set(prev.map(p => p.id));
@@ -97,7 +99,7 @@ const GymLayout: React.FC = () => {
             socket.auth = { id: user.id, role: user.role };
             socket.connect();
         }
-        
+
         socket.emit("join-gym", user.id);
 
         const targetEvent = "NEW_NOTIFICATION";
@@ -166,10 +168,10 @@ const GymLayout: React.FC = () => {
         if (unreadNotifications.length === 0) return;
         try {
             await markAllNotificationsAsRead();
-            const marked = unreadNotifications.map(n => ({...n, isRead: true}));
+            const marked = unreadNotifications.map(n => ({ ...n, isRead: true }));
             setReadNotifications(prev => [...marked, ...prev]);
             setUnreadNotifications([]);
-        } catch(e) {
+        } catch (e) {
             toast.error("Failed to mark all as read");
         }
     };
@@ -179,7 +181,7 @@ const GymLayout: React.FC = () => {
 
     const NotificationBell = () => (
         <div className="relative" ref={notifRef}>
-            <button 
+            <button
                 onClick={() => setIsNotifOpen(!isNotifOpen)}
                 className="relative p-2 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors focus:outline-none"
             >
@@ -216,8 +218,8 @@ const GymLayout: React.FC = () => {
                             )}
                         </div>
                     </div>
-                    
-                    <div 
+
+                    <div
                         ref={scrollRef}
                         onScroll={handleScroll}
                         className="max-h-96 overflow-y-auto custom-scrollbar"
@@ -230,8 +232,8 @@ const GymLayout: React.FC = () => {
                         ) : (
                             <div className="divide-y divide-zinc-800">
                                 {currentList.map(notif => (
-                                    <div 
-                                        key={notif.id} 
+                                    <div
+                                        key={notif.id}
                                         className={`p-4 hover:bg-zinc-800/50 transition-colors flex gap-3 items-start ${!notif.isRead ? 'bg-zinc-800/20' : ''}`}
                                     >
                                         <div className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 ${!notif.isRead ? 'bg-emerald-500' : 'bg-transparent'}`} />
@@ -244,11 +246,11 @@ const GymLayout: React.FC = () => {
                                                     {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })}
                                                 </p>
                                                 {!notif.isRead && (
-                                                    <button 
+                                                    <button
                                                         onClick={(e) => handleMarkAsRead(notif.id, e)}
                                                         className="text-[10px] text-emerald-400 font-medium hover:underline flex items-center gap-1"
                                                     >
-                                                        <Check className="w-3 h-3"/> Mark as read
+                                                        <Check className="w-3 h-3" /> Mark as read
                                                     </button>
                                                 )}
                                             </div>
