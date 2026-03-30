@@ -49,7 +49,6 @@ export default function SignInModal({ isOpen, onClose, onSwitchToSignUp, onForgo
 
         try {
             const response = await login({ email, password, role: selectedRole });
-
             if (response.status == "success") {
 
                 const { accessToken, role, email, id } = response.data;
@@ -69,11 +68,7 @@ export default function SignInModal({ isOpen, onClose, onSwitchToSignUp, onForgo
 
             if (axios.isAxiosError(err)) {
 
-                if (err.response?.status === 404) {
-                    setError("Login for this role currently unavailable");
-                } else {
-                    setError(err?.response?.data?.message);
-                }
+                setError("Invalid email or password")
             } else
                 setError("Network error. Please try again.");
         } finally {

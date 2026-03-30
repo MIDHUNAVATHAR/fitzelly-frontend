@@ -70,39 +70,42 @@ export default function ForgotPasswordModal({ isOpen, onClose, onSwitchToSignIn 
         sendOtp()
     }
 
-    const sendOtp = async () => {
+   const sendOtp = async () => {
+    setError("");
+    if (!email) {
+        setError('Please enter your email');
+        return;
+    }
 
-        setError("");
+    setIsLoading(true);
 
-        if (!email) {
-            setError('Please enter your email');
-            return;
+    try {
+        const response = await initiateForgotpassword({ email, role: selectedRole });
+
+        // Even if the backend didn't find the user, it should ideally return "success"
+        // to prevent enumeration. 
+        if (response.status === "success") {
+            setStep("OTP");
+            setError("");
+            setTimeLeft(300);
+            setCanResend(false);
+        } else {
+            // Only show errors for things like "Invalid Email Format" or "Server Down"
+            setError(response.message);
         }
-
-        setIsLoading(true);
-
-        try {
-
-            const response = await initiateForgotpassword({ email, role: selectedRole });
-
-            if (response.status === "success") {
-                setStep("OTP");
-                setError("");
-                setTimeLeft(300);
-                setCanResend(false)
-            } else {
-                setError(response.message)
-            }
-        } catch (err) {
-            if (isAxiosError(err)) {
-                setError(err?.response?.data.message);
-            } else {
-                setError("Network error")
-            }
-        } finally {
-            setIsLoading(false);
+    } catch (err) {
+        // SECURITY TRICK: Instead of showing "User not found", 
+        // just move to the OTP step anyway.
+        if (isAxiosError(err)) {
+            setStep("OTP");
+            setTimeLeft(300);
+        } else {
+            setError("Something went wrong. Please try again.");
         }
-    };
+    } finally {
+        setIsLoading(false);
+    }
+};
 
     const handleVerifyOtp = async (e: React.FormEvent<HTMLFormElement>) => {
 
