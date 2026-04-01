@@ -92,27 +92,28 @@ const GymLayout: React.FC = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    const [isConnected, setIsConnected] = React.useState(socket.connected);
+
     useEffect(() => {
         if (!user) return;
 
-        if (!socket.connected) {
-            socket.auth = { id: user.id, role: user.role };
-            socket.connect();
-        }
+        const onConnect = () => {
+            console.log("Socket connected! Joining gym room:", `gym_${user.id}`);
+            socket.emit("join", `gym_${user.id}`);
+            setIsConnected(true);
+        };
 
-        socket.emit("join-gym", user.id);
+        const onDisconnect = () => {
+            console.log("Socket disconnected");
+            setIsConnected(false);
+        };
 
-        const targetEvent = "NEW_NOTIFICATION";
-
-        const handleNewNotification = (data: NotificationItem) => {
+        const onNotification = (data: NotificationItem) => {
+            console.log("New live notification received on Gym Portal:", data);
             setUnreadNotifications(prev => [data, ...prev]);
-
             toast.custom(
                 (t) => (
-                    <div
-                        className={`${t.visible ? 'animate-enter' : 'animate-leave'} 
-                        max-w-md w-full bg-zinc-900 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-zinc-800`}
-                    >
+                    <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-zinc-900 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-zinc-800`}>
                         <div className="flex-1 w-0 p-4">
                             <div className="flex items-start">
                                 <div className="flex-shrink-0 pt-0.5">
@@ -121,20 +122,13 @@ const GymLayout: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="ml-3 flex-1">
-                                    <p className="text-sm font-medium text-white">
-                                        New Notification
-                                    </p>
-                                    <p className="mt-1 text-sm text-zinc-400">
-                                        {data.message}
-                                    </p>
+                                    <p className="text-sm font-medium text-white">New Notification</p>
+                                    <p className="mt-1 text-sm text-zinc-400">{data.message}</p>
                                 </div>
                             </div>
                         </div>
                         <div className="flex border-l border-zinc-800">
-                            <button
-                                onClick={() => toast.dismiss(t.id)}
-                                className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-emerald-500 hover:text-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                            >
+                            <button onClick={() => toast.dismiss(t.id)} className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-emerald-500 hover:text-emerald-400">
                                 Close
                             </button>
                         </div>
@@ -144,9 +138,22 @@ const GymLayout: React.FC = () => {
             );
         };
 
-        socket.on(targetEvent, handleNewNotification);
+        socket.on("connect", onConnect);
+        socket.on("disconnect", onDisconnect);
+        socket.on("NEW_NOTIFICATION", onNotification);
+
+        if (socket.connected) {
+            onConnect();
+        } else {
+            console.log("Initializing socket connection for gym user:", user.id);
+            socket.auth = { id: user.id, role: user.role };
+            socket.connect();
+        }
+
         return () => {
-            socket.off(targetEvent, handleNewNotification);
+            socket.off("connect", onConnect);
+            socket.off("disconnect", onDisconnect);
+            socket.off("NEW_NOTIFICATION", onNotification);
         };
     }, [user]);
 

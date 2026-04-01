@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { isAxiosError } from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getGymById, approveGym } from "../../../api/superAdmin-gyms.api";
+import { getGymById, approveGym, rejectGym } from "../../../api/superAdmin-gyms.api";
+import RejectGymModal from '../../../components/super-admin/RejectGymModal';
 import type { Gym } from "../../../api/superAdmin-gyms.api";
-import { Loader2, ArrowLeft, Mail, Phone, MapPin, Building2, Calendar, ShieldCheck, CheckCircle2, FileText, Eye, Download } from 'lucide-react';
+import { Loader2, ArrowLeft, Mail, Phone, MapPin, Building2, Calendar, ShieldCheck, CheckCircle2, FileText, Eye, Download, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import ConfirmModal from '../../../components/ui/ConfirmModal';
 
@@ -13,7 +14,9 @@ const ViewGym: React.FC = () => {
     const [gym, setGym] = useState<Gym | null>(null);
     const [loading, setLoading] = useState(true);
     const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
     const [isApproving, setIsApproving] = useState(false);
+    const [isRejecting, setIsRejecting] = useState(false);
 
     const fetchDetails = useCallback(async () => {
         if (!id) return;
@@ -50,6 +53,26 @@ const ViewGym: React.FC = () => {
             toast.error(errorMessage);
         } finally {
             setIsApproving(false);
+        }
+    };
+
+    const handleReject = async (reason: string) => {
+        if (!id) return;
+        try {
+            setIsRejecting(true);
+            await rejectGym(id, reason);
+            toast.success("Gym rejected successfully");
+            setIsRejectModalOpen(false);
+            await fetchDetails(); // Refresh data
+        } catch (error: unknown) {
+            console.error(error);
+            let errorMessage = "Failed to reject gym";
+            if (isAxiosError(error)) {
+                errorMessage = error.response?.data?.message || errorMessage;
+            }
+            toast.error(errorMessage);
+        } finally {
+            setIsRejecting(false);
         }
     };
 
@@ -141,7 +164,25 @@ const ViewGym: React.FC = () => {
                     <span className="font-medium">Back to Gyms</span>
                 </button>
                 <div className="flex gap-3">
-                    {gym.approvalStatus !== 'Approved' && (
+                    {gym.approvalStatus === 'Pending' && (
+                        <>
+                            <button
+                                onClick={() => setIsRejectModalOpen(true)}
+                                className="flex items-center gap-2 px-6 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-red-500 font-bold rounded-xl border border-red-500/20 transition-all shadow-lg"
+                            >
+                                <X className="w-5 h-5" />
+                                Reject Gym
+                            </button>
+                            <button
+                                onClick={() => setIsApproveModalOpen(true)}
+                                className="flex items-center gap-2 px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-400/20 transition-all shadow-lg shadow-emerald-500/20"
+                            >
+                                <CheckCircle2 className="w-5 h-5" />
+                                Approve Gym
+                            </button>
+                        </>
+                    )}
+                    {gym.approvalStatus === 'Rejected' && (
                         <button
                             onClick={() => setIsApproveModalOpen(true)}
                             className="flex items-center gap-2 px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-400/20 transition-all shadow-lg shadow-emerald-500/20"
@@ -232,6 +273,21 @@ const ViewGym: React.FC = () => {
                         </p>
                     </div>
 
+                    {/* Rejection Reason (Conditional) */}
+                    {gym.approvalStatus === 'Rejected' && gym.rejectionReason && (
+                        <div className="bg-red-500/5 border border-red-500/10 rounded-3xl p-8 shadow-xl">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-1.5 h-6 bg-red-500 rounded-full"></div>
+                                <h3 className="text-xl font-bold text-red-500">Rejection Reason</h3>
+                            </div>
+                            <div className="p-6 bg-red-500/5 border border-red-500/10 rounded-2xl">
+                                <p className="text-zinc-400 text-base leading-relaxed">
+                                    {gym.rejectionReason}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Verification Documents Section */}
                     <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 shadow-xl">
                         <div className="flex items-center gap-3 mb-8">
@@ -241,35 +297,35 @@ const ViewGym: React.FC = () => {
 
                         {gym.certificates && gym.certificates.length > 0 ? (
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-                                 {gym.certificates.map((cert) => (
-                                     <div key={cert.key} className="group bg-zinc-950/50 border border-zinc-800/30 rounded-xl overflow-hidden hover:border-emerald-500/30 transition-all duration-300">
-                                         <div className="aspect-[3/4] bg-zinc-900 flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-zinc-900 to-black">
-                                             {cert.type === 'PDF' ? (
-                                                 <div className="flex flex-col items-center gap-1">
-                                                     <FileText className="w-8 h-8 text-zinc-700" />
-                                                     <span className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest">PDF</span>
-                                                 </div>
-                                             ) : (
-                                                 <img src={cert.url} alt={cert.name} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
-                                             )}
-                                             
-                                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
-                                                 <a 
-                                                     href={cert.url} 
-                                                     target="_blank" 
-                                                     rel="noopener noreferrer"
-                                                     className="p-2 bg-white text-black rounded-full hover:scale-110 transition-transform"
-                                                     title="View Document"
-                                                 >
-                                                     <Eye className="w-4 h-4" />
-                                                 </a>
-                                             </div>
-                                         </div>
-                                         <div className="p-2 bg-zinc-900/50">
-                                             <h4 className="text-[10px] font-bold text-zinc-300 truncate text-center">{cert.name}</h4>
-                                         </div>
-                                     </div>
-                                 ))}
+                                {gym.certificates.map((cert) => (
+                                    <div key={cert.key} className="group bg-zinc-950/50 border border-zinc-800/30 rounded-xl overflow-hidden hover:border-emerald-500/30 transition-all duration-300">
+                                        <div className="aspect-[3/4] bg-zinc-900 flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-zinc-900 to-black">
+                                            {cert.type === 'PDF' ? (
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <FileText className="w-8 h-8 text-zinc-700" />
+                                                    <span className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest">PDF</span>
+                                                </div>
+                                            ) : (
+                                                <img src={cert.url} alt={cert.name} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                                            )}
+
+                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
+                                                <a
+                                                    href={cert.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="p-2 bg-white text-black rounded-full hover:scale-110 transition-transform"
+                                                    title="View Document"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div className="p-2 bg-zinc-900/50">
+                                            <h4 className="text-[10px] font-bold text-zinc-300 truncate text-center">{cert.name}</h4>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         ) : (
                             <div className="p-10 rounded-2xl bg-zinc-950/20 border border-dashed border-zinc-800/50 flex flex-col items-center justify-center text-center">
@@ -336,6 +392,14 @@ const ViewGym: React.FC = () => {
                 confirmText="Confirm Approval"
                 variant="success"
                 isProcessing={isApproving}
+            />
+
+            {/* Rejection Modal */}
+            <RejectGymModal
+                isOpen={isRejectModalOpen}
+                onClose={() => setIsRejectModalOpen(false)}
+                onConfirm={handleReject}
+                isProcessing={isRejecting}
             />
         </div>
     );

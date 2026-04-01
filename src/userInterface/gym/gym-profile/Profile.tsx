@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Mail, Phone, MapPin, Edit3, Camera, Save, AlertTriangle, Clock, FileText, Trash2, Plus, Eye } from 'lucide-react';
 
 import { toast } from 'react-hot-toast';
-import { getGymProfile, updateGymProfile, uploadGymLogo, uploadGymCertificate, deleteGymCertificate, type GymProfile } from "../../../api/gym-profile.api";
+import { getGymProfile, updateGymProfile, uploadGymLogo, uploadGymCertificate, deleteGymCertificate, reApplyGym, type GymProfile } from "../../../api/gym-profile.api";
 import { useImageCropper } from '../../../hooks/useImageCropper';
 import ImageCropperModal from '../../../components/ui/ImageCropperModal';
 import { useLocation } from '../../../hooks/useLocation';
@@ -18,6 +18,7 @@ const Profile: React.FC = () => {
     const [formData, setFormData] = useState<GymProfile>({});
     const [showLocationWarning, setShowLocationWarning] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [isReApplying, setIsReApplying] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const certInputRef = useRef<HTMLInputElement>(null);
 
@@ -221,6 +222,43 @@ const Profile: React.FC = () => {
         setIsEditing(false);
     };
 
+    const handleReApply = async () => {
+        if (!profile) return;
+
+        // Frontend validation for completeness
+        const isComplete = 
+            profile.logoUrl && 
+            profile.gymName && 
+            profile.phoneNumber && 
+            profile.address && 
+            profile.description && 
+            profile.location?.latitude && 
+            profile.location?.longitude && 
+            profile.certificates && 
+            profile.certificates.length > 0;
+
+        if (!isComplete) {
+            toast.error("Profile is incomplete. Please ensure logo, details, location, and at least one certificate are provided.", {
+                duration: 5000,
+                icon: '⚠️'
+            });
+            return;
+        }
+
+        try {
+            setIsReApplying(true);
+            await reApplyGym();
+            toast.success("Re-application submitted successfully! Super-admin has been notified.");
+            await loadProfile(); // Refresh profile to see 'Pending' status
+        } catch (error: any) {
+            console.error(error);
+            const message = error.response?.data?.message || "Failed to re-apply";
+            toast.error(message);
+        } finally {
+            setIsReApplying(false);
+        }
+    };
+
     const handleGetLocation = () => {
         setShowLocationWarning(true);
     };
@@ -281,23 +319,51 @@ const Profile: React.FC = () => {
                 <h1 className="text-2xl font-bold text-white">Gym Profile</h1>
             </div>
 
-            {/* Approval Status Banner -not approved */}
+            {/* Approval Status Banner - Pending / Rejected */}
             {isNotApproved && !loadingProfile && (
-                <div className="mb-6 bg-gradient-to-r from-amber-300/20 to-orange-400/20 border border-amber-500/30 rounded-xl p-4 sm:p-5 backdrop-blur-sm">
+                <div className={`mb-6 border rounded-xl p-4 sm:p-5 backdrop-blur-sm ${profile?.approvalStatus === 'Rejected' 
+                    ? 'bg-red-500/10 border-red-500/30' 
+                    : 'bg-gradient-to-r from-amber-300/20 to-orange-400/20 border-amber-500/30'}`}>
                     <div className="flex items-start gap-3 sm:gap-4">
-                        <div className="p-2 sm:p-3 bg-amber-500/20 rounded-xl flex-shrink-0">
-                            <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" />
+                        <div className={`p-2 sm:p-3 rounded-xl flex-shrink-0 ${profile?.approvalStatus === 'Rejected' ? 'bg-red-500/20' : 'bg-amber-500/20'}`}>
+                            {profile?.approvalStatus === 'Rejected' ? (
+                                <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
+                            ) : (
+                                <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" />
+                            )}
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-base sm:text-lg font-semibold text-amber-400 mb-1">Approval {profile?.approvalStatus}</h3>
-                            <p className="text-sm sm:text-base text-amber-200/90">
-                                Your gym profile is currently under review. Once approved, you'll automatically receive a <span className="font-bold text-amber-300">30-day free trial</span> to explore all premium features!
-                            </p>
+                            <h3 className={`text-base sm:text-lg font-semibold mb-1 ${profile?.approvalStatus === 'Rejected' ? 'text-red-500' : 'text-amber-400'}`}>
+                                Approval {profile?.approvalStatus}
+                            </h3>
+                            
+                            {profile?.approvalStatus === 'Rejected' ? (
+                                <div className="space-y-3">
+                                    <p className="text-sm sm:text-base text-red-200/90 italic">
+                                        Reason: "{profile.rejectionReason || "No reason provided."}"
+                                    </p>
+                                    <p className="text-sm sm:text-base text-zinc-300">
+                                        Please update your profile details as per the feedback and re-apply for verification.
+                                    </p>
+                                    <button 
+                                        onClick={handleReApply}
+                                        disabled={isReApplying}
+                                        className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg text-sm transition-all shadow-lg shadow-red-500/20 disabled:opacity-50"
+                                    >
+                                        {isReApplying ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "Re-apply Now"}
+                                    </button>
+                                </div>
+                            ) : (
+                                <p className="text-sm sm:text-base text-amber-200/90">
+                                    Your gym profile is currently under review. Once approved, you'll automatically receive a <span className="font-bold text-amber-300">30-day free trial</span> to explore all premium features!
+                                </p>
+                            )}
+
                             <div className="mt-3 flex flex-wrap gap-2">
-                                <span className="text-xs bg-amber-500/20 text-amber-300 px-2 py-1 rounded-full border border-amber-500/30">
+                                <span className={`text-xs px-2 py-1 rounded-full border ${profile?.approvalStatus === 'Rejected' ? 'bg-zinc-800 text-zinc-500 border-zinc-700' : 'bg-amber-500/20 text-amber-300 border-amber-500/30'}`}>
                                     ✓ Complete your profile
                                 </span>
-                                <span className="text-xs bg-amber-500/20 text-amber-300 px-2 py-1 rounded-full border border-amber-500/30">
+                                <span className={`text-xs px-2 py-1 rounded-full border ${profile?.approvalStatus === 'Rejected' ? 'bg-zinc-800 text-zinc-500 border-zinc-700' : 'bg-amber-500/20 text-amber-300 border-amber-500/30'}`}>
                                     ✓ Get approved
                                 </span>
                                 <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-full border border-emerald-500/30">

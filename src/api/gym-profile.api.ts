@@ -30,6 +30,7 @@ export interface GymProfile {
     planName?: string;
     amount?: number;
     certificates?: IGymCertificate[];
+    rejectionReason?: string;
 }
 
 
@@ -61,5 +62,10 @@ export const uploadGymCertificate = async (file: File, name: string) => {
 export const deleteGymCertificate = async (key: string) => {
     const response = await axiosInstance.delete(GYM.DELETE_GYM_CERTIFICATE, { data: { key } });
     return response.data.data;
+}
+
+export const reApplyGym = async () => {
+    const response = await axiosInstance.post(GYM.RE_APPLY);
+    return response.data;
 }
 

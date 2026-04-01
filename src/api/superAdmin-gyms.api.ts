@@ -23,6 +23,7 @@ export interface Gym {
     createdAt: string;
     expiryDate?: string;
     certificates?: IGymCertificate[];
+    rejectionReason?: string;
     latestSubscription?: {
         planName: string;
         amount: number;
@@ -78,5 +79,10 @@ export const updateGymStatus = async (gymId: string, gymData: Partial<Gym>): Pro
 
 export const approveGym = async (gymId: string): Promise<Gym> => {
     const response = await axiosInstance.post(SUPER_ADMIN.APPROVE_GYM(gymId));
+    return response.data.data;
+};
+
+export const rejectGym = async (gymId: string, rejectionReason: string): Promise<Gym> => {
+    const response = await axiosInstance.post(SUPER_ADMIN.REJECT_GYM(gymId), { rejectionReason });
     return response.data.data;
 };

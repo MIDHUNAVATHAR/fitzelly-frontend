@@ -94,7 +94,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onSwitchToSignIn 
             setError(response.message);
         }
     } catch (err) {
-        // SECURITY TRICK: Instead of showing "User not found", 
+        // SECURITY TRICK: Instead of showing "User not found",  
         // just move to the OTP step anyway.
         if (isAxiosError(err)) {
             setStep("OTP");

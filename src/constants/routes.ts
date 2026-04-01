@@ -6,6 +6,7 @@ export const GYM = {
     UPLOAD_GYM_LOGO: "/api/gym/profile/logo",
     UPLOAD_GYM_CERTIFICATE: "/api/gym/profile/certificate",
     DELETE_GYM_CERTIFICATE: "/api/gym/profile/certificate/delete",
+    RE_APPLY: "/api/gym/re-apply",
     INITIATE_GYM_SIGNUP: "/api/gym/auth/signup/initiate",
     COMPLETE_GYM_SIGNUP: "/api/gym/auth/signup/complete",
 
@@ -69,6 +70,7 @@ export const SUPER_ADMIN = {
     SUPER_ADMIN_GYMS: "/api/super-admin/gyms",
     GYM_BY_ID: (gymId: string) => `/api/super-admin/gyms/${gymId}`,
     APPROVE_GYM: (gymId: string) => `/api/super-admin/gyms/${gymId}/approve`,
+    REJECT_GYM: (gymId: string) => `/api/super-admin/gyms/${gymId}/reject`,
     GET_EXERCISES: "/api/super-admin/workout-library",
     ADD_EXERCISE: "/api/super-admin/workout-library",
     UPDATE_EXERCISE: (id: string) => `/api/super-admin/workout-library/${id}`,
