@@ -1,16 +1,7 @@
+import { LayoutDashboard, LogOut, Activity, User, Building, Wallet, Shield } from 'lucide-react';
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import {
-    LayoutDashboard,
-    User,
-    Building2,
-    LogOut,
-    Shield,
-    Dumbbell
-} from 'lucide-react';
 import { useLogout } from '../../hooks/useLogout';
-
-
+import { Link, useLocation } from 'react-router-dom';
 
 interface SidebarProps {
     isMobileOpen: boolean;
@@ -18,16 +9,18 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
-    const { pathname } = useLocation();
-    const { handleLogout } = useLogout();
+    const location = useLocation();
 
     const menuItems = [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/super-admin/dashboard' },
-        { id: 'profile', label: 'Profile', icon: User, path: '/super-admin/profile' },
-        { id: 'gyms', label: 'Gyms', icon: Building2, path: '/super-admin/gyms' },
-        { id: 'exercise_library', label: 'Exercise Library', icon: Dumbbell, path: '/super-admin/exercise-library' },
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/trainer/dashboard' },
+        { id: 'profile', label: 'Profile', icon: User, path: '/trainer/profile' },
+        { id: 'earnings', label: 'My Earnings', icon: Wallet, path: '/trainer/earnings' },
+        { id: 'gym_details', label: 'Gym Details', icon: Building, path: '/trainer/gym-details' },
+        { id: 'clients', label: 'Clients', icon: User, path: '/trainer/clients' },
+        { id: 'security', label: 'Security', icon: Shield, path: '/trainer/security' },
     ];
 
+    const { handleLogout } = useLogout();
 
     return (
         <>
@@ -51,25 +44,22 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
                     {/* Logo */}
                     <div className="p-6 border-b border-zinc-800 flex items-center gap-3">
                         <div className="w-8 h-8 rounded bg-emerald-400 flex items-center justify-center">
-                            <Shield className="w-5 h-5 text-black" />
+                            <Activity className="w-5 h-5 text-black" />
                         </div>
-                        <span className="text-xl font-bold text-white tracking-wider">FITZ<span className="text-emerald-400">ELLY</span> <span className="text-[10px] bg-zinc-800 px-1 rounded text-zinc-400 ml-1">ADMIN</span></span>
+                        <span className="text-xl font-bold text-white tracking-wider">FITZ<span className="text-emerald-400">ELLY</span></span>
                     </div>
 
                     {/* Menu */}
                     <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
                         {menuItems.map((item) => {
                             const Icon = item.icon;
-                            
-                            const isActive = pathname.startsWith(item.path);
+                            const isActive = location.pathname.startsWith(item.path);
 
                             return (
                                 <Link
                                     key={item.id}
                                     to={item.path}
-                                    onClick={() => {
-                                        setIsMobileOpen(false); // Close mobile sidebar on selection
-                                    }}
+                                    onClick={() => setIsMobileOpen(false)}
                                     className={`
                     w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200 group
                     ${isActive
@@ -90,12 +80,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
                         })}
                     </nav>
 
-                    {/* User / Logout */}
+                    {/* Logout */}
                     <div className="p-4 border-t border-zinc-800 mt-auto">
-                        <button
-                            onClick={handleLogout}
-                            className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-400/10 transition-colors"
-                        >
+                        <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-400/10 transition-colors">
                             <LogOut className="w-5 h-5" />
                             <span className="font-medium">Logout</span>
                         </button>

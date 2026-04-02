@@ -74,7 +74,7 @@ export const setupInterceptors = (getAccessToken: () => string | null, setAccess
                 const newToken = res.data.data.accessToken;
 
                 setAccessToken(newToken);
-                processQueue(null, newToken)
+                // processQueue(null, newToken)
 
                 originalRequest.headers.Authorization = `Bearer ${newToken}`;
                 return axiosInstance(originalRequest);
@@ -82,6 +82,10 @@ export const setupInterceptors = (getAccessToken: () => string | null, setAccess
                 const errObj = err instanceof Error ? err : new Error("refresh token failed");
                 processQueue(errObj, null);
                 setAccessToken(null);
+                console.log("xxxxx")
+                window.location.href = "/";
+
+
                 return Promise.reject(err);
             } finally {
                 isRefreshing = false;

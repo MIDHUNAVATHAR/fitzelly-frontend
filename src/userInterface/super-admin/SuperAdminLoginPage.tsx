@@ -11,6 +11,9 @@ import { isAxiosError } from 'axios';
 import { ROLES } from '../../constants/roles';
 import PasswordInput from '../landing/components/PasswordInput';
 
+import { UAParser } from 'ua-parser-js';
+import axios from 'axios';
+
 type AuthView = 'LOGIN' | 'FORGOT_EMAIL' | 'VERIFY_OTP' | 'RESET_PASSWORD';
 
 const SuperAdminLoginPage: React.FC = () => {
@@ -25,6 +28,27 @@ const SuperAdminLoginPage: React.FC = () => {
 
     const { login: updateAuthContext } = useAuth();
 
+    const getDeviceInfo = async () => {
+        const parser = new UAParser();
+        const result = parser.getResult();
+        
+        // Try to get IP
+        let ip = "Unknown";
+        try {
+            const ipRes = await axios.get('https://api.ipify.org?format=json');
+            ip = ipRes.data.ip;
+        } catch (err) {
+            console.error("Failed to get IP:", err);
+        }
+
+        return {
+            browser: result.browser.name ? `${result.browser.name} ${result.browser.version || ''}`.trim() : "Unknown Browser",
+            os: result.os.name ? `${result.os.name} ${result.os.version || ''}`.trim() : "Unknown OS",
+            device: result.device.model || result.device.type || "Desktop",
+            ip
+        };
+    };
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!email || !password) return toast.error('Please fill in all fields');
@@ -32,7 +56,13 @@ const SuperAdminLoginPage: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const response = await login({ email: email, password: password, role: ROLES.SUPER_ADMIN })
+            const deviceInfo = await getDeviceInfo();
+            const response = await login({ 
+                email: email, 
+                password: password, 
+                role: ROLES.SUPER_ADMIN,
+                ...deviceInfo
+            })
             if (response.status == "success") {
 
                 const { accessToken, role, email, id } = response.data;

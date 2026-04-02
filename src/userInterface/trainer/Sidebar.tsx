@@ -1,4 +1,5 @@
-import { LayoutDashboard, LogOut, Activity, User, Building, Wallet } from 'lucide-react';
+import { LayoutDashboard, LogOut, Activity, User, Building, Wallet, Shield } from 'lucide-react';
+import React from 'react';
 import { useLogout } from '../../hooks/useLogout';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -16,6 +17,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
         { id: 'earnings', label: 'My Earnings', icon: Wallet, path: '/trainer/earnings' },
         { id: 'gym_details', label: 'Gym Details', icon: Building, path: '/trainer/gym-details' },
         { id: 'clients', label: 'Clients', icon: User, path: '/trainer/clients' },
+        { id: 'security', label: 'Security', icon: Shield, path: '/trainer/security' },
     ];
 
     const { handleLogout } = useLogout();

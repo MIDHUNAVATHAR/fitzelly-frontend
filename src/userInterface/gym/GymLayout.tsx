@@ -92,24 +92,15 @@ const GymLayout: React.FC = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const [isConnected, setIsConnected] = React.useState(socket.connected);
-
     useEffect(() => {
         if (!user) return;
 
         const onConnect = () => {
-            console.log("Socket connected! Joining gym room:", `gym_${user.id}`);
+            console.log("Socket connected, joining room:", `gym_${user.id}`);
             socket.emit("join", `gym_${user.id}`);
-            setIsConnected(true);
-        };
-
-        const onDisconnect = () => {
-            console.log("Socket disconnected");
-            setIsConnected(false);
         };
 
         const onNotification = (data: NotificationItem) => {
-            console.log("New live notification received on Gym Portal:", data);
             setUnreadNotifications(prev => [data, ...prev]);
             toast.custom(
                 (t) => (
@@ -139,20 +130,17 @@ const GymLayout: React.FC = () => {
         };
 
         socket.on("connect", onConnect);
-        socket.on("disconnect", onDisconnect);
         socket.on("NEW_NOTIFICATION", onNotification);
 
         if (socket.connected) {
             onConnect();
         } else {
-            console.log("Initializing socket connection for gym user:", user.id);
             socket.auth = { id: user.id, role: user.role };
             socket.connect();
         }
 
         return () => {
             socket.off("connect", onConnect);
-            socket.off("disconnect", onDisconnect);
             socket.off("NEW_NOTIFICATION", onNotification);
         };
     }, [user]);

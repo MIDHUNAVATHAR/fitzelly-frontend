@@ -40,6 +40,7 @@ import EnquiriesList from "./userInterface/gym/enquiries/EnquiriesList";
 import ExpensesList from "./userInterface/gym/expenses/ExpensesList";
 import TrainerPayoutsPage from "./userInterface/gym/trainer-payouts/TrainerPayoutsPage";
 import GymAnalyticsPage from "./userInterface/gym/analytics/AnalyticsPage";
+import SecurityPage from "./userInterface/gym/security/SecurityPage";
 
 import SuperDashboardHome from "./userInterface/super-admin/dashboard/DashboardHome";
 import SuperProfile from "./userInterface/super-admin/profile/SuperAdmin-Profile";
@@ -122,6 +123,7 @@ function App() {
             <Route path="enquiries" element={<EnquiriesList />} />
             <Route path="payouts" element={<TrainerPayoutsPage />} />
             <Route path="expenses" element={<ExpensesList />} />
+            <Route path="security" element={<SecurityPage />} />
 
 
           </Route >
@@ -136,6 +138,7 @@ function App() {
             <Route path="gym-details" element={<GymDetailsPage />} />
             <Route path="workout-plan" element={<ClientWorkoutPlanPage />} />
             <Route path="equipment-booking" element={<EquipmentBookingPage />} />
+            <Route path="security" element={<SecurityPage />} />
 
           </Route>
         </Route>
@@ -151,6 +154,7 @@ function App() {
             <Route path="clients/:id" element={<TrainerClientProfilePage />} />
             <Route path="clients/:id/workout-plan" element={<TrainerWorkoutPlanPage />} />
             <Route path="earnings" element={<MyEarningsPage />} />
+            <Route path="security" element={<SecurityPage />} />
 
           </Route>
         </Route>
@@ -167,6 +171,7 @@ function App() {
             <Route path="gyms" element={<GymList />}></Route>
             <Route path="gyms/:id" element={<GymView />} />
             <Route path="exercise-library" element={<ExerciseLibraryPage />} />
+            <Route path="security" element={<SecurityPage />} />
 
           </Route>
         </Route>

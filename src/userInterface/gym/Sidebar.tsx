@@ -14,7 +14,8 @@ import {
     Receipt,
     Wallet,
     HandCoins,
-    LineChart
+    LineChart,
+    Shield
 } from 'lucide-react';
 import { useLogout } from '../../hooks/useLogout';
 import { Link, useLocation } from 'react-router-dom';
@@ -41,6 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
         { id: 'enquiries', label: 'Enquiries', icon: MessageSquare, path: '/gym/enquiries' },
         { id: 'payouts', label: 'Trainer Payouts', icon: Wallet, path: '/gym/payouts' },
         { id: 'expenses', label: 'Expenses', icon: Receipt, path: '/gym/expenses' },
+        { id: 'security', label: 'Security', icon: Shield, path: '/gym/security' },
         { id: 'settings', label: 'Settings', icon: Settings, path: '/gym/settings' },
     ];
 

@@ -16,6 +16,8 @@ interface SignInModalProps {
     onForgotPassword?: () => void;
 }
 
+import { UAParser } from 'ua-parser-js';
+
 export default function SignInModal({ isOpen, onClose, onSwitchToSignUp, onForgotPassword }: SignInModalProps) {
     const [selectedRole, setSelectedRole] = useState("client");
     const [email, setEmail] = useState('');
@@ -23,6 +25,27 @@ export default function SignInModal({ isOpen, onClose, onSwitchToSignUp, onForgo
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+
+    const getDeviceInfo = async () => {
+        const parser = new UAParser();
+        const result = parser.getResult();
+        
+        // Try to get IP
+        let ip = "Unknown";
+        try {
+            const ipRes = await axios.get('https://api.ipify.org?format=json');
+            ip = ipRes.data.ip;
+        } catch (err) {
+            console.error("Failed to get IP:", err);
+        }
+
+        return {
+            browser: result.browser.name ? `${result.browser.name} ${result.browser.version || ''}`.trim() : "Unknown Browser",
+            os: result.os.name ? `${result.os.name} ${result.os.version || ''}`.trim() : "Unknown OS",
+            device: result.device.model || result.device.type || "Desktop",
+            ip
+        };
+    };
 
     const resetError = () => {
         setError("")
@@ -48,7 +71,13 @@ export default function SignInModal({ isOpen, onClose, onSwitchToSignUp, onForgo
         setIsLoading(true);
 
         try {
-            const response = await login({ email, password, role: selectedRole });
+            const deviceInfo = await getDeviceInfo();
+            const response = await login({ 
+                email, 
+                password, 
+                role: selectedRole,
+                ...deviceInfo
+            });
             if (response.status == "success") {
 
                 const { accessToken, role, email, id } = response.data;

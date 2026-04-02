@@ -3,7 +3,11 @@ import { axiosInstance } from "./axios";
 interface loginPayload {
     email: string,
     password: string,
-    role: string
+    role: string,
+    device?: string,
+    browser?: string,
+    os?: string,
+    ip?: string
 }
 
 export const login = async (payload: loginPayload) => {
