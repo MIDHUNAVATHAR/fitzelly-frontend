@@ -114,6 +114,7 @@ const ViewGym: React.FC = () => {
             case 'Approved': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
             case 'Trial':
             case 'Pending': return 'text-amber-400 bg-amber-400/10 border-amber-400/20';
+            case 'Reapplied': return 'text-purple-400 bg-purple-400/10 border-purple-400/20';
             case 'Rejected':
             case 'Expired': return 'text-red-400 bg-red-400/10 border-red-400/20';
             default: return 'text-zinc-400 bg-zinc-800 border-zinc-700';
@@ -164,7 +165,7 @@ const ViewGym: React.FC = () => {
                     <span className="font-medium">Back to Gyms</span>
                 </button>
                 <div className="flex gap-3">
-                    {gym.approvalStatus === 'Pending' && (
+                    {(gym.approvalStatus === 'Pending' || gym.approvalStatus === 'Reapplied') && (
                         <>
                             <button
                                 onClick={() => setIsRejectModalOpen(true)}

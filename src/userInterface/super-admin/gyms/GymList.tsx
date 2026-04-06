@@ -17,14 +17,15 @@ const GymsList: React.FC = () => {
     const [gyms, setGyms] = useState<GymWithId[]>([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
+    const [status, setStatus] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(10);
     const [totalItems, setTotalItems] = useState(0);
 
-    const loadGyms = useCallback(async (page: number, currentLimit: number, searchTerm: string) => {
+    const loadGyms = useCallback(async (page: number, currentLimit: number, searchTerm: string, statusTerm: string) => {
         try {
             setLoading(true);
-            const data = await fetchGyms(page, searchTerm, currentLimit);
+            const data = await fetchGyms(page, searchTerm, currentLimit, statusTerm);
             // map _id to id for reusableTable
             const mappedGyms = data.gyms.map(g => ({ ...g, id: g._id }));
             setGyms(mappedGyms);
@@ -38,12 +39,12 @@ const GymsList: React.FC = () => {
 
     useEffect(() => {
         setCurrentPage(1);
-        loadGyms(1, limit, search);
-    }, [search, limit, loadGyms]);
+        loadGyms(1, limit, search, status);
+    }, [search, status, limit, loadGyms]);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
-        loadGyms(page, limit, search);
+        loadGyms(page, limit, search, status);
     };
 
     const handleLimitChange = (newLimit: number) => {
@@ -56,6 +57,7 @@ const GymsList: React.FC = () => {
             case 'Approved': return 'text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full text-xs font-semibold';
             case 'Pending': return 'text-amber-500 bg-amber-500/10 px-2 py-1 rounded-full text-xs font-semibold';
             case 'Rejected': return 'text-red-500 bg-red-500/10 px-2 py-1 rounded-full text-xs font-semibold';
+            case 'Reapplied': return 'text-purple-500 bg-purple-500/10 px-2 py-1 rounded-full text-xs font-semibold';
             case 'Active': return 'text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full text-xs font-semibold';
             case 'Trial': return 'text-blue-500 bg-blue-500/10 px-2 py-1 rounded-full text-xs font-semibold';
             case 'Expired': return 'text-red-500 bg-red-500/10 px-2 py-1 rounded-full text-xs font-semibold';
@@ -121,11 +123,28 @@ const GymsList: React.FC = () => {
                 <h1 className="text-2xl font-bold text-white">Gyms</h1>
             </div>
 
-            <SearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder="Search gyms..."
-            />
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
+                <div className="flex-1 w-full">
+                    <SearchInput
+                        value={search}
+                        onChange={setSearch}
+                        placeholder="Search gyms..."
+                    />
+                </div>
+                <div className="w-full sm:w-48">
+                    <select
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                        className="w-full bg-zinc-900 border border-zinc-800 text-zinc-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition"
+                    >
+                        <option value="all">All Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                        <option value="Reapplied">Reapplied</option>
+                    </select>
+                </div>
+            </div>
 
             <ReusableTable
                 data={gyms}

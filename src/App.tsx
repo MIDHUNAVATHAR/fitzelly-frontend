@@ -46,6 +46,7 @@ import SuperDashboardHome from "./userInterface/super-admin/dashboard/DashboardH
 import SuperProfile from "./userInterface/super-admin/profile/SuperAdmin-Profile";
 import GymList from "./userInterface/super-admin/gyms/GymList";
 import GymView from "./userInterface/super-admin/gyms/ViewGym";
+import PlansManagement from "./userInterface/super-admin/plans/PlansManagement";
 
 
 /**
@@ -170,6 +171,7 @@ function App() {
             <Route path="profile" element={<SuperProfile />}></Route>
             <Route path="gyms" element={<GymList />}></Route>
             <Route path="gyms/:id" element={<GymView />} />
+            <Route path="plans" element={<PlansManagement />} />
             <Route path="exercise-library" element={<ExerciseLibraryPage />} />
             <Route path="security" element={<SecurityPage />} />
 

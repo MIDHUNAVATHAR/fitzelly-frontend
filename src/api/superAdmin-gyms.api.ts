@@ -17,7 +17,7 @@ export interface Gym {
     email: string;
     phone: string;
     address: string;
-    approvalStatus: 'Approved' | 'Pending' | 'Rejected';
+    approvalStatus: 'Approved' | 'Pending' | 'Rejected' | 'Reapplied';
     subscriptionStatus: 'Active' | 'Trial' | 'Expired' | 'Pending';
     location: { latitude: number; longitude: number };
     createdAt: string;
@@ -45,14 +45,16 @@ export interface GymsResponse {
 export const fetchGyms = async (
     page: number = 1,
     search: string = '',
-    limit: number = 10
+    limit: number = 10,
+    status: string = 'all'
 ): Promise<GymsResponse> => {
 
     const response = await axiosInstance.get(SUPER_ADMIN.SUPER_ADMIN_GYMS, {
         params: {
             page,
             limit,
-            search: search || undefined
+            search: search || undefined,
+            status: status !== 'all' ? status : undefined
         }
     });
 
