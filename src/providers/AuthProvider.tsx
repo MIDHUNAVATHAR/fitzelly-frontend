@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [accessToken, setAccessToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isSubscriptionExpired, setIsSubscriptionExpired] = useState(false);
 
 
     //called after login
@@ -17,6 +18,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setAccessToken(token);
         setUser(userData);
         setIsLoading(false);
+        setIsSubscriptionExpired(false);
     };
 
 
@@ -28,6 +30,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } finally {
             setAccessToken(null);
             setUser(null);
+            setIsSubscriptionExpired(false);
         }
     };
 
@@ -43,6 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 if (data && data.accessToken) {
                     setAccessToken(data.accessToken);
                     setUser({ id: data.user.id, email: data.user.email, role: data.user.role });
+                    setIsSubscriptionExpired(false);
                 }
 
             } catch {
@@ -57,7 +61,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
     return (
-        <AuthContext.Provider value={{ user, accessToken, isLoading, login, logout, setAccessToken }}>
+        <AuthContext.Provider value={{ user, accessToken, isLoading, isSubscriptionExpired, login, logout, setAccessToken, setIsSubscriptionExpired }}>
             {children}
         </AuthContext.Provider>
     );

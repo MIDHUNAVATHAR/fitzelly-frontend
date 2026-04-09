@@ -8,6 +8,12 @@ import SuperAdminLoginPage from "./userInterface/super-admin/SuperAdminLoginPage
 import CreatePassword from "./userInterface/auth/CreatePassword";
 import { ROLES } from "./constants/roles";
 import { lazyComponent } from "./components/wrapper/lazyLoad";
+import SubscriptionExpiredModal from "./components/SubscriptionExpiredModal";
+import { ChatProvider } from "./context/ChatProvider";
+import CallOverlay from "./components/ui/CallOverlay";
+
+const ClientChatPage = lazyComponent(React.lazy(() => import("./userInterface/client/chat/ChatPage")));
+const GymChatPage = lazyComponent(React.lazy(() => import("./userInterface/gym/chat/ChatPage")));
 
 
 /**
@@ -41,6 +47,7 @@ import ExpensesList from "./userInterface/gym/expenses/ExpensesList";
 import TrainerPayoutsPage from "./userInterface/gym/trainer-payouts/TrainerPayoutsPage";
 import GymAnalyticsPage from "./userInterface/gym/analytics/AnalyticsPage";
 import SecurityPage from "./userInterface/gym/security/SecurityPage";
+import SubscriptionPage from "./userInterface/gym/subscription/SubscriptionPage";
 
 import SuperDashboardHome from "./userInterface/super-admin/dashboard/DashboardHome";
 import SuperProfile from "./userInterface/super-admin/profile/SuperAdmin-Profile";
@@ -58,6 +65,8 @@ import ClientProfilePage from "./userInterface/client/profile/ClientProfile";
 import GymDetailsPage from "./userInterface/client/gym-details/GymDetails";
 import ClientWorkoutPlanPage from "./userInterface/client/workout-plan/WorkoutPlan";
 import EquipmentBookingPage from "./userInterface/client/equipment-booking/EquipmentBookingPage";
+import HealthTrackingPage from "./userInterface/client/health-tracking/HealthTrackingPage";
+
 
 /**
  * trainer components 
@@ -76,7 +85,7 @@ import MyEarningsPage from "./userInterface/trainer/earnings/MyEarningsPage";
 function App() {
 
   return (
-    <>
+    <ChatProvider>
       <Toaster
         position="top-right"
         reverseOrder={false}
@@ -88,6 +97,8 @@ function App() {
           },
         }}
       />
+      <SubscriptionExpiredModal />
+      <CallOverlay />
 
       <Routes>
         { /* Public Routes */}
@@ -124,7 +135,9 @@ function App() {
             <Route path="enquiries" element={<EnquiriesList />} />
             <Route path="payouts" element={<TrainerPayoutsPage />} />
             <Route path="expenses" element={<ExpensesList />} />
+            <Route path="messages" element={<GymChatPage />} />
             <Route path="security" element={<SecurityPage />} />
+            <Route path="settings/subscription" element={<SubscriptionPage />} />
 
 
           </Route >
@@ -139,7 +152,10 @@ function App() {
             <Route path="gym-details" element={<GymDetailsPage />} />
             <Route path="workout-plan" element={<ClientWorkoutPlanPage />} />
             <Route path="equipment-booking" element={<EquipmentBookingPage />} />
+            <Route path="messages" element={<ClientChatPage />} />
+            <Route path="health-tracking" element={<HealthTrackingPage />} />
             <Route path="security" element={<SecurityPage />} />
+
 
           </Route>
         </Route>
@@ -181,7 +197,7 @@ function App() {
         {/* 404 route */}
         <Route path="*" element={<NotFoundPage />}></Route>
       </Routes>
-    </>
+    </ChatProvider>
 
   )
 }

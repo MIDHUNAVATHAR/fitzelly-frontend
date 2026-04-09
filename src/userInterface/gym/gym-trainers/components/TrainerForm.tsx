@@ -8,6 +8,7 @@ import ImageCropperModal from "../../../../components/ui/ImageCropperModal";
 import CertificatePreviewModal from "../../../../components/ui/CertificatePreviewModal";
 import DeleteConfirmModal from "../../plans/DeleteConfirmModal";
 import { useImageCropper } from "../../../../hooks/useImageCropper";
+import { toast } from 'react-hot-toast';
 
 interface TrainerFormProps {
     initialData?: Partial<Trainer>;
@@ -114,7 +115,7 @@ const TrainerForm: React.FC<TrainerFormProps> = ({ initialData, onSubmit, isLoad
 
         // Append all text fields
         Object.entries(data).forEach(([key, value]) => {
-            if (value !== undefined && value !== null) {
+            if (value !== undefined && value !== null && !Number.isNaN(value)) {
                 formData.append(key, value.toString());
             }
         });
@@ -137,6 +138,13 @@ const TrainerForm: React.FC<TrainerFormProps> = ({ initialData, onSubmit, isLoad
         onSubmit(formData);
     };
 
+    const onError = (errors: any) => {
+        const errorCount = Object.keys(errors).length;
+        if (errorCount > 0) {
+            toast.error("Please fill in all required fields", { id: 'form-validation' });
+        }
+    };
+
     return (
         <div className="w-full p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
             <div className="flex items-center mb-6">
@@ -150,17 +158,18 @@ const TrainerForm: React.FC<TrainerFormProps> = ({ initialData, onSubmit, isLoad
                 <h2 className="text-xl font-bold text-white">{title}</h2>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmitForm, onError)} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                     {/* Full Name */}
                     <div>
                         <label className="block text-sm font-medium text-zinc-400 mb-1">
-                            Full Name
+                            Full Name <span className="text-red-500">*</span>
                         </label>
                         <input
                             {...register('fullName', { required: 'Full name is required' })}
-                            className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            className={`w-full px-4 py-2 bg-zinc-800 border rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none ${errors.fullName ? 'border-red-500' : 'border-zinc-700'
+                                }`}
                         />
                         {errors.fullName && (
                             <span className="text-red-400 text-xs">{errors.fullName.message}</span>
@@ -170,18 +179,22 @@ const TrainerForm: React.FC<TrainerFormProps> = ({ initialData, onSubmit, isLoad
                     {/* Email */}
                     <div>
                         <label className="block text-sm font-medium text-zinc-400 mb-1">
-                            Email
+                            Email <span className="text-red-500">*</span>
                         </label>
                         <input
                             {...register('email', {
                                 required: 'Email is required',
-                                pattern: /^\S+@\S+$/i
+                                pattern: {
+                                    value: /^\S+@\S+$/i,
+                                    message: 'Invalid email format'
+                                }
                             })}
-                            className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            className={`w-full px-4 py-2 bg-zinc-800 border rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none ${errors.email ? 'border-red-500' : 'border-zinc-700'
+                                }`}
                         />
                         {errors.email && (
                             <span className="text-red-400 text-xs">
-                                {errors.email?.message || "Invalid email"}
+                                {errors.email?.message}
                             </span>
                         )}
                     </div>
@@ -189,11 +202,12 @@ const TrainerForm: React.FC<TrainerFormProps> = ({ initialData, onSubmit, isLoad
                     {/* Phone */}
                     <div>
                         <label className="block text-sm font-medium text-zinc-400 mb-1">
-                            Phone Number
+                            Phone Number <span className="text-red-500">*</span>
                         </label>
                         <input
                             {...register('phoneNumber', { required: 'Phone number is required' })}
-                            className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            className={`w-full px-4 py-2 bg-zinc-800 border rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none ${errors.phoneNumber ? 'border-red-500' : 'border-zinc-700'
+                                }`}
                         />
                         {errors.phoneNumber && (
                             <span className="text-red-400 text-xs">{errors.phoneNumber.message}</span>
@@ -207,9 +221,18 @@ const TrainerForm: React.FC<TrainerFormProps> = ({ initialData, onSubmit, isLoad
                         </label>
                         <input
                             type="number"
-                            {...register('salary', { valueAsNumber: true })}
-                            className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                            placeholder="0"
+                            {...register('salary', { 
+                                valueAsNumber: true,
+                                validate: (val) => {
+                                    if (val === undefined || val === null || isNaN(val)) return true;
+                                    if (val <= 0) return 'Salary must be greater than 0';
+                                    return true;
+                                }
+                            })}
+                            className={`w-full px-4 py-2 bg-zinc-800 border rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none ${errors.salary ? 'border-red-500' : 'border-zinc-700'
+                                }`}
+                            placeholder="Optional"
+                            onKeyDown={(e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()}
                         />
                         {errors.salary && (
                             <span className="text-red-400 text-xs">{errors.salary.message}</span>
@@ -219,30 +242,54 @@ const TrainerForm: React.FC<TrainerFormProps> = ({ initialData, onSubmit, isLoad
                     {/* Specialization */}
                     <div>
                         <label className="block text-sm font-medium text-zinc-400 mb-1">
-                            Specialization
+                            Specialization <span className="text-red-500">*</span>
                         </label>
                         <input
-                            {...register('specialization')}
-                            className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            {...register('specialization', { required: 'Specialization is required' })}
+                            className={`w-full px-4 py-2 bg-zinc-800 border rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none ${errors.specialization ? 'border-red-500' : 'border-zinc-700'
+                                }`}
                             placeholder="e.g. Yoga, HIIT, Cardio"
                         />
+                        {errors.specialization && (
+                            <span className="text-red-400 text-xs">{errors.specialization.message}</span>
+                        )}
                     </div>
 
                     {/* DOB */}
                     <div>
                         <label className="block text-sm font-medium text-zinc-400 mb-1">
-                            Date of Birth
+                            Date of Birth <span className="text-red-500">*</span>
                         </label>
                         <Controller
                             control={control}
                             name="dateOfBirth"
+                            rules={{
+                                required: 'Date of birth is required',
+                                validate: (value) => {
+                                    if (!value) return true;
+                                    const dob = new Date(value);
+                                    const today = new Date();
+                                    let age = today.getFullYear() - dob.getFullYear();
+                                    const monthDiff = today.getMonth() - dob.getMonth();
+                                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+                                        age--;
+                                    }
+                                    if (age < 10) return 'Trainer must be at least 10 years old';
+                                    if (age > 100) return 'Trainer must be less than 100 years old';
+                                    return true;
+                                }
+                            }}
                             render={({ field }) => (
                                 <DateInput
                                     {...field}
-                                    className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                    className={`w-full px-4 py-2 bg-zinc-800 border rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none ${errors.dateOfBirth ? 'border-red-500' : 'border-zinc-700'
+                                        }`}
                                 />
                             )}
                         />
+                        {errors.dateOfBirth && (
+                            <span className="text-red-400 text-xs">{errors.dateOfBirth.message}</span>
+                        )}
                     </div>
                 </div>
 

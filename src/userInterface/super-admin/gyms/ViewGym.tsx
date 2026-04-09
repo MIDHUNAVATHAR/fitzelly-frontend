@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { isAxiosError } from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getGymById, approveGym, rejectGym } from "../../../api/superAdmin-gyms.api";
 import RejectGymModal from '../../../components/super-admin/RejectGymModal';
+import EditSubscriptionModal from '../../../components/super-admin/EditSubscriptionModal';
+import { getGymById, approveGym, rejectGym, updateGymSubscription } from "../../../api/superAdmin-gyms.api";
 import type { Gym } from "../../../api/superAdmin-gyms.api";
 import { Loader2, ArrowLeft, Mail, Phone, MapPin, Building2, Calendar, ShieldCheck, CheckCircle2, FileText, Eye, Download, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -15,8 +16,10 @@ const ViewGym: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
     const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+    const [isEditSubscriptionModalOpen, setIsEditSubscriptionModalOpen] = useState(false);
     const [isApproving, setIsApproving] = useState(false);
     const [isRejecting, setIsRejecting] = useState(false);
+    const [isEditingSubscription, setIsEditingSubscription] = useState(false);
 
     const fetchDetails = useCallback(async () => {
         if (!id) return;
@@ -73,6 +76,26 @@ const ViewGym: React.FC = () => {
             toast.error(errorMessage);
         } finally {
             setIsRejecting(false);
+        }
+    };
+
+    const handleEditSubscription = async (status: string, expiryDate: string) => {
+        if (!id) return;
+        try {
+            setIsEditingSubscription(true);
+            await updateGymSubscription(id, status, expiryDate);
+            toast.success("Subscription updated successfully");
+            setIsEditSubscriptionModalOpen(false);
+            await fetchDetails();
+        } catch (error: unknown) {
+            console.error(error);
+            let errorMessage = "Failed to update subscription";
+            if (isAxiosError(error)) {
+                errorMessage = error.response?.data?.message || errorMessage;
+            }
+            toast.error(errorMessage);
+        } finally {
+            setIsEditingSubscription(false);
         }
     };
 
@@ -339,9 +362,20 @@ const ViewGym: React.FC = () => {
 
                     {/* Subscription Details Section */}
                     <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 shadow-xl">
-                        <div className="flex items-center gap-3 mb-8">
-                            <div className="w-1.5 h-6 bg-emerald-500 rounded-full"></div>
-                            <h3 className="text-xl font-bold text-white">Current Subscription</h3>
+                        <div className="flex justify-between items-center mb-8">
+                            <div className="flex items-center gap-3">
+                                <div className="w-1.5 h-6 bg-emerald-500 rounded-full"></div>
+                                <h3 className="text-xl font-bold text-white">Current Subscription</h3>
+                            </div>
+                            {gym.approvalStatus === 'Approved' && (
+                                <button
+                                    onClick={() => setIsEditSubscriptionModalOpen(true)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 font-bold rounded-xl border border-emerald-500/20 transition-all text-sm"
+                                >
+                                    <FileText className="w-4 h-4" />
+                                    Edit Subscription
+                                </button>
+                            )}
                         </div>
 
                         {gym.latestSubscription ? (
@@ -401,6 +435,16 @@ const ViewGym: React.FC = () => {
                 onClose={() => setIsRejectModalOpen(false)}
                 onConfirm={handleReject}
                 isProcessing={isRejecting}
+            />
+
+            {/* Edit Subscription Modal */}
+            <EditSubscriptionModal
+                isOpen={isEditSubscriptionModalOpen}
+                onClose={() => setIsEditSubscriptionModalOpen(false)}
+                onConfirm={handleEditSubscription}
+                currentStatus={gym.subscriptionStatus}
+                currentExpiryDate={gym.expiryDate || ""}
+                isProcessing={isEditingSubscription}
             />
         </div>
     );

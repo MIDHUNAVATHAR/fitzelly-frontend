@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Plus, Eye, Edit, Trash2, Mail, Loader } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, Mail, Loader, MessageCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { getClients, softDeleteClient, sendWelcomeEmail } from "../../../api/gym-clients.api";
 import type { ClientDTO } from "../../../api/gym-clients.api";
@@ -147,6 +147,17 @@ const ClientsList: React.FC = () => {
                         className={`p-1.5 rounded transition ${client.isEmailVerified ? 'bg-zinc-800 text-zinc-600 cursor-not-allowed' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white'}`}
                     >
                         {sendingEmailId === client.id ? <Loader className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                    </button>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            const clientId = client.id || (client as any)._id;
+                            navigate(`/gym/messages`, { state: { selectUserId: clientId, selectUserName: client.fullName } });
+                        }}
+                        title="Chat"
+                        className="p-1.5 bg-zinc-800 rounded hover:bg-zinc-700 text-emerald-400 transition"
+                    >
+                        <MessageCircle className="w-4 h-4" />
                     </button>
                     <button
                         onClick={(e) => {

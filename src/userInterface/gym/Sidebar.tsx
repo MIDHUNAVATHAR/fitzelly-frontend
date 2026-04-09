@@ -4,18 +4,19 @@ import {
     User,
     Users,
     Dumbbell,
-    Settings,
     LogOut,
     List,
     ShieldCheck,
     Box,
     UserCheck,
     MessageSquare,
+    MessageCircle,
     Receipt,
     Wallet,
     HandCoins,
     LineChart,
-    Shield
+    Shield,
+    Zap
 } from 'lucide-react';
 import { useLogout } from '../../hooks/useLogout';
 import { Link, useLocation } from 'react-router-dom';
@@ -33,6 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
         { id: 'analytics', label: 'Analytics', icon: LineChart, path: '/gym/analytics' },
         { id: 'profile', label: 'Profile', icon: User, path: '/gym/profile' },
         { id: 'clients', label: 'Clients', icon: Users, path: '/gym/clients' },
+        { id: 'chat', label: 'Messages', icon: MessageCircle, path: '/gym/messages' },
         { id: 'trainers', label: 'Trainers', icon: Dumbbell, path: '/gym/trainers' },
         { id: 'plans', label: 'Membership Plans', icon: List, path: '/gym/plans' },
         { id: 'memberships', label: 'Memberships', icon: ShieldCheck, path: '/gym/memberships' },
@@ -43,7 +45,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
         { id: 'payouts', label: 'Trainer Payouts', icon: Wallet, path: '/gym/payouts' },
         { id: 'expenses', label: 'Expenses', icon: Receipt, path: '/gym/expenses' },
         { id: 'security', label: 'Security', icon: Shield, path: '/gym/security' },
-        { id: 'settings', label: 'Settings', icon: Settings, path: '/gym/settings' },
+        { id: 'subscription', label: 'Subscription', icon: Zap, path: '/gym/settings/subscription' },
     ];
 
     const { handleLogout } = useLogout();

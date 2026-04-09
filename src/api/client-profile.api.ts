@@ -13,6 +13,8 @@ export interface ClientProfile {
     profileImage?: string;
     profileUrl?: string;
     joinedDate?: string;
+    height?: number;
+    weight?: number;
 }
 
 export interface ClientMembership {

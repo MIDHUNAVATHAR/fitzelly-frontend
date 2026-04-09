@@ -88,3 +88,15 @@ export const rejectGym = async (gymId: string, rejectionReason: string): Promise
     const response = await axiosInstance.post(SUPER_ADMIN.REJECT_GYM(gymId), { rejectionReason });
     return response.data.data;
 };
+
+export const updateGymSubscription = async (
+    gymId: string,
+    subscriptionStatus: string,
+    expiryDate: string
+): Promise<Gym> => {
+    const response = await axiosInstance.patch(SUPER_ADMIN.UPDATE_GYM_SUBSCRIPTION(gymId), {
+        subscriptionStatus,
+        expiryDate
+    });
+    return response.data.data;
+};

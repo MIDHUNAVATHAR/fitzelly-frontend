@@ -5,6 +5,8 @@ import type { ClientDTO } from "../../../../api/gym-clients.api"
 import DateInput from '../../../../components/ui/DateInput';
 
 
+import { toast } from 'react-hot-toast';
+
 interface ClientFormProps {
     initialData?: Partial<ClientDTO>;
     onSubmit: (data: Partial<ClientDTO>) => void;
@@ -16,6 +18,7 @@ interface FormErrors {
     fullName?: string;
     email?: string;
     phoneNumber?: string;
+    dateOfBirth?: string;
 }
 
 const ClientForm: React.FC<ClientFormProps> = ({ initialData, onSubmit, isLoading, title }) => {
@@ -56,6 +59,22 @@ const ClientForm: React.FC<ClientFormProps> = ({ initialData, onSubmit, isLoadin
             newErrors.phoneNumber = 'Phone number is required';
         }
 
+        if (formData.dateOfBirth) {
+            const dob = new Date(formData.dateOfBirth);
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            const monthDiff = today.getMonth() - dob.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+                age--;
+            }
+
+            if (age < 10) {
+                newErrors.dateOfBirth = 'Client must be at least 10 years old';
+            } else if (age > 100) {
+                newErrors.dateOfBirth = 'Client must be less than 100 years old';
+            }
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -65,6 +84,8 @@ const ClientForm: React.FC<ClientFormProps> = ({ initialData, onSubmit, isLoadin
 
         if (validateForm()) {
             onSubmit(formData);
+        } else {
+            toast.error("Please fill in all required fields", { id: 'client-form-validation' });
         }
     };
 
@@ -127,9 +148,11 @@ const ClientForm: React.FC<ClientFormProps> = ({ initialData, onSubmit, isLoadin
                                 name="dateOfBirth"
                                 value={formData.dateOfBirth || ''}
                                 onChange={handleChange}
-                                className="w-full pl-10 px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                className={`w-full pl-10 px-4 py-2 bg-zinc-800 border rounded-lg text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none ${errors.dateOfBirth ? 'border-red-500' : 'border-zinc-700'
+                                    }`}
                             />
                         </div>
+                        {errors.dateOfBirth && <span className="text-red-400 text-xs">{errors.dateOfBirth}</span>}
                     </div>
 
                     <div>

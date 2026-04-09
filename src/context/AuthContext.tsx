@@ -14,9 +14,11 @@ interface AuthContextType {
     user: User | null;
     accessToken: string | null;
     isLoading: boolean;
+    isSubscriptionExpired: boolean;
     login: (token: string, user: User) => void;
     logout: () => void;
     setAccessToken: (token: string | null) => void;
+    setIsSubscriptionExpired: (isExpired: boolean) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);

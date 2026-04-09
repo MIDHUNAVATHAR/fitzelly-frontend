@@ -96,6 +96,19 @@ const TrainerProfilePage: React.FC = () => {
             return;
         }
 
+        const dob = new Date(dateOfBirth);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+
+        if (age < 10 || age > 100) {
+            toast.error("Age must be between 10 and 100 years");
+            return;
+        }
+
         setIsSaving(true);
         try {
             const updatedProfile = await updateTrainerProfile({

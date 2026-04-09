@@ -1,5 +1,4 @@
-import React from 'react';
-import { LayoutDashboard, LogOut, HeartPulse, User, Building, Dumbbell, Clock, Shield } from 'lucide-react';
+import { LayoutDashboard, LogOut, HeartPulse, User, Building, Dumbbell, Clock, Shield, MessageSquare, Scale } from 'lucide-react';
 import { useLogout } from '../../hooks/useLogout';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -13,8 +12,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
 
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/client/dashboard' },
+        { id: 'messages', label: 'Messages', icon: MessageSquare, path: '/client/messages' },
         { id: 'profile', label: 'Profile', icon: User, path: '/client/profile' },
         { id: 'gym_details', label: 'Gym Details', icon: Building, path: '/client/gym-details' },
+        { id: 'health_tracking', label: 'Weight & BMI', icon: Scale, path: '/client/health-tracking' },
         { id: 'workout_plan', label: 'Workout Plan', icon: Dumbbell, path: '/client/workout-plan' },
         { id: 'equipment_booking', label: 'Equipment Booking', icon: Clock, path: '/client/equipment-booking' },
         { id: 'security', label: 'Security', icon: Shield, path: '/client/security' },

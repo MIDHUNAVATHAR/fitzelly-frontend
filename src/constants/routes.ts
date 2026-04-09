@@ -71,10 +71,12 @@ export const SUPER_ADMIN = {
     GYM_BY_ID: (gymId: string) => `/api/super-admin/gyms/${gymId}`,
     APPROVE_GYM: (gymId: string) => `/api/super-admin/gyms/${gymId}/approve`,
     REJECT_GYM: (gymId: string) => `/api/super-admin/gyms/${gymId}/reject`,
+    UPDATE_GYM_SUBSCRIPTION: (gymId: string) => `/api/super-admin/gyms/${gymId}/subscription`,
     GET_EXERCISES: "/api/super-admin/workout-library",
     ADD_EXERCISE: "/api/super-admin/workout-library",
     UPDATE_EXERCISE: (id: string) => `/api/super-admin/workout-library/${id}`,
     DELETE_EXERCISE: (id: string) => `/api/super-admin/workout-library/${id}`,
+    GET_DASHBOARD: "/api/super-admin/dashboard",
 }
 
 
@@ -118,6 +120,8 @@ export const CLIENT = {
     TRACK_WORKOUT_PROGRESS: "/api/client/workout-progress",
     GET_WORKOUT_PROGRESS: (date: string) => `/api/client/workout-progress?date=${date}`,
     GET_WORKOUT_STREAK: "/api/client/workout-streak",
+    WEIGHT_LOG: "/api/client/weight-log",
+    WEIGHT_HISTORY: "/api/client/weight-history",
 }
 
 export const COMMON = {
@@ -127,4 +131,11 @@ export const COMMON = {
         `/api/attendance/report?date=${date}&userType=${userType}`,
     MARK_ATTENDANCE_MANUAL: "/api/attendance/mark-manual",
     GET_YEARLY_ATTENDANCE_COUNT: "/api/attendance/yearly-count"
+}
+export const CHAT = {
+    CONVERSATIONS: "/api/chat/conversations",
+    CONVERSATION_WITH_USER: (otherId: string) => `/api/chat/conversation/${otherId}`,
+    MESSAGES_BY_CONV: (convId: string) => `/api/chat/messages/${convId}`,
+    SEND_MESSAGE: "/api/chat/messages",
+    MARK_AS_READ: (convId: string) => `/api/chat/messages/${convId}/read`,
 }

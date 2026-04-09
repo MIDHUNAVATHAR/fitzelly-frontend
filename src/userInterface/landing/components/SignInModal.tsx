@@ -33,7 +33,7 @@ export default function SignInModal({ isOpen, onClose, onSwitchToSignUp, onForgo
         // Try to get IP
         let ip = "Unknown";
         try {
-            const ipRes = await axios.get('https://api.ipify.org?format=json');
+            const ipRes = await axios.get('https://api.ipify.org?format=json', { timeout: 1500 });
             ip = ipRes.data.ip;
         } catch (err) {
             console.error("Failed to get IP:", err);

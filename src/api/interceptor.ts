@@ -29,7 +29,11 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 }
 
 
-export const setupInterceptors = (getAccessToken: () => string | null, setAccessToken: (token: string | null) => void) => {
+export const setupInterceptors = (
+    getAccessToken: () => string | null, 
+    setAccessToken: (token: string | null) => void,
+    onSubscriptionExpired: (isExpired: boolean) => void
+) => {
 
     if (requestInterceptor !== null) axiosInstance.interceptors.request.eject(requestInterceptor);
     if (responseInterceptor !== null) axiosInstance.interceptors.response.eject(responseInterceptor);
@@ -44,13 +48,23 @@ export const setupInterceptors = (getAccessToken: () => string | null, setAccess
         return config;
     })
 
-    responseInterceptor = axiosInstance.interceptors.response.use(res => res, async error => {
+    responseInterceptor = axiosInstance.interceptors.response.use(res => {
+        // Reset sub expiry if successful call (optional, but good for recovery)
+        // onSubscriptionExpired(false);
+        return res;
+    }, async error => {
         const originalRequest = error.config;
 
         const isAuthRoute = originalRequest.url?.includes("/auth/login") ||
             originalRequest.url?.includes("/auth/refresh-token") ||
             originalRequest.url?.includes("/auth/logout") ||
             originalRequest.url?.includes("/auth/forgot-password/initiate")
+
+        // Handle Subscription Expired
+        if (error.response?.status === 403 && error.response?.data?.message === "GYM_SUBSCRIPTION_EXPIRED") {
+            onSubscriptionExpired(true);
+            return Promise.reject(error);
+        }
 
         if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
 
@@ -94,4 +108,4 @@ export const setupInterceptors = (getAccessToken: () => string | null, setAccess
         return Promise.reject(error);
     })
 
-}
+}
