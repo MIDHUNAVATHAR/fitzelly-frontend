@@ -1,12 +1,22 @@
-import React, { useEffect, useRef } from 'react';
-import { useChat } from '../../context/ChatProvider';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useChat } from '../../context/ChatContext';
 import { useAuth } from '../../context/useAuth';
+import { getConversationWithUser, saveCallHistory } from '../../api/chat.api';
 import { Phone, PhoneOff, Video, VideoOff, Mic, MicOff, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+interface CallData {
+    from: string;
+    to: string;
+    callerName?: string;
+    name?: string;
+    callType: 'video' | 'audio';
+    offer?: RTCSessionDescriptionInit;
+}
+
 const CallOverlay: React.FC = () => {
     const { 
-        isCalling, isIncomingCall, localStream, remoteStream, callData,
+        isCalling, isIncomingCall, isCallAccepted, localStream, remoteStream, callData,
         answerCall, endCall, toggleAudio, toggleVideo, 
         isAudioMuted, isVideoOff 
     } = useChat();
@@ -14,6 +24,91 @@ const CallOverlay: React.FC = () => {
 
     const localVideoRef = useRef<HTMLVideoElement>(null);
     const remoteVideoRef = useRef<HTMLVideoElement>(null);
+    const [callDuration, setCallDuration] = useState(0);
+    const [startTime, setStartTime] = useState<Date | null>(null);
+
+    // Track when call actually starts for duration calculation
+    useEffect(() => {
+        if (isCallAccepted && !startTime) {
+            // Using a timeout to avoid synchronous setState during effect synchronization
+            const timer = setTimeout(() => {
+                setStartTime(new Date());
+            }, 0);
+            return () => clearTimeout(timer);
+        }
+    }, [isCallAccepted, startTime]);
+
+    useEffect(() => {
+        let interval: ReturnType<typeof setInterval>;
+        if (isCalling && isCallAccepted) {
+            interval = setInterval(() => {
+                setCallDuration(prev => prev + 1);
+            }, 1000);
+        } else {
+            // Use deferred update to avoid cascading render issues
+            const timer = setTimeout(() => {
+                setCallDuration(0);
+            }, 0);
+            return () => {
+                clearTimeout(timer);
+                if (interval) clearInterval(interval);
+            };
+        }
+        return () => clearInterval(interval);
+    }, [isCalling, isCallAccepted]);
+
+    const formatDuration = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const persistCallHistory = useCallback(async (status: 'completed' | 'missed' | 'rejected', duration: number, finalCallData: CallData) => {
+        if (!user || user.id !== finalCallData?.from) return; // Only caller saves history log
+        
+        try {
+            const targetId = finalCallData.to;
+            const conv = await getConversationWithUser(targetId);
+            const endTime = new Date();
+            const actualStartTime = startTime || endTime;
+
+            await saveCallHistory({
+                callerId: user.id,
+                receiverId: targetId,
+                conversationId: conv.id,
+                type: finalCallData.callType,
+                status,
+                duration,
+                startTime: actualStartTime,
+                endTime: endTime
+            });
+        } catch (err) {
+            console.error("Failed to persist call history:", err);
+        }
+    }, [user, startTime]);
+
+    const prevCallState = useRef({ isCalling, isIncomingCall, isCallAccepted, callDuration, callData });
+    useEffect(() => {
+        const wasInCall = prevCallState.current.isCalling || prevCallState.current.isIncomingCall;
+        const nowNotInCall = !isCalling && !isIncomingCall;
+
+        if (wasInCall && nowNotInCall && prevCallState.current.callData) {
+            const fData = prevCallState.current.callData;
+            const fAccepted = prevCallState.current.isCallAccepted;
+            const fDuration = prevCallState.current.callDuration;
+            
+            const status = fAccepted ? 'completed' : 'missed';
+            persistCallHistory(status, fDuration, fData);
+            
+            // Defers state update to avoid direct setState within effect warning
+            const timer = setTimeout(() => {
+                setStartTime(null);
+            }, 0);
+            return () => clearTimeout(timer);
+        }
+        
+        prevCallState.current = { isCalling, isIncomingCall, isCallAccepted, callDuration, callData };
+    }, [isCalling, isIncomingCall, isCallAccepted, callDuration, callData, persistCallHistory]);
 
     useEffect(() => {
         if (localVideoRef.current && localStream) {
@@ -87,11 +182,15 @@ const CallOverlay: React.FC = () => {
                                         <User className="w-16 h-16 lg:w-24 lg:h-24 text-zinc-600" />
                                     </div>
                                     <h3 className="text-zinc-200 text-xl lg:text-3xl font-bold">
-                                        {callData?.name || (callData?.callerName && user?.id === callData?.to ? callData.callerName : "Participant")}
+                                        {callData?.name || callData?.callerName || "Participant"}
                                     </h3>
                                     <p className="text-zinc-500 text-sm lg:text-base mt-2 flex items-center gap-2">
-                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                        {callData?.callType === 'audio' ? "Audio Only Call..." : "Connecting video..."}
+                                        <span className={`w-2 h-2 rounded-full ${isCallAccepted ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500 animate-pulse'}`} />
+                                        {isCallAccepted ? (
+                                            callData?.callType === 'audio' ? "Audio Call in progress" : "Connecting video..."
+                                        ) : (
+                                            "Ringing..."
+                                        )}
                                     </p>
                                 </div>
                             )}
@@ -99,19 +198,23 @@ const CallOverlay: React.FC = () => {
                             {/* Local Video (PiP) */}
                             {callData?.callType === 'video' && (
                                 <div className="absolute top-6 right-6 w-32 md:w-48 lg:w-64 aspect-video bg-zinc-900 rounded-2xl overflow-hidden border-2 border-zinc-800 shadow-2xl z-10">
-                                    {isVideoOff ? (
-                                        <div className="w-full h-full flex items-center justify-center bg-zinc-900">
-                                            <VideoOff className="w-8 h-8 text-zinc-700" />
-                                        </div>
-                                    ) : (
+                                    <div className="relative w-full h-full">
+
                                         <video 
                                             ref={localVideoRef} 
                                             autoPlay 
                                             muted 
                                             playsInline 
-                                            className="w-full h-full object-cover mirror"
+                                            className={`w-full h-full object-cover scale-x-[-1] ${isVideoOff ? 'hidden' : 'block'}`}
                                         />
-                                    )}
+
+                                        {isVideoOff && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-zinc-900">
+                                                <VideoOff className="w-8 h-8 text-zinc-700" />
+                                            </div>
+                                        )}
+
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -149,7 +252,10 @@ const CallOverlay: React.FC = () => {
                         {/* Header Info */}
                         <div className="absolute top-6 left-6 flex items-center gap-3 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 z-20">
                             <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                            <span className="text-[10px] lg:text-xs font-semibold text-white tracking-widest uppercase">{callData?.callType} CALL</span>
+                            <span className="text-[10px] lg:text-xs font-semibold text-white tracking-widest uppercase">
+                                {callData?.callType} CALL
+                                {isCallAccepted && ` • ${formatDuration(callDuration)}`}
+                            </span>
                         </div>
                     </div>
                 )}

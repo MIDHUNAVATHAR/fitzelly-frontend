@@ -5,7 +5,7 @@ import type { Expense, ExpenseCategory } from '../../../api/expense.api';
 interface ExpenseModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (data: any) => Promise<void>;
+    onSave: (data: Omit<Expense, 'id' | 'gymId'>) => Promise<void>;
     expense?: Expense | null;
     title: string;
 }

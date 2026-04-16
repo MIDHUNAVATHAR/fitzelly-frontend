@@ -18,9 +18,15 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getClientWorkoutPlan, createOrUpdateWorkoutPlan } from '../../../api/workout-plan.api';
-import type { IDayPlan, IExercise } from '../../../api/workout-plan.api';
 import { axiosInstance } from '../../../api/axios';
 import { TRAINER_ROUTES } from '../../../constants/routes';
+import type { IExercise, IDayPlan } from '../../../api/workout-plan.api';
+
+interface ITemplate {
+    id: string;
+    name: string;
+    days: IDayPlan[];
+}
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -35,8 +41,8 @@ const WorkoutPlanPage: React.FC = () => {
     const [notes, setNotes] = useState("");
 
     // Data from library
-    const [libraryExercises, setLibraryExercises] = useState<any[]>([]);
-    const [templates, setTemplates] = useState<any[]>([]);
+    const [libraryExercises, setLibraryExercises] = useState<IExercise[]>([]);
+    const [templates, setTemplates] = useState<ITemplate[]>([]);
 
     // Modal state for Exercises
     const [showExModal, setShowExModal] = useState(false);
@@ -131,7 +137,7 @@ const WorkoutPlanPage: React.FC = () => {
         setShowLibraryModal(true);
     };
 
-    const handleSelectFromLibrary = (exercise: any) => {
+    const handleSelectFromLibrary = (exercise: IExercise) => {
         if (activeDayIdx === null) return;
         
         const newEx: IExercise = { 
@@ -227,16 +233,16 @@ const WorkoutPlanPage: React.FC = () => {
     };
 
     // Template Logic
-    const handleApplyTemplate = async (template: any) => {
+    const handleApplyTemplate = async (template: ITemplate) => {
         const confirmMsg = "Applying a template will overwrite the current weekly schedule. Continue?";
         if (!confirm(confirmMsg)) return;
 
         const newPlan = DAYS.map(day => {
-            const tempDay = template.days.find((d: any) => d.day === day);
+            const tempDay = template.days.find((d: IDayPlan) => d.day === day);
             if (tempDay) {
                 return {
                     day,
-                    exercises: tempDay.exercises.map((ex: any) => ({
+                    exercises: tempDay.exercises.map((ex: IExercise) => ({
                         id: Math.random().toString(36).substr(2, 9),
                         name: ex.name,
                         instructions: ex.instructions,
@@ -475,7 +481,7 @@ const WorkoutPlanPage: React.FC = () => {
                                             <span className="text-[10px] bg-zinc-900 px-2 py-1 rounded text-zinc-500">Weekly</span>
                                         </div>
                                         <div className="flex mt-2 gap-1 overflow-x-hidden">
-                                            {temp.days.slice(0, 3).map((d: any, i: number) => (
+                                            {temp.days.slice(0, 3).map((d: IDayPlan, i: number) => (
                                                 <span key={i} className="text-[9px] text-zinc-600 uppercase font-black">{d.day.substring(0,2)}</span>
                                             ))}
                                             <span className="text-[9px] text-zinc-600">...</span>
@@ -526,7 +532,10 @@ const WorkoutPlanPage: React.FC = () => {
                                     >
                                         <button 
                                             type="button"
-                                            onClick={(e) => { e.stopPropagation(); ex.videoUrl && setActiveVideoUrl(ex.videoUrl); }}
+                                            onClick={(e) => { 
+                                                e.stopPropagation(); 
+                                                if (ex.videoUrl) setActiveVideoUrl(ex.videoUrl); 
+                                            }}
                                             className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${ex.videoUrl ? 'bg-zinc-900 group-hover:bg-emerald-400/10 text-emerald-400' : 'bg-zinc-900 text-zinc-600 cursor-default'}`}
                                         >
                                             {ex.videoUrl ? <Video className="w-5 h-5" /> : <Dumbbell className="w-5 h-5" />}

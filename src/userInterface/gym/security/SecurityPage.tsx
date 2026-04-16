@@ -19,8 +19,13 @@ const SecurityPage: React.FC = () => {
             if (response.status === 'success') {
                 setSessions(response.data);
             }
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to fetch sessions');
+        } catch (error: unknown) {
+            let message = 'Failed to fetch sessions';
+            if (error && typeof error === 'object' && 'response' in error) {
+                 const axiosError = error as { response?: { data?: { message?: string } } };
+                 message = axiosError.response?.data?.message || message;
+            }
+            toast.error(message);
         } finally {
             setLoading(false);
         }
@@ -40,8 +45,13 @@ const SecurityPage: React.FC = () => {
                 setConfirmModal({ show: false, sessionId: null });
                 fetchSessions();
             }
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to revoke session');
+        } catch (error: unknown) {
+            let message = 'Failed to revoke session';
+            if (error && typeof error === 'object' && 'response' in error) {
+                 const axiosError = error as { response?: { data?: { message?: string } } };
+                 message = axiosError.response?.data?.message || message;
+            }
+            toast.error(message);
         }
     };
 

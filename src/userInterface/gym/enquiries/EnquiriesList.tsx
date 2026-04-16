@@ -54,9 +54,18 @@ const EnquiriesList: React.FC = () => {
         loadEnquiries();
     }, [loadEnquiries]);
 
-    const handleAdd = async (data: any) => {
+    const handleAdd = async (data: Partial<Enquiry>) => {
+        if (!data.fullName || !data.phoneNumber) {
+            toast.error('Full name and phone number are required');
+            return;
+        }
+
         try {
-            await addEnquiry(data);
+            await addEnquiry({
+                fullName: data.fullName,
+                phoneNumber: data.phoneNumber,
+                email: data.email || undefined
+            });
             toast.success('Enquiry added successfully');
             loadEnquiries();
         } catch (error) {
@@ -65,10 +74,15 @@ const EnquiriesList: React.FC = () => {
         }
     };
 
-    const handleEdit = async (data: any) => {
+    const handleEdit = async (data: Partial<Enquiry>) => {
         if (!selectedEnquiry) return;
         try {
-            await updateEnquiry(selectedEnquiry.id, data);
+            await updateEnquiry(selectedEnquiry.id, {
+                fullName: data.fullName,
+                phoneNumber: data.phoneNumber,
+                email: data.email || undefined,
+                status: data.status
+            });
             toast.success('Enquiry updated successfully');
             loadEnquiries();
         } catch (error) {
@@ -84,7 +98,7 @@ const EnquiriesList: React.FC = () => {
             toast.success('Enquiry deleted successfully');
             setIsDeleteModalOpen(false);
             loadEnquiries();
-        } catch (error) {
+        } catch {
             toast.error('Failed to delete enquiry');
         }
     };

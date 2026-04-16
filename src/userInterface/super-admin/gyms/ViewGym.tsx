@@ -5,7 +5,7 @@ import RejectGymModal from '../../../components/super-admin/RejectGymModal';
 import EditSubscriptionModal from '../../../components/super-admin/EditSubscriptionModal';
 import { getGymById, approveGym, rejectGym, updateGymSubscription } from "../../../api/superAdmin-gyms.api";
 import type { Gym } from "../../../api/superAdmin-gyms.api";
-import { Loader2, ArrowLeft, Mail, Phone, MapPin, Building2, Calendar, ShieldCheck, CheckCircle2, FileText, Eye, Download, X } from 'lucide-react';
+import { Loader2, ArrowLeft, Mail, Phone, MapPin, Building2, Calendar, ShieldCheck, CheckCircle2, FileText, Eye, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import ConfirmModal from '../../../components/ui/ConfirmModal';
 
@@ -113,23 +113,6 @@ const ViewGym: React.FC = () => {
         }
     };
 
-    const handleDownload = async (url: string, fileName: string) => {
-        try {
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(blobUrl);
-        } catch (error) {
-            console.error('Download failed:', error);
-            toast.error("Failed to download file");
-        }
-    };
 
     const getStatusColor = (status: string | undefined) => {
         switch (status) {

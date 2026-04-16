@@ -21,7 +21,7 @@ const DashboardHome: React.FC = () => {
             try {
                 const result = await getGymDashboard();
                 setData(result);
-            } catch (error: any) {
+            } catch {
                 toast.error('Failed to load dashboard data.');
             } finally {
                 setIsLoading(false);
@@ -107,7 +107,7 @@ const DashboardHome: React.FC = () => {
                     </div>
                     <div className="p-2">
                         {data.expiries.length > 0 ? (
-                            data.expiries.map((exp: any, idx: number) => (
+                            data.expiries.map((exp, idx) => (
                                 <div key={idx} className="flex items-center justify-between p-3 hover:bg-zinc-800/50 rounded-lg transition-colors group">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-amber-400 font-bold">
@@ -141,7 +141,7 @@ const DashboardHome: React.FC = () => {
                     </div>
                     <div className="p-2">
                         {data.birthdays.length > 0 ? (
-                            data.birthdays.map((b: any, idx: number) => (
+                            data.birthdays.map((b, idx) => (
                                 <div key={idx} className="flex items-center justify-between p-3 hover:bg-zinc-800/50 rounded-lg transition-colors group">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-full bg-pink-500/10 flex items-center justify-center text-pink-400">
@@ -173,7 +173,7 @@ const DashboardHome: React.FC = () => {
                     </div>
                     <div className="p-2">
                         {data.inactiveClients.length > 0 ? (
-                            data.inactiveClients.map((client: any, idx: number) => (
+                            data.inactiveClients.map((client, idx) => (
                                 <div key={idx} className="flex items-center justify-between p-3 hover:bg-zinc-800/50 rounded-lg transition-colors group">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400">

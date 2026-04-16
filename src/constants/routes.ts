@@ -138,4 +138,7 @@ export const CHAT = {
     MESSAGES_BY_CONV: (convId: string) => `/api/chat/messages/${convId}`,
     SEND_MESSAGE: "/api/chat/messages",
     MARK_AS_READ: (convId: string) => `/api/chat/messages/${convId}/read`,
+    CALL_HISTORY: "/api/chat/call-history",
+    SAVE_CALL_HISTORY: "/api/chat/call-history",
+    UPLOAD_ATTACHMENT: "/api/chat/attachment",
 }

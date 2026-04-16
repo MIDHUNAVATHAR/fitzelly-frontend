@@ -18,7 +18,7 @@ export const createStripeCheckoutSession = async (planId: string): Promise<{ ses
     return response.data.data;
 };
 
-export const confirmFitzellySubscription = async (sessionId: string, planId: string): Promise<any> => {
+export const confirmFitzellySubscription = async (sessionId: string, planId: string): Promise<{ success: boolean }> => {
     const response = await axiosInstance.post("/api/gym/subscriptions/confirm", { sessionId, planId });
     return response.data;
 };

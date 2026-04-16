@@ -16,6 +16,7 @@ import type { EquipmentSlot, EquipmentBooking } from '../../../api/equipment-boo
 import { getClientProfile } from '../../../api/client-profile.api';
 import { format, addDays } from 'date-fns';
 import { toast } from 'react-hot-toast';
+import { isAxiosError } from 'axios';
 
 const EquipmentBookingPage: React.FC = () => {
     const [gymId, setGymId] = useState<string | null>(null);
@@ -75,7 +76,7 @@ const EquipmentBookingPage: React.FC = () => {
         try {
             const data = await getEquipmentSlots(equipmentId, tomorrowStr);
             setSlots(data);
-        } catch (error) {
+        } catch {
             toast.error("Failed to load slots");
         } finally {
             setIsLoadingSlots(false);
@@ -112,8 +113,9 @@ const EquipmentBookingPage: React.FC = () => {
                 fetchSlots(selectedEquipment.id)
             ]);
             setMyBookings(updatedBookings);
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Booking failed");
+        } catch (error: unknown) {
+            const errorMsg = isAxiosError(error) ? error.response?.data?.message : "Booking failed";
+            toast.error(errorMsg || "Booking failed");
         } finally {
             setIsBooking(false);
             setPendingSlot(null);
@@ -138,8 +140,9 @@ const EquipmentBookingPage: React.FC = () => {
             if (selectedEquipment) {
                 fetchSlots(selectedEquipment.id);
             }
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Cancellation failed");
+        } catch (error: unknown) {
+            const errorMsg = isAxiosError(error) ? error.response?.data?.message : "Cancellation failed";
+            toast.error(errorMsg || "Cancellation failed");
         } finally {
             setIsCancelling(false);
             setBookingToCancel(null);

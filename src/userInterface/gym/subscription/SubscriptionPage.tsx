@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
     Check, 
@@ -23,23 +23,18 @@ const SubscriptionPage: React.FC = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [paymentSuccess, setPaymentSuccess] = useState(false);
 
-    useEffect(() => {
-        fetchPlans();
-        handlePaymentCallbacks();
-    }, []);
-
-    const fetchPlans = async () => {
+    const fetchPlans = useCallback(async () => {
         try {
             const data = await getAvailableFitzellyPlans();
             setPlans(data);
-        } catch (error) {
+        } catch {
             toast.error("Failed to load plans");
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
-    const handlePaymentCallbacks = async () => {
+    const handlePaymentCallbacks = useCallback(async () => {
         const success = searchParams.get('success');
         const sessionId = searchParams.get('session_id');
         const planId = searchParams.get('plan_id');
@@ -54,21 +49,32 @@ const SubscriptionPage: React.FC = () => {
                     icon: '🎉',
                     duration: 6000
                 });
-            } catch (error) {
+            } catch {
                 toast.error("Failed to confirm subscription. Please contact support.");
             } finally {
                 setIsProcessing(false);
+                // Clean up URL
+                window.history.replaceState({}, '', window.location.pathname);
             }
         }
-    };
+    }, [searchParams, setIsSubscriptionExpired]);
+
+    useEffect(() => {
+        fetchPlans();
+        handlePaymentCallbacks();
+    }, [fetchPlans, handlePaymentCallbacks]);
 
     const handleSubscribe = async (planId: string) => {
         try {
             setIsProcessing(true);
             const { url } = await createStripeCheckoutSession(planId);
             window.location.href = url;
-        } catch (error: any) {
-            const message = error.response?.data?.message || "Failed to initiate checkout";
+        } catch (error: unknown) {
+            let message = "Failed to initiate checkout";
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { data?: { message?: string } } };
+                message = axiosError.response?.data?.message || message;
+            }
             toast.error(message);
         } finally {
             setIsProcessing(false);

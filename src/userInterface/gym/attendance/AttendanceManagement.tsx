@@ -75,7 +75,10 @@ const AttendanceManagement: React.FC = () => {
     }, [gymId, fetchReport]);
 
     useEffect(() => {
-        fetchReport();
+        const loadData = async () => {
+            await fetchReport();
+        };
+        loadData();
     }, [fetchReport]);
 
     const filteredReport = useMemo(() => {
@@ -199,7 +202,7 @@ const AttendanceManagement: React.FC = () => {
                             </div>
                             <select
                                 value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value as any)}
+                                onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
                                 className="bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2 text-sm text-zinc-300 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all cursor-pointer"
                             >
                                 <option value="All">All Statuses</option>

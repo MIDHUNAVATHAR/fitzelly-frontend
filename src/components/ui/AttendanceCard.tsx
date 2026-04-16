@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import { getTodayAttendance, markAttendance } from '../../api/attendance.api';
 import type { AttendanceDTO } from '../../api/attendance.api';
 import ConfirmModal from '../ui/ConfirmModal';
+import { isAxiosError } from 'axios';
 
 interface AttendanceCardProps {
     gymId: string;
@@ -58,9 +59,13 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({ gymId }) => {
                     latitude: position.coords.latitude,
                     longitude: position.coords.longitude
                 };
-            } catch (err: any) {
+
+
+            } catch (err: unknown) {
                 let errorMsg = "Could not get your location. Please enable GPS.";
-                if (err.code === 1) errorMsg = "Please allow location access to continue.";
+                if (err instanceof GeolocationPositionError && err.code === 1) {
+                    errorMsg = "Please allow location access to continue.";
+                }
                 throw new Error(errorMsg);
             }
 
@@ -75,8 +80,13 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({ gymId }) => {
                 setAttendance(response.data);
                 setIsConfirmModalOpen(false);
             }
-        } catch (error: any) {
-            const message = error.response?.data?.message || error.message || 'Failed to update attendance';
+        } catch (error: unknown) {
+            let message = 'Failed to update attendance';
+            if (isAxiosError(error) && error.response?.data?.message) {
+                message = error.response.data.message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
             toast.error(message, { duration: 4000 });
         } finally {
             setIsActionLoading(false);

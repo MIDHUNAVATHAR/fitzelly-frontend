@@ -88,8 +88,6 @@ const SuperAdminLayout: React.FC = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const [isConnected, setIsConnected] = React.useState(socket.connected);
-
     React.useEffect(() => {
         if (!user) return;
 
@@ -97,12 +95,10 @@ const SuperAdminLayout: React.FC = () => {
             console.log("Socket connected! Joining rooms for role:", user.role);
             socket.emit("join", `role_${user.role}`);
             socket.emit("join", user.role); // Redundant room join for safety
-            setIsConnected(true);
         };
 
         const onDisconnect = () => {
             console.log("Socket disconnected");
-            setIsConnected(false);
         };
 
         const onNotification = (data: NotificationItem) => {
@@ -164,7 +160,7 @@ const SuperAdminLayout: React.FC = () => {
             if (notif) {
                 setReadNotifications(prev => [{ ...notif, isRead: true }, ...prev]);
             }
-        } catch (e) {
+        } catch {
             toast.error("Failed to mark as read");
         }
     };
@@ -176,7 +172,7 @@ const SuperAdminLayout: React.FC = () => {
             const marked = unreadNotifications.map(n => ({ ...n, isRead: true }));
             setReadNotifications(prev => [...marked, ...prev]);
             setUnreadNotifications([]);
-        } catch (e) {
+        } catch {
             toast.error("Failed to mark all as read");
         }
     };

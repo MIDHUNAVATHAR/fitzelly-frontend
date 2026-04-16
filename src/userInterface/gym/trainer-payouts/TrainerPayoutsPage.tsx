@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
     Plus, 
     Filter, 
@@ -44,12 +44,7 @@ const TrainerPayoutsPage: React.FC = () => {
         date: format(new Date(), 'yyyy-MM-dd')
     });
 
-    useEffect(() => {
-        fetchPayouts();
-        fetchTrainers();
-    }, [currentPage, limit, startDate, endDate, selectedTrainer]);
-
-    const fetchPayouts = async () => {
+    const fetchPayouts = useCallback(async () => {
         try {
             setLoading(true);
             const data = await getTrainerPayouts(
@@ -61,21 +56,26 @@ const TrainerPayoutsPage: React.FC = () => {
             );
             setPayouts(data.data.payouts);
             setTotalCount(data.data.total);
-        } catch (error) {
+        } catch {
             toast.error('Failed to fetch payouts');
         } finally {
             setLoading(false);
         }
-    };
+    }, [currentPage, limit, startDate, endDate, selectedTrainer]);
 
-    const fetchTrainers = async () => {
+    const fetchTrainers = useCallback(async () => {
         try {
             const data = await getTrainers(1, 100, '');
             setTrainers(data.trainers);
         } catch (error) {
             console.error('Failed to fetch trainers', error);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        fetchPayouts();
+        fetchTrainers();
+    }, [fetchPayouts, fetchTrainers]);
 
     const totalPayoutAmount = useMemo(() => {
         return payouts.reduce((sum, p) => sum + p.amount, 0);
@@ -130,7 +130,7 @@ const TrainerPayoutsPage: React.FC = () => {
             }
             setShowModal(false);
             fetchPayouts();
-        } catch (error) {
+        } catch {
             toast.error('Operation failed');
         } finally {
             setSubmitting(false);
@@ -143,7 +143,7 @@ const TrainerPayoutsPage: React.FC = () => {
             await deleteTrainerPayout(id);
             toast.success('Payout deleted successfully');
             fetchPayouts();
-        } catch (error) {
+        } catch {
             toast.error('Failed to delete payout');
         }
     };

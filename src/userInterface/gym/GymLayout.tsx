@@ -154,7 +154,7 @@ const GymLayout: React.FC = () => {
             if (notif) {
                 setReadNotifications(prev => [{ ...notif, isRead: true }, ...prev]);
             }
-        } catch (e) {
+        } catch {
             toast.error("Failed to mark as read");
         }
     };
@@ -166,7 +166,7 @@ const GymLayout: React.FC = () => {
             const marked = unreadNotifications.map(n => ({ ...n, isRead: true }));
             setReadNotifications(prev => [...marked, ...prev]);
             setUnreadNotifications([]);
-        } catch (e) {
+        } catch {
             toast.error("Failed to mark all as read");
         }
     };

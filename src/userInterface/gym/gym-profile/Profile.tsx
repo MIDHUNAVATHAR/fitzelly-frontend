@@ -250,9 +250,13 @@ const Profile: React.FC = () => {
             await reApplyGym();
             toast.success("Re-application submitted successfully! Super-admin has been notified.");
             await loadProfile(); // Refresh profile to see 'Pending' status
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error(error);
-            const message = error.response?.data?.message || "Failed to re-apply";
+            let message = "Failed to re-apply";
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { data?: { message?: string } } };
+                message = axiosError.response?.data?.message || message;
+            }
             toast.error(message);
         } finally {
             setIsReApplying(false);

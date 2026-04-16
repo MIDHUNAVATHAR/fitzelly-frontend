@@ -67,7 +67,7 @@ const ExpensesList: React.FC = () => {
         loadExpenses();
     }, [loadExpenses]);
 
-    const handleAdd = async (data: any) => {
+    const handleAdd = async (data: Omit<Expense, 'id' | 'gymId'>) => {
         try {
             await addExpense(data);
             toast.success('Expense added successfully');
@@ -78,7 +78,7 @@ const ExpensesList: React.FC = () => {
         }
     };
 
-    const handleEdit = async (data: any) => {
+    const handleEdit = async (data: Partial<Expense>) => {
         if (!selectedExpense) return;
         try {
             await updateExpense(selectedExpense.id, data);
@@ -97,7 +97,7 @@ const ExpensesList: React.FC = () => {
             toast.success('Expense deleted successfully');
             setIsDeleteModalOpen(false);
             loadExpenses();
-        } catch (error) {
+        } catch {
             toast.error('Failed to delete expense');
         }
     };

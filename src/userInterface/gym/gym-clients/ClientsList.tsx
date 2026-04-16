@@ -151,7 +151,7 @@ const ClientsList: React.FC = () => {
                     <button
                         onClick={(e) => {
                             e.stopPropagation();
-                            const clientId = client.id || (client as any)._id;
+                            const clientId = client.id;
                             navigate(`/gym/messages`, { state: { selectUserId: clientId, selectUserName: client.fullName } });
                         }}
                         title="Chat"

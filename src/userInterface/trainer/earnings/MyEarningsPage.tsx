@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
     Wallet, 
     TrendingUp, 
@@ -19,22 +19,22 @@ const MyEarningsPage: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(10);
 
-    useEffect(() => {
-        fetchEarnings();
-    }, [currentPage, limit]);
-
-    const fetchEarnings = async () => {
+    const fetchEarnings = useCallback(async () => {
         try {
             setLoading(true);
             const response = await getTrainerEarnings(currentPage, limit);
             setEarnings(response.data.payouts);
             setTotalCount(response.data.total);
-        } catch (error) {
+        } catch {
             toast.error('Failed to fetch earnings history');
         } finally {
             setLoading(false);
         }
-    };
+    }, [currentPage, limit]);
+
+    useEffect(() => {
+        fetchEarnings();
+    }, [fetchEarnings]);
 
     const totalLifetimeEarnings = useMemo(() => {
         // This is based on the visible list

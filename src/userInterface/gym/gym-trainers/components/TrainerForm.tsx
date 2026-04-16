@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, type FieldErrors } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Upload, FileText, Trash2 } from 'lucide-react';
 import type { Trainer } from "../../../../api/gym-trainers.api";
@@ -138,7 +138,7 @@ const TrainerForm: React.FC<TrainerFormProps> = ({ initialData, onSubmit, isLoad
         onSubmit(formData);
     };
 
-    const onError = (errors: any) => {
+    const onError = (errors: FieldErrors<Partial<Trainer>>) => {
         const errorCount = Object.keys(errors).length;
         if (errorCount > 0) {
             toast.error("Please fill in all required fields", { id: 'form-validation' });

@@ -33,7 +33,7 @@ const PlansManagement: React.FC = () => {
             setLoading(true);
             const data = await fetchSubscriptionPlans();
             setPlans(data);
-        } catch (error) {
+        } catch {
             toast.error("Failed to fetch plans");
         } finally {
             setLoading(false);
@@ -69,8 +69,13 @@ const PlansManagement: React.FC = () => {
             }
             setIsModalOpen(false);
             loadPlans();
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Something went wrong");
+        } catch (error: unknown) {
+            let message = "Something went wrong";
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { data?: { message?: string } } };
+                message = axiosError.response?.data?.message || message;
+            }
+            toast.error(message);
         } finally {
             setIsActionLoading(false);
         }
@@ -84,7 +89,7 @@ const PlansManagement: React.FC = () => {
             toast.success("Plan deleted successfully");
             setIsDeleteModalOpen(false);
             loadPlans();
-        } catch (error) {
+        } catch {
             toast.error("Failed to delete plan");
         } finally {
             setIsActionLoading(false);

@@ -104,7 +104,7 @@ const HealthTrackingPage: React.FC = () => {
             });
             toast.success("Health metrics updated");
             fetchData();
-        } catch (error) {
+        } catch {
             toast.error("Failed to log metrics");
         } finally {
             setSaving(false);

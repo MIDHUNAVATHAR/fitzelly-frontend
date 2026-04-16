@@ -9,7 +9,6 @@ import {
     Loader2, 
     Search, 
     Dumbbell, 
-    AlertCircle, 
     CheckCircle2, 
     Upload,
     Play
@@ -53,8 +52,7 @@ const ExerciseLibraryPage: React.FC = () => {
         try {
             const response = await axiosInstance.get(TRAINER_ROUTES.GET_EXERCISES);
             setExercises(response.data.data || []);
-        } catch (error) {
-            console.error("Error fetching library:", error);
+        } catch {
             toast.error("Failed to load exercise library");
         } finally {
             setLoading(false);
@@ -92,7 +90,7 @@ const ExerciseLibraryPage: React.FC = () => {
             await axiosInstance.delete(TRAINER_ROUTES.DELETE_EXERCISE(id));
             setExercises(exercises.filter(e => e.id !== id));
             toast.success("Exercise deleted from library");
-        } catch (error) {
+        } catch {
             toast.error("Failed to delete exercise");
         }
     };
@@ -129,8 +127,7 @@ const ExerciseLibraryPage: React.FC = () => {
                 toast.success("Exercise updated!");
             }
             setShowModal(false);
-        } catch (error) {
-            console.error("Save error:", error);
+        } catch {
             toast.error("Failed to save exercise");
         } finally {
             setUploading(false);

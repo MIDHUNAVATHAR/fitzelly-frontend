@@ -13,7 +13,8 @@ import {
 } from 'lucide-react';
 import { getTrainerProfile } from '../../../api/trainer-profile.api';
 import { getAssignedClients } from '../../../api/trainer-clients.api';
-import { getTrainerEarnings } from '../../../api/trainer-payout.api';
+import { getTrainerEarnings, type TrainerPayout } from '../../../api/trainer-payout.api';
+import type { ClientDTO } from '../../../api/gym-clients.api';
 import AttendanceCard from '../../../components/ui/AttendanceCard';
 import { getYearlyAttendanceCount } from '../../../api/attendance.api';
 import { isAxiosError } from 'axios';
@@ -25,7 +26,7 @@ const DashboardHome: React.FC = () => {
     const [gymId, setGymId] = useState<string | null>(null);
     const [trainerName, setTrainerName] = useState<string>('');
     const [isLoading, setIsLoading] = useState(true);
-    const [recentClients, setRecentClients] = useState<any[]>([]);
+    const [recentClients, setRecentClients] = useState<ClientDTO[]>([]);
     const [stats, setStats] = useState({
         clientCount: 0,
         totalEarnings: 0,
@@ -55,7 +56,7 @@ const DashboardHome: React.FC = () => {
                     let cCount = 0;
                     let tEarnings = 0;
                     let pCount = 0;
-                    let rClients: any[] = [];
+                    let rClients: ClientDTO[] = [];
                     let sCount = 0;
 
                     if (clientsRes.status === 'fulfilled') {
@@ -65,8 +66,8 @@ const DashboardHome: React.FC = () => {
                     }
 
                     if (earningsRes.status === 'fulfilled') {
-                        const payouts = earningsRes.value?.data?.payouts || [];
-                        tEarnings = payouts.reduce((sum: number, p: any) => sum + (Number(p.amount) || 0), 0);
+                        const payouts: TrainerPayout[] = earningsRes.value?.data?.payouts || [];
+                        tEarnings = payouts.reduce((sum: number, p: TrainerPayout) => sum + (Number(p.amount) || 0), 0);
                         pCount = payouts.length;
                     }
 

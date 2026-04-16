@@ -11,8 +11,7 @@ import {
     ArrowRight,
     Video,
     X,
-    Play,
-    Plus
+    Play
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getMyWorkoutPlan, trackWorkoutProgress, getWorkoutProgress, getWorkoutStreak } from '../../../api/workout-plan.api';

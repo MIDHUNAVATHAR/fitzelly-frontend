@@ -54,8 +54,8 @@ const ExerciseLibraryPage: React.FC = () => {
         try {
             const response = await axiosInstance.get(SUPER_ADMIN.GET_EXERCISES);
             setExercises(response.data.data || []);
-        } catch (error) {
-            console.error("Error fetching library:", error);
+        } catch {
+            console.error("Error fetching library:");
             toast.error("Failed to load exercise library");
         } finally {
             setLoading(false);
@@ -99,7 +99,7 @@ const ExerciseLibraryPage: React.FC = () => {
             toast.success("Exercise deleted from library");
             setShowDeleteModal(false);
             setExToDelete(null);
-        } catch (error) {
+        } catch {
             toast.error("Failed to delete exercise");
         }
     };

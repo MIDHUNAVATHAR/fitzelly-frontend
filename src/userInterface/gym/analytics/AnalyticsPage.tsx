@@ -15,8 +15,13 @@ const GymAnalyticsPage: React.FC = () => {
             try {
                 const data = await getGymAnalytics();
                 setAnalytics(data);
-            } catch (error: any) {
-                toast.error(error.response?.data?.message || 'Failed to load analytics.');
+            } catch (error: unknown) {
+                let message = 'Failed to load analytics.';
+                if (error && typeof error === 'object' && 'response' in error) {
+                    const axiosError = error as { response?: { data?: { message?: string } } };
+                    message = axiosError.response?.data?.message || message;
+                }
+                toast.error(message);
             } finally {
                 setIsLoading(false);
             }
@@ -41,7 +46,7 @@ const GymAnalyticsPage: React.FC = () => {
     const formatCurrency = (value: number) => `₹${value.toLocaleString()}`;
 
     // Custom Tooltips
-    const RevenueTooltip = ({ active, payload, label }: any) => {
+    const RevenueTooltip = ({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) => {
         if (active && payload && payload.length) {
             return (
                 <div className="bg-zinc-800 border border-zinc-700 p-3 rounded-lg shadow-xl">
@@ -53,7 +58,7 @@ const GymAnalyticsPage: React.FC = () => {
         return null;
     };
 
-    const PieTooltip = ({ active, payload }: any) => {
+    const PieTooltip = ({ active, payload }: { active?: boolean; payload?: { name: string; value: number }[] }) => {
         if (active && payload && payload.length) {
             return (
                 <div className="bg-zinc-800 border border-zinc-700 p-3 rounded-lg shadow-xl">

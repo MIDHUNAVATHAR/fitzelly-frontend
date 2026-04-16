@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, User, Phone, Mail, Award, CalendarDays, MapPin, Loader2 } from 'lucide-react';
 import { getClientAssignedTrainer } from '../../../api/client-profile.api';
+import type { Trainer } from '../../../api/gym-trainers.api';
 import { toast } from 'react-hot-toast';
 
 interface TrainerProfileModalProps {
@@ -9,7 +10,7 @@ interface TrainerProfileModalProps {
 }
 
 const TrainerProfileModal: React.FC<TrainerProfileModalProps> = ({ trainerId, onClose }) => {
-    const [trainer, setTrainer] = useState<any>(null);
+    const [trainer, setTrainer] = useState<Trainer | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {

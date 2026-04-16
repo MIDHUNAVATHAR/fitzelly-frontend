@@ -5,7 +5,7 @@ import type { Enquiry } from '../../../api/enquiry.api';
 interface EnquiryModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (data: any) => Promise<void>;
+    onSave: (data: Partial<Enquiry>) => Promise<void>;
     enquiry?: Enquiry | null;
     title: string;
 }
@@ -15,7 +15,7 @@ const EnquiryModal: React.FC<EnquiryModalProps> = ({ isOpen, onClose, onSave, en
         fullName: '',
         phoneNumber: '',
         email: '',
-        status: 'PENDING' as any
+        status: 'PENDING' as Enquiry['status']
     });
     const [isSaving, setIsSaving] = useState(false);
 
@@ -102,7 +102,7 @@ const EnquiryModal: React.FC<EnquiryModalProps> = ({ isOpen, onClose, onSave, en
                             <select
                                 className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all"
                                 value={formData.status}
-                                onChange={e => setFormData({ ...formData, status: e.target.value as any })}
+                                onChange={e => setFormData({ ...formData, status: e.target.value as Enquiry['status'] })}
                             >
                                 <option value="PENDING">Pending</option>
                                 <option value="CONTACTED">Contacted</option>

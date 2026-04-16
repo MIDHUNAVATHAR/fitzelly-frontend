@@ -22,16 +22,19 @@ const EditSubscriptionModal: React.FC<EditSubscriptionModalProps> = ({
     const [expiryDate, setExpiryDate] = useState('');
 
     useEffect(() => {
-        // Only allow Active or Expired for manual edits
-        if (currentStatus === 'Active' || currentStatus === 'Expired') {
-            setStatus(currentStatus);
-        } else {
-            setStatus('Active'); // Default to Active for Pending/Trial if superadmin is editing manually
-        }
-        if (currentExpiryDate) {
-            const date = new Date(currentExpiryDate);
-            setExpiryDate(date.toISOString().split('T')[0]);
-        }
+        const timer = setTimeout(() => {
+            // Only allow Active or Expired for manual edits
+            if (currentStatus === 'Active' || currentStatus === 'Expired') {
+                setStatus(currentStatus);
+            } else {
+                setStatus('Active'); // Default to Active for Pending/Trial if superadmin is editing manually
+            }
+            if (currentExpiryDate) {
+                const date = new Date(currentExpiryDate);
+                setExpiryDate(date.toISOString().split('T')[0]);
+            }
+        }, 0);
+        return () => clearTimeout(timer);
     }, [currentStatus, currentExpiryDate, isOpen]);
 
     if (!isOpen) return null;
