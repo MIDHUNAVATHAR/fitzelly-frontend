@@ -1,12 +1,7 @@
+import { type SubscriptionPlan } from "../dtos/gym-subscription.resDTO";
+
 import { axiosInstance } from "./axios";
 
-export interface SubscriptionPlan {
-    id: string;
-    name: string;
-    price: number;
-    durationMonths: number;
-    description: string;
-}
 
 export const getAvailableFitzellyPlans = async (): Promise<SubscriptionPlan[]> => {
     const response = await axiosInstance.get("/api/gym/subscriptions");

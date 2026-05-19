@@ -20,7 +20,7 @@ import { toast } from 'react-hot-toast';
 import { getClientWorkoutPlan, createOrUpdateWorkoutPlan } from '../../../api/workout-plan.api';
 import { axiosInstance } from '../../../api/axios';
 import { TRAINER_ROUTES } from '../../../constants/routes';
-import type { IExercise, IDayPlan } from '../../../api/workout-plan.api';
+import { type IExercise,type IDayPlan } from '../../../dtos/workout-plan.resDTO';
 
 interface ITemplate {
     id: string;

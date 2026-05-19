@@ -11,7 +11,8 @@ import {
     ArrowRight
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getAvailableFitzellyPlans, createStripeCheckoutSession, confirmFitzellySubscription, type SubscriptionPlan } from '../../../api/gym-subscription.api';
+import { getAvailableFitzellyPlans, createStripeCheckoutSession, confirmFitzellySubscription} from '../../../api/gym-subscription.api';
+import { type SubscriptionPlan } from '../../../dtos/gym-subscription.resDTO';
 import { useAuth } from '../../../context/useAuth';
 import { toast } from 'react-hot-toast';
 

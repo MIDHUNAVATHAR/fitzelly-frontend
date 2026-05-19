@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getMembershipById, deletePayment } from '../../../api/membership.api';
-import type { Membership, Payment } from '../../../api/membership.api';
+import { type Membership, type Payment } from '../../../dtos/membership.resDTO';
 import AddPaymentModal from './AddPaymentModal';
 import { isAxiosError } from 'axios';
 

@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { X, Calendar } from 'lucide-react';
-import type { CreatePlanDTO, UpdatePlanDTO, Plan } from '../../../api/plan.api';
+import { type CreatePlanDTO, type UpdatePlanDTO } from '../../../dtos/plan.reqDTO';
+import { type Plan } from '../../../dtos/plan.resDTO';
 
 interface PlanFormModalProps {
     isOpen: boolean;

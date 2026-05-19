@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getTrainerById, updateTrainer } from "../../../api/gym-trainers.api";
-import type { Trainer } from "../../../api/gym-trainers.api";
+import { type Trainer } from '../../../dtos/gym-trainers.resDTO';
 import DateInput from "../../../components/ui/DateInput";
 import { useDateFormat } from "../../../hooks/useDateFormat";
 import ImageCropperModal from "../../../components/ui/ImageCropperModal";

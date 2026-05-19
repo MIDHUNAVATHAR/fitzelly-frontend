@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Search, Edit3, Trash2, ChevronRight, Activity, ShieldCheck, Plus, Info, Clock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getMemberships, deleteMembership } from '../../../api/membership.api';
-import type { Membership } from '../../../api/membership.api';
+import { type Membership } from '../../../dtos/membership.resDTO';
 import Pagination from '../../../components/ui/Pagination';
 import { Link, useNavigate } from 'react-router-dom';
 import DeleteConfirmModal from '../plans/DeleteConfirmModal';
 import EditMembershipModal from './EditMembershipModal';
 import AddMembershipModal from './AddMembershipModal';
 import { getTrainers } from '../../../api/gym-trainers.api';
-import type { Trainer } from '../../../api/gym-trainers.api';
+import { type Trainer } from '../../../dtos/gym-trainers.resDTO';
+
 
 const MembershipListPage: React.FC = () => {
     const [memberships, setMemberships] = useState<Membership[]>([]);

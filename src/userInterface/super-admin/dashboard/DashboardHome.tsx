@@ -18,7 +18,7 @@ import {
   Area 
 } from 'recharts';
 import { getSuperAdminDashboard } from '../../../api/analytics.api';
-import type { SuperAdminDashboardMetrics } from '../../../api/analytics.api';
+import { type SuperAdminDashboardMetrics } from '../../../dtos/analytics.resDTO';
 import toast from 'react-hot-toast';
 
 const DashboardHome: React.FC = () => {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, User, Phone, Mail, Award, CalendarDays, MapPin, Loader2 } from 'lucide-react';
 import { getClientAssignedTrainer } from '../../../api/client-profile.api';
-import type { Trainer } from '../../../api/gym-trainers.api';
+import { type Trainer } from '../../../dtos/gym-trainers.resDTO';
 import { toast } from 'react-hot-toast';
 
 interface TrainerProfileModalProps {

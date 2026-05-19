@@ -15,7 +15,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getMyWorkoutPlan, trackWorkoutProgress, getWorkoutProgress, getWorkoutStreak } from '../../../api/workout-plan.api';
-import type { IWorkoutPlan, IWorkoutProgress } from '../../../api/workout-plan.api';
+import { type IWorkoutPlan, type IWorkoutProgress } from '../../../dtos/workout-plan.resDTO';
+
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 

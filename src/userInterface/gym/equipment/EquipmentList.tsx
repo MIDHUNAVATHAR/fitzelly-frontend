@@ -8,7 +8,7 @@ import SearchInput from "../../../components/ui/SearchInput";
 import Pagination from "../../../components/ui/Pagination";
 import ConfirmModal from "../../../components/ui/ConfirmModal";
 import { getEquipments, deleteEquipment } from "../../../api/equipment.api";
-import type { Equipment } from "../../../api/equipment.api";
+import { type Equipment } from "../../../dtos/equipment.resDTO";
 import EquipmentModal from "./EquipmentModal";
 
 const EquipmentList: React.FC = () => {

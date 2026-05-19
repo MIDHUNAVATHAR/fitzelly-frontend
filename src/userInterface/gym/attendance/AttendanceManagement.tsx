@@ -5,7 +5,7 @@ import {
     Clock,
 } from 'lucide-react';
 import { getDailyAttendanceReport,markManualAttendance } from '../../../api/attendance.api';
-import type { DailyAttendanceRecord } from '../../../api/attendance.api';
+import { type DailyAttendanceRecord } from '../../../dtos/attendance.resDTO';
 import DateInput from '../../../components/ui/DateInput';
 import ConfirmModal from '../../../components/ui/ConfirmModal';
 import { toast } from 'react-hot-toast';

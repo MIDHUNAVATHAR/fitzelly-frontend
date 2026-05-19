@@ -1,21 +1,8 @@
+import { type TrainerProfile } from '../dtos/trainer-profile.resDTO';
+
 import { axiosInstance } from './axios';
 import { TRAINER_ROUTES } from '../constants/routes';
 
-export interface TrainerProfile {
-    id?: string;
-    gymId?: string;
-    fullName?: string;
-    email?: string;
-    phoneNumber?: string;
-    specialization?: string;
-    salary?: string;
-    dateOfBirth?: string;
-    profileUrl?: string;
-    joinedDate?: string;
-    qualification?: string;
-    address?: string;
-    certificates?: string[];
-}
 
 export const getTrainerProfile = async (): Promise<TrainerProfile> => {
     const response = await axiosInstance.get(TRAINER_ROUTES.TRAINER_PROFILE);

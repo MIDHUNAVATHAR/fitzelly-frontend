@@ -51,13 +51,14 @@ const HealthTrackingPage: React.FC = () => {
                 healthTrackingApi.getWeightHistory(),
                 getClientProfile()
             ]);
-            setWeightHistory(history);
+            const safeHistory = Array.isArray(history) ? history : [];
+            setWeightHistory(safeHistory);
             if (profileData.profile.height) setCurrentHeight(profileData.profile.height.toString());
             if (profileData.profile.weight) setCurrentWeight(profileData.profile.weight.toString());
 
             // If history has more recent weight, use that
-            if (history && history.length > 0) {
-                const latest = history[history.length - 1];
+            if (safeHistory.length > 0) {
+                const latest = safeHistory[safeHistory.length - 1];
                 setCurrentWeight(latest.weight.toString());
                 setCurrentHeight(latest.height.toString());
             }

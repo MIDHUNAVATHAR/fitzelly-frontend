@@ -3,7 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Mail, Phone, Calendar, User, PhoneCall, Tag, Award, ArrowLeft, Edit3, Save, X, Loader2, IndianRupee, CreditCard, Ruler, Scale, IdCard } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getClientById, updateClient } from "../../../api/gym-clients.api";
-import type { ClientDTO } from "../../../api/gym-clients.api";
+import { type ClientDTO } from '../../../dtos/gym-clients.resDTO';
 import { useDateFormat } from "../../../hooks/useDateFormat";
 import DateInput from "../../../components/ui/DateInput";
 

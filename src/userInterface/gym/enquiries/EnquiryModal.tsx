@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Loader } from 'lucide-react';
-import type { Enquiry } from '../../../api/enquiry.api';
+import { type Enquiry } from '../../../dtos/enquiry.resDTO';
 
 interface EnquiryModalProps {
     isOpen: boolean;

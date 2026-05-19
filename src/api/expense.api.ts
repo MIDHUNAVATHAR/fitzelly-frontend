@@ -1,23 +1,8 @@
+import { type Expense } from '../dtos/expense.resDTO';
+
 import { GYM } from '../constants/routes';
 import { axiosInstance } from './axios';
 
-export type ExpenseCategory =
-    | "RENT"
-    | "ELECTRICITY"
-    | "WATER"
-    | "INSURANCE_TAX"
-    | "MARKETING"
-    | "MAINTENANCE"
-    | "OTHER";
-
-export interface Expense {
-    id: string;
-    gymId: string;
-    category: ExpenseCategory;
-    amount: number;
-    notes: string | null;
-    date: string;
-}
 
 export const getExpenses = async (
     page: number = 1,

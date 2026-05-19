@@ -1,15 +1,8 @@
+import { type TrainerPayout } from '../dtos/trainer-payout.resDTO';
+
 import { axiosInstance } from './axios';
 import { GYM, TRAINER_ROUTES } from '../constants/routes';
 
-export interface TrainerPayout {
-    id: string;
-    gymId: string;
-    trainerId: string;
-    trainerName?: string;
-    amount: number;
-    notes: string | null;
-    date: string;
-}
 
 export const getTrainerPayouts = async (
     page: number = 1,

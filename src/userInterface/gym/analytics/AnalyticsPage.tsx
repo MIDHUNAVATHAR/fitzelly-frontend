@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Users, Activity, Wallet, TrendingUp, TrendingDown } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { getGymAnalytics, type GymAnalyticsData } from '../../../api/analytics.api';
+import { getGymAnalytics } from '../../../api/analytics.api';
+import { type GymAnalyticsData } from '../../../dtos/analytics.resDTO';
+
 
 const COLORS = ['#34d399', '#f87171', '#60a5fa', '#fbbf24', '#a78bfa'];
 

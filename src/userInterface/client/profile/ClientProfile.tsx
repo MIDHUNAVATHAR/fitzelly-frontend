@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Mail, Phone, Calendar, Users, PhoneCall, Edit3, Camera, Save, CalendarDays, Activity, Award, User, CreditCard, IndianRupee } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { getClientProfile, updateClientProfile, uploadClientProfileImage, type ClientProfile, type ClientMembership } from "../../../api/client-profile.api";
+import { getClientProfile, updateClientProfile, uploadClientProfileImage } from "../../../api/client-profile.api";
+import { type ClientProfile , type ClientMembership} from '../../../dtos/client-profile.resDTO';
 import { useImageCropper } from '../../../hooks/useImageCropper';
 import ImageCropperModal from '../../../components/ui/ImageCropperModal';
 import DateInput from '../../../components/ui/DateInput';

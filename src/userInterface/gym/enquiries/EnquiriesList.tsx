@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { getEnquiries, addEnquiry, updateEnquiry, deleteEnquiry } from '../../../api/enquiry.api';
-import type { Enquiry } from '../../../api/enquiry.api';
+import { type Enquiry } from '../../../dtos/enquiry.resDTO';
 import { toast } from 'react-hot-toast';
 import ReusableTable from '../../../components/ui/ReusableTable';
 import type { Column } from '../../../components/ui/ReusableTable';

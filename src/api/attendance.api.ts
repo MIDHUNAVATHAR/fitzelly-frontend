@@ -1,20 +1,8 @@
+import { type DailyAttendanceRecord } from "../dtos/attendance.resDTO";
+
 import { axiosInstance } from "./axios";
 import { COMMON } from "../constants/routes";
 
-
-export interface AttendanceLog {
-    checkIn: string;
-    checkOut?: string;
-}
-
-export interface AttendanceDTO {
-    id: string;
-    userId: string;
-    date: string;
-    logs: AttendanceLog[];
-    status: string;
-    userType: string;
-}
 
 export const markAttendance = async (data: {
     action: 'CHECK_IN' | 'CHECK_OUT',
@@ -31,19 +19,6 @@ export const getTodayAttendance = async () => {
     return response.data;
 };
 
-export interface DailyAttendanceRecord {
-    userId: string;
-    fullName: string;
-    clientId?: string;
-    checkIn: string;
-    checkOut: string;
-    status: 'PRESENT' | 'ABSENT' | 'PENDING';
-    userType: 'CLIENT' | 'TRAINER';
-    logs?: {
-        checkIn: string;
-        checkOut?: string;
-    }[];
-}
 
 export const getDailyAttendanceReport = async (date: string, userType: 'CLIENT' | 'TRAINER'): Promise<{ status: string, data: { report: DailyAttendanceRecord[], gymId: string } }> => {
     const response = await axiosInstance.get(COMMON.GET_DAILY_ATTENDANCE_REPORT(date, userType));

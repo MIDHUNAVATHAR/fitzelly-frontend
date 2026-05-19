@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Loader2, Dumbbell, CheckCircle2, Circle, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getMyWorkoutPlan, trackWorkoutProgress, getWorkoutProgress } from '../../../api/workout-plan.api';
-import type { IWorkoutPlan, IWorkoutProgress } from '../../../api/workout-plan.api';
+import { type IWorkoutPlan, type IWorkoutProgress } from '../../../dtos/workout-plan.resDTO';
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 

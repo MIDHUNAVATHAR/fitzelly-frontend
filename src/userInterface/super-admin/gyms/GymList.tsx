@@ -4,7 +4,7 @@ import ReusableTable from '../../../components/ui/ReusableTable';
 import type { Column } from '../../../components/ui/ReusableTable';
 import SearchInput from '../../../components/ui/SearchInput';
 import Pagination from '../../../components/ui/Pagination';
-import type { Gym } from "../../../api/superAdmin-gyms.api";
+import { type Gym } from '../../../dtos/superAdmin-gyms.resDTO';
 import { fetchGyms } from "../../../api/superAdmin-gyms.api";
 import { Eye } from 'lucide-react';
 

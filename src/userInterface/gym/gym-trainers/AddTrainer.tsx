@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import TrainerForm from "./components/TrainerForm";
 import { addTrainer } from "../../../api/gym-trainers.api";
-import type { Trainer } from "../../../api/gym-trainers.api";
+import { type Trainer } from '../../../dtos/gym-trainers.resDTO';
 import { isAxiosError } from 'axios';
 
 const AddTrainer: React.FC = () => {

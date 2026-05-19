@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar } from 'lucide-react';
-import type { ClientDTO } from "../../../../api/gym-clients.api"
+import { type ClientDTO } from '../../../../dtos/gym-clients.resDTO';
 import DateInput from '../../../../components/ui/DateInput';
 
 

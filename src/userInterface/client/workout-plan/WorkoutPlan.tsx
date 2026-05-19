@@ -3,7 +3,8 @@ import { Loader2, Dumbbell, CheckCircle2, Circle, Calendar, Info, Play, Video, X
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { getMyWorkoutPlan, trackWorkoutProgress, getWorkoutProgress } from '../../../api/workout-plan.api';
-import type { IWorkoutPlan, IWorkoutProgress, IExercise } from '../../../api/workout-plan.api';
+import { type IWorkoutPlan, type IWorkoutProgress, type IExercise } from '../../../dtos/workout-plan.resDTO';
+
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 

@@ -1,6 +1,7 @@
 import { axiosInstance } from "./axios";
 import { TRAINER_ROUTES } from "../constants/routes";
-import type { ClientDTO } from "./gym-clients.api";
+import { type ClientDTO } from "../dtos/gym-clients.resDTO";
+
 
 interface ClientsResponse {
     status: string;

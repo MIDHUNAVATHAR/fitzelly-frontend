@@ -9,7 +9,8 @@ import {
     UserMinus
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { getGymDashboard, type DashboardData } from '../../api/analytics.api';
+import { getGymDashboard,  } from '../../api/analytics.api';
+import { type DashboardData } from '../../dtos/analytics.resDTO';
 import { format } from 'date-fns';
 
 const DashboardHome: React.FC = () => {

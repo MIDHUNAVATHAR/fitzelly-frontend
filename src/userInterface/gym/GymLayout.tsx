@@ -11,7 +11,7 @@ import {
     markNotificationAsRead,
     markAllNotificationsAsRead
 } from "../../api/notification.api";
-import type { NotificationItem } from "../../api/notification.api";
+import { type NotificationItem } from '../../dtos/notification.resDTO';
 
 
 

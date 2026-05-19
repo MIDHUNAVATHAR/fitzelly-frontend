@@ -8,7 +8,7 @@ import SuperAdminLoginPage from "./userInterface/super-admin/SuperAdminLoginPage
 import CreatePassword from "./userInterface/auth/CreatePassword";
 import { ROLES } from "./constants/roles";
 import { lazyComponent } from "./components/wrapper/lazyLoad";
-import SubscriptionExpiredModal from "./components/SubscriptionExpiredModal";
+import SubscriptionExpiredModal from "./components/ui/SubscriptionExpiredModal";
 import { ChatProvider } from "./context/ChatProvider";
 import CallOverlay from "./components/ui/CallOverlay";
 

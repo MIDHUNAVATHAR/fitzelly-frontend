@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, DollarSign, FileText } from 'lucide-react';
 import { addPayment, updatePayment } from '../../../api/membership.api';
-import type { Payment } from '../../../api/membership.api';
+import { type Payment } from '../../../dtos/membership.resDTO';
+
 import { toast } from 'react-hot-toast';
 import { isAxiosError } from 'axios';
 import DateInput from '../../../components/ui/DateInput';

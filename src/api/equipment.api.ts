@@ -1,25 +1,8 @@
 import { axiosInstance } from "./axios";
 import { GYM } from "../constants/routes";
 
-export interface Equipment {
-    id: string;
-    gymId: string;
-    name: string;
-    description: string;
-    image: string;
-    availableDays: string[];
-    availableFrom: string;
-    availableTo: string;
-    allowedPlans: string[];
-    capacity: number;
-    slotIntervalMinutes: number;
-    isActive: boolean;
-}
 
-// export const getEquipments = async (page: number, limit: number, search: string = '') => {
-//     const response = await axiosInstance.get(`/api/gym/equipments?page=${page}&limit=${limit}&search=${search}`);
-//     return response.data.data;
-// };
+
 export const getEquipments = async (
     page: number,
     limit: number,

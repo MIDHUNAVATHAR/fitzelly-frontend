@@ -1,25 +1,8 @@
+import { type EquipmentBooking , type EquipmentSlot} from "../dtos/equipment-booking.resDTO";
+
 import { axiosInstance } from "./axios";
 import { CLIENT } from "../constants/routes";
 
-export interface EquipmentSlot {
-    startTime: string;
-    endTime: string;
-    capacity: number;
-    bookedCount: number;
-    isAvailable: boolean;
-}
-
-export interface EquipmentBooking {
-    id: string;
-    clientId: string;
-    gymId: string;
-    equipmentId: string;
-    date: string;
-    startTime: string;
-    endTime: string;
-    status: 'BOOKED' | 'CANCELLED';
-    createdAt: string;
-}
 
 export const getEquipmentSlots = async (equipmentId: string, date: string): Promise<EquipmentSlot[]> => {
     const response = await axiosInstance.get(CLIENT.GET_EQUIPMENT_SLOTS(equipmentId, date));

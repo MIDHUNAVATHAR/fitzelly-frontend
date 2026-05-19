@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { X, Upload, Loader2, Image as ImageIcon } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { addEquipment, updateEquipment } from "../../../api/equipment.api";
-import type { Equipment } from "../../../api/equipment.api";
+import { type Equipment } from "../../../dtos/equipment.resDTO";
 import { getPlans } from "../../../api/plan.api";
-import type { Plan } from "../../../api/plan.api";
+import { type Plan } from "../../../dtos/plan.resDTO";
+
 import ImageCropperModal from "../../../components/ui/ImageCropperModal";
 import { useImageCropper } from "../../../hooks/useImageCropper";
 

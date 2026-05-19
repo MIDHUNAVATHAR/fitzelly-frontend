@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Clock, LogIn, LogOut, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getTodayAttendance, markAttendance } from '../../api/attendance.api';
-import type { AttendanceDTO } from '../../api/attendance.api';
+import type { AttendanceDTO } from '../../dtos/attendance.resDTO';
 import ConfirmModal from '../ui/ConfirmModal';
 import { isAxiosError } from 'axios';
 
