@@ -11,6 +11,7 @@ export const healthTrackingApi = {
     },
     getWeightHistory: async () => {
         const response = await axiosInstance.get("/api/client/weight-history");
-        return response.data.data;
+
+        return response.data; 
     }
 };
