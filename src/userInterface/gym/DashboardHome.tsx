@@ -1,204 +1,203 @@
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import {
-    CheckCircle,
+import React, { useState, useEffect } from 'react';
+import { 
+    Wallet,
+    Cake,
+    AlertCircle,
+    UserCheck,
     Clock,
-    IndianRupee,
     TrendingUp,
-    Building2,
-    ArrowRight
+    UserMinus
 } from 'lucide-react';
-import {
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-    AreaChart,
-    Area
-} from 'recharts';
-import { getSuperAdminDashboard } from '../../api/analytics.api';
-
-import { type SuperAdminDashboardMetrics } from '../../dtos/analytics.resDTO';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
+import { getGymDashboard,  } from '../../api/analytics.api';
+import { type DashboardData } from '../../dtos/analytics.resDTO';
+import { format } from 'date-fns';
 
 const DashboardHome: React.FC = () => {
-    const [data, setData] = useState<SuperAdminDashboardMetrics | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState<DashboardData | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchDashboard = async () => {
             try {
-                const result = await getSuperAdminDashboard();
+                const result = await getGymDashboard();
                 setData(result);
-            } catch (error) {
-                toast.error("Failed to fetch dashboard data");
-                console.error(error);
+            } catch {
+                toast.error('Failed to load dashboard data.');
             } finally {
-                setLoading(false);
+                setIsLoading(false);
             }
         };
+
         fetchDashboard();
     }, []);
 
-    if (loading) {
+    if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-[60vh]">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="w-8 h-8 border-4 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
 
     if (!data) return null;
 
-    const stats = [
-        { label: 'Total Gyms', value: data.totalGyms, icon: Building2, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-        { label: 'Active Gyms', value: data.activeGyms, icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-500/10' },
-        { label: 'Pending Approvals', value: data.pendingGyms, icon: Clock, color: 'text-orange-500', bg: 'bg-orange-500/10' },
-        { label: 'Total Revenue', value: `₹${data.totalRevenue.toLocaleString()}`, icon: IndianRupee, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-    ];
+    const formatCurrency = (val: number) => `₹${val.toLocaleString()}`;
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500 p-4">
-            {/* Header */}
-            <div>
-                <motion.h1
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-3xl font-bold text-white tracking-tight"
-                >
-                    Platform Overview
-                </motion.h1>
-                <motion.p
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="text-zinc-400 mt-1"
-                >
-                    Real-time performance metrics and platform growth tracking.
-                </motion.p>
+        <div className="space-y-6 animate-in fade-in duration-500 pb-10 max-w-7xl mx-auto">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-white">Dashboard Overview</h1>
+                    <p className="text-zinc-400 text-sm mt-1">Live updates and upcoming priorities</p>
+                </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat, index) => (
-                    <motion.div
-                        key={stat.label}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl backdrop-blur-sm"
-                    >
-                        <div className="flex items-center justify-between mb-4">
-                            <div className={`${stat.bg} p-3 rounded-xl`}>
-                                <stat.icon className={`w-6 h-6 ${stat.color}`} />
-                            </div>
-                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Live</span>
-                        </div>
-                        <h3 className="text-3xl font-bold text-white mb-1">{stat.value}</h3>
-                        <p className="text-zinc-400 text-sm font-medium">{stat.label}</p>
-                    </motion.div>
-                ))}
+            {/* Top Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl relative overflow-hidden group">
+                    <div className="flex items-center justify-between mb-4">
+                        <UserCheck className="w-6 h-6 text-emerald-400" />
+                        <span className="text-xs font-medium px-2 py-1 rounded-full bg-emerald-400/10 text-emerald-400">Today</span>
+                    </div>
+                    <p className="text-zinc-400 text-sm mb-1">Total Check-ins</p>
+                    <div className="flex items-baseline gap-2">
+                        <h3 className="text-3xl font-bold text-white">{data.todayCheckins.client + data.todayCheckins.trainer}</h3>
+                        <span className="text-xs text-zinc-500">({data.todayCheckins.client} C, {data.todayCheckins.trainer} T)</span>
+                    </div>
+                </div>
+
+                <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl group">
+                    <div className="flex items-center justify-between mb-4">
+                        <Wallet className="w-6 h-6 text-blue-400" />
+                        <span className="text-xs font-medium px-2 py-1 rounded-full bg-blue-400/10 text-blue-400">Month</span>
+                    </div>
+                    <p className="text-zinc-400 text-sm mb-1">Monthly Revenue</p>
+                    <h3 className="text-3xl font-bold text-white">{formatCurrency(data.monthRevenue)}</h3>
+                </div>
+
+                <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl group">
+                    <div className="flex items-center justify-between mb-4">
+                        <TrendingUp className="w-6 h-6 text-amber-400" />
+                        <span className="text-xs font-medium px-2 py-1 rounded-full bg-amber-400/10 text-amber-400">New</span>
+                    </div>
+                    <p className="text-zinc-400 text-sm mb-1">Monthly Joinees</p>
+                    <h3 className="text-3xl font-bold text-white">{data.monthJoinees}</h3>
+                </div>
+
+                <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl group">
+                    <div className="flex items-center justify-between mb-4">
+                        <AlertCircle className="w-6 h-6 text-red-500" />
+                        <span className="text-xs font-medium px-2 py-1 rounded-full bg-red-400/10 text-red-400">Alert</span>
+                    </div>
+                    <p className="text-zinc-400 text-sm mb-1">Inactive (7+ days)</p>
+                    <h3 className="text-3xl font-bold text-white">{data.inactiveClients.length}</h3>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Revenue Chart */}
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="lg:col-span-2 bg-zinc-900/50 border border-zinc-800 p-8 rounded-3xl backdrop-blur-sm"
-                >
-                    <div className="flex items-center justify-between mb-8">
-                        <div>
-                            <h3 className="text-xl font-bold text-white">Revenue Growth</h3>
-                            <p className="text-zinc-400 text-sm">Monthly platform revenue trend</p>
-                        </div>
-                        <div className="bg-orange-500/10 text-orange-500 px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4" />
-                            +12.5% Growth
-                        </div>
+            {/* Bottom Details Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                {/* Membership Expiries */}
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl lg:col-span-1">
+                    <div className="p-5 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
+                        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-amber-400" />
+                            Expiring Soon
+                        </h2>
                     </div>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height={300}>
-                            <AreaChart data={data.revenueTrend}>
-                                <defs>
-                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
-                                <XAxis
-                                    dataKey="month"
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: '#71717a', fontSize: 10 }}
-                                    dy={10}
-                                />
-                                <YAxis
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: '#71717a', fontSize: 10 }}
-                                />
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '12px' }}
-                                    itemStyle={{ color: '#f97316' }}
-                                />
-                                <Area
-                                    type="monotone"
-                                    dataKey="revenue"
-                                    stroke="#f97316"
-                                    strokeWidth={3}
-                                    fillOpacity={1}
-                                    fill="url(#colorRevenue)"
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
-                </motion.div>
-
-                {/* Recent Registrations */}
-                <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-3xl backdrop-blur-sm"
-                >
-                    <div className="flex items-center justify-between mb-8">
-                        <h3 className="text-xl font-bold text-white">Recent Gyms</h3>
-                        <button className="text-orange-500 text-xs font-bold hover:underline flex items-center gap-1">
-                            View All <ArrowRight className="w-4 h-4" />
-                        </button>
-                    </div>
-                    <div className="space-y-6">
-                        {data.recentGyms.length > 0 ? (
-                            data.recentGyms.map((gym) => (
-                                <div key={gym.id} className="flex items-center justify-between group cursor-pointer">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 font-bold border border-orange-500/20 group-hover:scale-110 transition-transform">
-                                            {gym.name[0]}
+                    <div className="p-2">
+                        {data.expiries.length > 0 ? (
+                            data.expiries.map((exp, idx) => (
+                                <div key={idx} className="flex items-center justify-between p-3 hover:bg-zinc-800/50 rounded-lg transition-colors group">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-amber-400 font-bold">
+                                            {exp.name.slice(0, 1)}
                                         </div>
                                         <div>
-                                            <h4 className="text-sm font-bold text-white leading-none group-hover:text-orange-500 transition-colors">{gym.name}</h4>
-                                            <p className="text-[10px] text-zinc-500 mt-1 uppercase tracking-tighter">
-                                                Joined {new Date(gym.registrationDate).toLocaleDateString()}
-                                            </p>
+                                            <p className="text-sm font-semibold text-white">{exp.name}</p>
+                                            <p className="text-xs text-zinc-500">Expires {format(new Date(exp.expiryDate), 'MMM dd')}</p>
                                         </div>
                                     </div>
-                                    <span className={`text-[10px] uppercase tracking-widest font-black px-2 py-1 rounded-md ${gym.status === 'Approved' ? 'bg-green-500/10 text-green-500' :
-                                        gym.status === 'Pending' ? 'bg-orange-500/10 text-orange-500' :
-                                            'bg-red-500/10 text-red-500'
-                                        }`}>
-                                        {gym.status}
-                                    </span>
+                                    <div className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                        exp.daysRemaining <= 1 ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-500'
+                                    }`}>
+                                        {exp.daysRemaining === 0 ? 'Today' : `${exp.daysRemaining} days`}
+                                    </div>
                                 </div>
                             ))
                         ) : (
-                            <p className="text-zinc-500 text-sm text-center py-4 italic">No gym registrations found</p>
+                            <div className="p-8 text-center text-zinc-600">No upcoming expiries</div>
                         )}
                     </div>
-                </motion.div>
+                </div>
+
+                {/* Today's Birthdays */}
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl lg:col-span-1">
+                    <div className="p-5 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
+                        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                            <Cake className="w-5 h-5 text-pink-400" />
+                            Celebrations
+                        </h2>
+                    </div>
+                    <div className="p-2">
+                        {data.birthdays.length > 0 ? (
+                            data.birthdays.map((b, idx) => (
+                                <div key={idx} className="flex items-center justify-between p-3 hover:bg-zinc-800/50 rounded-lg transition-colors group">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-pink-500/10 flex items-center justify-center text-pink-400">
+                                            <Cake className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-semibold text-white">{b.name}</p>
+                                            <p className="text-xs text-zinc-500">{b.role}</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-xs font-medium text-zinc-400 group-hover:text-white transition-colors">
+                                        IT'S TODAY! 🎈
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="p-8 text-center text-zinc-600">No birthdays today</div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Inactive Clients (7+ days) */}
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl lg:col-span-1">
+                    <div className="p-5 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
+                        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                            <UserMinus className="w-5 h-5 text-red-400" />
+                            Inactive Clients
+                        </h2>
+                    </div>
+                    <div className="p-2">
+                        {data.inactiveClients.length > 0 ? (
+                            data.inactiveClients.map((client, idx) => (
+                                <div key={idx} className="flex items-center justify-between p-3 hover:bg-zinc-800/50 rounded-lg transition-colors group">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400">
+                                            {client.name.slice(0, 1)}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-semibold text-white">{client.name}</p>
+                                            <p className="text-xs text-zinc-500">
+                                                {client.lastCheckIn ? `Last seen: ${format(new Date(client.lastCheckIn), 'MMM dd')}` : 'Never checked in'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="text-xs font-semibold text-zinc-500">
+                                        {client.daysSinceLastSeen}d+
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="p-8 text-center text-zinc-600">All clients active!</div>
+                        )}
+                    </div>
+                </div>
+
             </div>
         </div>
     );
