@@ -49,7 +49,7 @@ export const uploadAttachment = async (file: File) => {
 };
 
 export const deleteChatMessage = async (messageId: string) => {
-    const response = await axiosInstance.delete(`/api/chat/messages/${messageId}`);
+    const response = await axiosInstance.delete(CHAT.DELETE_MESSAGE(messageId));
     return response.data;
 };
 

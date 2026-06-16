@@ -1,5 +1,4 @@
-import { type ClientProfile, type ClientMembership } from '../dtos/client-profile.resDTO';
-
+import { type ClientProfile, type ClientMembership, type GymProfile } from '../dtos/client-profile.resDTO';
 import { CLIENT, } from '../constants/routes';
 import { axiosInstance } from './axios';
 
@@ -27,22 +26,6 @@ export const uploadClientProfileImage = async (file: File): Promise<{ profileIma
     return response.data.data;
 };
 
-export interface GymProfile {
-    logoUrl?: string;
-    gymName?: string;
-    caption?: string;
-    email?: string;
-    phoneNumber?: string;
-    address?: string;
-    description?: string;
-    location?: {
-        latitude: number;
-        longitude: number;
-    };
-    approvalStatus?: string;
-    subscriptionStatus?: string;
-    expiryDate?: string;
-}
 
 export const getClientGymDetails = async (): Promise<GymProfile> => {
     const response = await axiosInstance.get(CLIENT.GET_GYM);

@@ -61,7 +61,13 @@ export const GYM = {
     ADD_PLAN: "/api/gym/plan",
     UPDATE_PLAN: (id: string) => `/api/gym/plan/${id}`,
     DELETE_PLAN: (id: string) => `/api/gym/plan/${id}`,
+
+    
+    GET_SUBSCRIPTION_PLANS: "/api/gym/subscriptions",
+    CREATE_SUBSCRIPTION_SESSION: "/api/gym/subscriptions/create-session",
+    CONFIRM_SUBSCRIPTION: "/api/gym/subscriptions/confirm",
 }
+
 
 
 export const SUPER_ADMIN = {
@@ -77,6 +83,12 @@ export const SUPER_ADMIN = {
     UPDATE_EXERCISE: (id: string) => `/api/super-admin/workout-library/${id}`,
     DELETE_EXERCISE: (id: string) => `/api/super-admin/workout-library/${id}`,
     GET_DASHBOARD: "/api/super-admin/dashboard",
+
+     // Subscription Plans
+    GET_SUBSCRIPTION_PLANS: "/api/super-admin/subscription-plans",
+    CREATE_SUBSCRIPTION_PLAN: "/api/super-admin/subscription-plans",
+    UPDATE_SUBSCRIPTION_PLAN: (id: string) => `/api/super-admin/subscription-plans/${id}`,
+    DELETE_SUBSCRIPTION_PLAN: (id: string) => `/api/super-admin/subscription-plans/${id}`,
 }
 
 
@@ -141,4 +153,39 @@ export const CHAT = {
     CALL_HISTORY: "/api/chat/call-history",
     SAVE_CALL_HISTORY: "/api/chat/call-history",
     UPLOAD_ATTACHMENT: "/api/chat/attachment",
+    DELETE_MESSAGE: (messageId: string) => `/api/chat/messages/${messageId}`,
 }
+
+
+export const AUTH = {
+    FORGOT_PASSWORD_INITIATE: (role: string) =>
+        `/api/${role}/auth/forgot-password/initiate`,
+
+    FORGOT_PASSWORD_VERIFY: (role: string) =>
+        `/api/${role}/auth/forgot-password/verify`,
+
+    RESET_PASSWORD: (role: string) =>
+        `/api/${role}/auth/resetPassword`,
+    GOOGLE_LOGIN: "/api/auth/google",
+     REFRESH_TOKEN: "/api/auth/refresh-token",
+};
+
+
+export const API_MESSAGES = {
+    GYM_SUBSCRIPTION_EXPIRED: "GYM_SUBSCRIPTION_EXPIRED",
+};
+
+export const AUTH_PATHS = {
+    LOGIN: "/auth/login",
+    REFRESH_TOKEN: "/auth/refresh-token",
+    LOGOUT: "/auth/logout",
+    FORGOT_PASSWORD_INITIATE: "/auth/forgot-password/initiate",
+};
+
+export const SECURITY = {
+    GET_ACTIVE_SESSIONS: "/api/security/active-sessions",
+    REVOKE_SESSION: (sessionId: string) =>
+        `/api/security/session/${sessionId}`,
+    REVOKE_ALL_SESSIONS: "/api/security/sessions/revoke-all",
+    GET_LOGIN_HISTORY: "/api/security/login-history",
+};

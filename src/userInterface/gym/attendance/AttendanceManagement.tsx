@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import {
-    Calendar,
-    Search,
-    Clock,
-} from 'lucide-react';
+import { Calendar,Search,Clock,} from 'lucide-react';
 import { getDailyAttendanceReport,markManualAttendance } from '../../../api/attendance.api';
 import { type DailyAttendanceRecord } from '../../../dtos/attendance.resDTO';
 import DateInput from '../../../components/ui/DateInput';

@@ -3,7 +3,7 @@ import { Mail, ArrowRight, ArrowLeft, ShieldCheck, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../api/login.api';
-import { initiateForgotpassword } from '../../api/forgotpassword.api';
+import { initiateForgotPassword } from '../../api/forgotpassword.api';
 import { verifyForgotPassword } from '../../api/forgotpassword.api';
 import { resetPassword } from '../../api/forgotpassword.api';
 import { useAuth } from '../../context/useAuth';
@@ -92,7 +92,7 @@ const SuperAdminLoginPage: React.FC = () => {
         if (!email) return toast.error('Please enter your email');
         setIsLoading(true);
         try {
-            const result = await initiateForgotpassword({ email: email, role: ROLES.SUPER_ADMIN })
+            const result = await initiateForgotPassword({ email: email, role: ROLES.SUPER_ADMIN })
             toast.success(result?.message || "An otp send to your email ")
             setIsLoading(false)
             setView('VERIFY_OTP')

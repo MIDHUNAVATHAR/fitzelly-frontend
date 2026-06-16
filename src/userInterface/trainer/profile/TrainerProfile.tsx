@@ -37,8 +37,7 @@ const TrainerProfilePage: React.FC = () => {
     };
 
     // Image Cropper Hook
-    const {
-        imageSrc,
+    const {imageSrc,
         crop,
         zoom,
         isCropping,

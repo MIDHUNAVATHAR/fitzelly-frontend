@@ -1,17 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { 
-    Plus, 
-    Filter, 
-    ChevronLeft, 
-    ChevronRight, 
-    Edit2, 
-    Trash2, 
-    Wallet, 
-    TrendingUp, 
-    Users, 
-    X, 
-    Loader2 
-} from 'lucide-react';
+import { Plus, Filter, ChevronLeft,  ChevronRight,  Edit2, Trash2, Wallet, TrendingUp, Users, X, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { format, startOfMonth } from 'date-fns';
 import DateInput from '../../../components/ui/DateInput';

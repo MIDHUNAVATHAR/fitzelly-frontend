@@ -1,21 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-    ChevronLeft, 
-    Plus, 
-    Trash2, 
-    Loader2, 
-    Dumbbell, 
-    X, 
-    Edit2, 
-    NotebookPen, 
-    Quote, 
-    AlertTriangle, 
-    Calendar,
-    Search,
-    Video,
-    Package
-} from 'lucide-react';
+import { ChevronLeft, Plus, Trash2, Loader2, Dumbbell, X, Edit2, NotebookPen, Quote, AlertTriangle, Calendar,Search,Video,Package} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getClientWorkoutPlan, createOrUpdateWorkoutPlan } from '../../../api/workout-plan.api';
 import { axiosInstance } from '../../../api/axios';

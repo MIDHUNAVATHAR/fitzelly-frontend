@@ -1,14 +1,7 @@
 import { axiosInstance } from "./axios";
+import type { loginPayload } from "../dtos/authDTO";
 
-interface loginPayload {
-    email: string,
-    password: string,
-    role: string,
-    device?: string,
-    browser?: string,
-    os?: string,
-    ip?: string
-}
+
 
 export const login = async (payload: loginPayload) => {
     const res = await axiosInstance.post(`/api/${payload.role}/auth/login`, payload);

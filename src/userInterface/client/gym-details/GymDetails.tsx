@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, AlignLeft, Info } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { getClientGymDetails, type GymProfile } from '../../../api/client-profile.api';
+import { getClientGymDetails } from '../../../api/client-profile.api';
+import type { GymProfile } from '../../../dtos/client-profile.resDTO';
 import { isAxiosError } from 'axios';
 
 const GymDetailsPage: React.FC = () => {

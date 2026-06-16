@@ -1,17 +1,10 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { 
-    Wallet, 
-    TrendingUp, 
-    Loader2,
-    Calendar,
-    ChevronLeft,
-    ChevronRight,
-    ArrowUpRight
-} from 'lucide-react';
+import { Wallet, TrendingUp, Loader2,Calendar,ChevronLeft,ChevronRight,ArrowUpRight} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { getTrainerEarnings,  } from '../../../api/trainer-payout.api';
 import { type TrainerPayout } from '../../../dtos/trainer-payout.resDTO';
+
 
 const MyEarningsPage: React.FC = () => {
     const [earnings, setEarnings] = useState<TrainerPayout[]>([]);

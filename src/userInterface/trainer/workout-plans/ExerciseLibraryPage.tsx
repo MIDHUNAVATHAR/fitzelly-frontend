@@ -1,18 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Plus, 
-    Trash2, 
-    Edit2, 
-    Video, 
-    Link as LinkIcon, 
-    X, 
-    Loader2, 
-    Search, 
-    Dumbbell, 
-    CheckCircle2, 
-    Upload,
-    Play
-} from 'lucide-react';
+import { Plus, Trash2, Edit2, Video, Link as LinkIcon, X, Loader2, Search, Dumbbell, CheckCircle2, Upload, Play} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { axiosInstance } from '../../../api/axios';
 import { TRAINER_ROUTES } from '../../../constants/routes';

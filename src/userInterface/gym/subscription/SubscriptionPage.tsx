@@ -1,15 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { 
-    Check, 
-    Zap, 
-    Crown, 
-    CreditCard, 
-    Loader2, 
-    CheckCircle2, 
-    Sparkles,
-    ArrowRight
-} from 'lucide-react';
+import { Check, Zap, Crown, CreditCard,  Loader2, CheckCircle2, Sparkles,ArrowRight} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getAvailableFitzellyPlans, createStripeCheckoutSession, confirmFitzellySubscription} from '../../../api/gym-subscription.api';
 import { type SubscriptionPlan } from '../../../dtos/gym-subscription.resDTO';

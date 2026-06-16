@@ -1,25 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-    Scale,
-    Ruler,
-    Activity,
-    History,
-    Loader2,
-    TrendingUp,
-    ArrowRight,
-    TrendingDown,
-    Minus
-} from "lucide-react";
-import {
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-    AreaChart,
-    Area
-} from "recharts";
+import {Scale,Ruler,Activity,History,Loader2,TrendingUp,ArrowRight,TrendingDown,Minus} from "lucide-react";
+import {XAxis,YAxis,CartesianGrid,Tooltip,ResponsiveContainer,AreaChart,Area} from "recharts";
 import { healthTrackingApi } from "../../../api/health-tracking.api";
 import { getClientProfile } from "../../../api/client-profile.api";
 import { toast } from "react-hot-toast";

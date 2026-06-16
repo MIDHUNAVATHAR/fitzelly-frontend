@@ -1,15 +1,6 @@
 import { axiosInstance } from "./axios";
 import { GYM } from "../constants/routes";
-
-interface GymSignupInitiatePayload {
-    email: string;
-}
-
-interface GymSignupVerifyPayload {
-    email: string;
-    password: string;
-    otp: string;
-}
+import type {GymSignupInitiatePayload, GymSignupVerifyPayload} from "../dtos/authDTO"
 
 export const initiateGymSignup = async (payload: GymSignupInitiatePayload) => {
     const res = await axiosInstance.post(GYM.INITIATE_GYM_SIGNUP, payload);

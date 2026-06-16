@@ -18,17 +18,9 @@ interface ClientsResponse {
 
 export const getAssignedClients = async (page: number = 1, limit: number = 10, search: string = ''): Promise<{ data: { clients: ClientDTO[] }, totalItems: number, status: string }> => {
     try {
-        const response = await axiosInstance.get<ClientsResponse>(TRAINER_ROUTES.TRAINER_CLIENTS, {
-            params: { page, limit, search }
-        });
+        const response = await axiosInstance.get<ClientsResponse>(TRAINER_ROUTES.TRAINER_CLIENTS, { params: { page, limit, search }});
 
-        return {
-            status: response.data.status,
-            data: {
-                clients: response.data.data.clients
-            },
-            totalItems: response.data.data.pagination.total
-        };
+        return { status: response.data.status, data: {clients: response.data.data.clients },totalItems: response.data.data.pagination.total };
     } catch (error) {
         console.error("Error fetching assigned clients:", error);
         throw error;

@@ -1,10 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import {
-    ArrowLeft, Edit3, Save, X, Loader2,
-    Mail, Phone, Calendar,
-    IndianRupee, Tag
-} from 'lucide-react';
+import { ArrowLeft, Edit3, Save, X, Loader2, Mail, Phone, Calendar,IndianRupee, Tag} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getTrainerById, updateTrainer } from "../../../api/gym-trainers.api";
 import { type Trainer } from '../../../dtos/gym-trainers.resDTO';

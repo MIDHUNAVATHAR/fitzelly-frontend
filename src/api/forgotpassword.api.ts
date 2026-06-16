@@ -1,33 +1,47 @@
 import { axiosInstance } from "./axios";
-
-interface initiateForgotpasswordPayload {
-    email: string;
-    role: string;
-}
-
-interface verifyForgotPasswordPaylaod extends initiateForgotpasswordPayload {
-    otp: string;
-}
-
-interface resetPasswordPayload extends verifyForgotPasswordPaylaod {
-    password: string;
-}
+import { AUTH } from "../constants/routes";
+import type { InitiateForgotPasswordPayload } from "../dtos/authDTO";
+import type { VerifyForgotPasswordPayload } from "../dtos/authDTO";
+import type { ResetPasswordPayload } from "../dtos/authDTO";
 
 
 
-export const initiateForgotpassword = async (payload: initiateForgotpasswordPayload) => {
-    const res = await axiosInstance.post(`/api/${payload.role}/auth/forgot-password/initiate`, { email: payload.email });
-    return res.data;
-}
+export const initiateForgotPassword = async (
+    payload: InitiateForgotPasswordPayload
+) => {
+    const { data } = await axiosInstance.post(
+        AUTH.FORGOT_PASSWORD_INITIATE(payload.role),
+        { email: payload.email }
+    );
 
+    return data;
+};
 
-export const verifyForgotPassword = async (payload: verifyForgotPasswordPaylaod) => {
-    const res = await axiosInstance.post(`/api/${payload.role}/auth/forgot-password/verify`, { email: payload.email, otp: payload.otp });
-    return res.data;
-}
+export const verifyForgotPassword = async (
+    payload: VerifyForgotPasswordPayload
+) => {
+    const { data } = await axiosInstance.post(
+        AUTH.FORGOT_PASSWORD_VERIFY(payload.role),
+        {
+            email: payload.email,
+            otp: payload.otp,
+        }
+    );
 
+    return data;
+};
 
-export const resetPassword = async (payload: resetPasswordPayload) => {
-    const res = await axiosInstance.post(`/api/${payload.role}/auth/resetPassword`, { email: payload.email, password: payload.password, otp: payload.otp });
-    return res.data;
-}
+export const resetPassword = async (
+    payload: ResetPasswordPayload
+) => {
+    const { data } = await axiosInstance.post(
+        AUTH.RESET_PASSWORD(payload.role),
+        {
+            email: payload.email,
+            otp: payload.otp,
+            password: payload.password,
+        }
+    );
+
+    return data;
+};

@@ -1,16 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Users,
-    Wallet,
-    Calendar,
-    Loader2,
-    AlertCircle,
-    ArrowUpRight,
-    TrendingUp,
-    Activity as ActivityIcon,
-    UserPlus,
-    Clock
-} from 'lucide-react';
+import {Users,Wallet,Calendar,Loader2,AlertCircle,ArrowUpRight,TrendingUp,Activity as ActivityIcon,UserPlus,Clock} from 'lucide-react';
 import { getTrainerProfile } from '../../../api/trainer-profile.api';
 import { getAssignedClients } from '../../../api/trainer-clients.api';
 import { getTrainerEarnings } from '../../../api/trainer-payout.api';

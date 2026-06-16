@@ -13,12 +13,7 @@ export const fetchGyms = async (
 ): Promise<GymsResponse> => {
 
     const response = await axiosInstance.get(SUPER_ADMIN.SUPER_ADMIN_GYMS, {
-        params: {
-            page,
-            limit,
-            search: search || undefined,
-            status: status !== 'all' ? status : undefined
-        }
+        params: { page,limit, search: search || undefined, status: status !== 'all' ? status : undefined }
     });
 
     return response.data.data;
@@ -33,12 +28,8 @@ export const getGymById = async (gymId: string): Promise<Gym> => {
 
 
 export const updateGymStatus = async (gymId: string, gymData: Partial<Gym>): Promise<Gym> => {
-    console.log("updaing aprrove steart");
-    console.log(gymId);
-    console.log(gymData);
 
     const response = await axiosInstance.patch(SUPER_ADMIN.GYM_BY_ID(gymId), gymData);
-    console.log("update gym res : ", response)
     return response.data.data;
 };
 
@@ -52,11 +43,7 @@ export const rejectGym = async (gymId: string, rejectionReason: string): Promise
     return response.data.data;
 };
 
-export const updateGymSubscription = async (
-    gymId: string,
-    subscriptionStatus: string,
-    expiryDate: string
-): Promise<Gym> => {
+export const updateGymSubscription = async (gymId: string,subscriptionStatus: string,expiryDate: string): Promise<Gym> => {
     const response = await axiosInstance.patch(SUPER_ADMIN.UPDATE_GYM_SUBSCRIPTION(gymId), {
         subscriptionStatus,
         expiryDate
