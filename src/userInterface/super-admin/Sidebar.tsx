@@ -5,7 +5,6 @@ import {
     User,
     Building2,
     LogOut,
-    Shield,
     Dumbbell,
     ShieldCheck,
     Package
