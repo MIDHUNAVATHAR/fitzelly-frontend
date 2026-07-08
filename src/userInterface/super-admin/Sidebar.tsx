@@ -5,12 +5,13 @@ import {
     User,
     Building2,
     LogOut,
-    Shield,
     Dumbbell,
     ShieldCheck,
     Package
 } from 'lucide-react';
+import Logo from '../../components/ui/Logo';
 import { useLogout } from '../../hooks/useLogout';
+
 
 
 
@@ -53,12 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
             >
                 <div className="flex flex-col h-full w-full">
                     {/* Logo */}
-                    <div className="p-6 border-b border-zinc-800 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded bg-emerald-400 flex items-center justify-center">
-                            <Shield className="w-5 h-5 text-black" />
-                        </div>
-                        <span className="text-xl font-bold text-white tracking-wider">FITZ<span className="text-emerald-400">ELLY</span> <span className="text-[10px] bg-zinc-800 px-1 rounded text-zinc-400 ml-1">ADMIN</span></span>
-                    </div>
+                     <Logo></Logo>
 
                     {/* Menu */}
                     <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Mail, Phone, Calendar, Tag, Award, ArrowLeft, Loader2, Activity, User, ShieldAlert } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import type { ClientDTO } from '../../../api/gym-clients.api';
+import { type ClientDTO } from '../../../dtos/gym-clients.resDTO';
 import { getAssignedClientById } from "../../../api/trainer-clients.api";
 
 

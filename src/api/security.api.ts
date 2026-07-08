@@ -1,26 +1,15 @@
 import { axiosInstance } from "./axios";
+import { SECURITY } from "../constants/routes";
 
-export interface SessionItem {
-    id: string;
-    userId: string;
-    role: string;
-    device: string;
-    browser?: string;
-    os?: string;
-    ip: string;
-    lastActive: string;
-    isRevoked: boolean;
-    isCurrent?: boolean;
-    createdAt: string;
-}
 
 export const securityApi = {
     getActiveSessions: async () => {
-        const response = await axiosInstance.get('/api/security/active-sessions');
+        const response = await axiosInstance.get( SECURITY.GET_ACTIVE_SESSIONS );
         return response.data;
     },
+
     revokeSession: async (sessionId: string) => {
-        const response = await axiosInstance.delete(`/api/security/session/${sessionId}`);
+        const response = await axiosInstance.delete( SECURITY.REVOKE_SESSION(sessionId));
         return response.data;
-    }
+    },
 };

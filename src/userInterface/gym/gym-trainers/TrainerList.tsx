@@ -8,7 +8,7 @@ import Pagination from '../../../components/ui/Pagination';
 import ConfirmModal from '../../../components/ui/ConfirmModal';
 import { Plus, Mail, Eye, Edit, Trash2, Loader } from 'lucide-react';
 import { getTrainers, softDeleteTrainer, sendWelcomeEmail } from "../../../api/gym-trainers.api";
-import type { Trainer } from "../../../api/gym-trainers.api";
+import { type Trainer } from '../../../dtos/gym-trainers.resDTO';
 import { toast } from 'react-hot-toast';
 import { isAxiosError } from 'axios';
 

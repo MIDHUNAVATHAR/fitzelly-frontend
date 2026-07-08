@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mail, Phone, Edit3, Camera, Save, Building2 } from 'lucide-react';
-import { getSuperAdminProfile, updateSuperAdminProfile, uploadSuperAdminLogo, type SuperAdminProfile } from "../../../api/superAdmin-profile.api";
+import { getSuperAdminProfile, updateSuperAdminProfile, uploadSuperAdminLogo } from "../../../api/superAdmin-profile.api";
+import { type SuperAdminProfile } from '../../../dtos/superAdmin-profile.resDTO';
 import { toast } from 'react-hot-toast';
 import { useImageCropper } from '../../../hooks/useImageCropper';
 import ImageCropperModal from '../../../components/ui/ImageCropperModal';

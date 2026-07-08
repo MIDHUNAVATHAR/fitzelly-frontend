@@ -1,20 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import {
-    Users,
-    Wallet,
-    Calendar,
-    Loader2,
-    AlertCircle,
-    ArrowUpRight,
-    TrendingUp,
-    Activity as ActivityIcon,
-    UserPlus,
-    Clock
-} from 'lucide-react';
+import {Users,Wallet,Calendar,Loader2,AlertCircle,ArrowUpRight,TrendingUp,Activity as ActivityIcon,UserPlus,Clock} from 'lucide-react';
 import { getTrainerProfile } from '../../../api/trainer-profile.api';
 import { getAssignedClients } from '../../../api/trainer-clients.api';
-import { getTrainerEarnings, type TrainerPayout } from '../../../api/trainer-payout.api';
-import type { ClientDTO } from '../../../api/gym-clients.api';
+import { getTrainerEarnings } from '../../../api/trainer-payout.api';
+import { type TrainerPayout } from '../../../dtos/trainer-payout.resDTO';
+import { type ClientDTO } from '../../../dtos/gym-clients.resDTO';
 import AttendanceCard from '../../../components/ui/AttendanceCard';
 import { getYearlyAttendanceCount } from '../../../api/attendance.api';
 import { isAxiosError } from 'axios';

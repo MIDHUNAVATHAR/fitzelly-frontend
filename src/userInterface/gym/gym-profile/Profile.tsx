@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Mail, Phone, MapPin, Edit3, Camera, Save, AlertTriangle, Clock, FileText, Trash2, Plus, Eye } from 'lucide-react';
 
 import { toast } from 'react-hot-toast';
-import { getGymProfile, updateGymProfile, uploadGymLogo, uploadGymCertificate, deleteGymCertificate, reApplyGym, type GymProfile } from "../../../api/gym-profile.api";
+import { getGymProfile, updateGymProfile, uploadGymLogo, uploadGymCertificate, deleteGymCertificate, reApplyGym } from "../../../api/gym-profile.api";
+import { type GymProfile } from '../../../dtos/gym-profile.resDTO';
 import { useImageCropper } from '../../../hooks/useImageCropper';
 import ImageCropperModal from '../../../components/ui/ImageCropperModal';
 import { useLocation } from '../../../hooks/useLocation';

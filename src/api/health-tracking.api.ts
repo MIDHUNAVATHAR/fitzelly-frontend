@@ -1,19 +1,18 @@
+import { type WeightLog } from "../dtos/health-tracking.resDTO";
+import { CLIENT } from "../constants/routes";
 import { axiosInstance } from "./axios";
 
-export interface WeightLog {
-    weight: number;
-    height: number;
-    bmi: number;
-    date: string;
-}
+
 
 export const healthTrackingApi = {
     addWeightLog: async (log: WeightLog) => {
-        const response = await axiosInstance.post("/api/client/weight-log", log);
-        return response.data;
+        const { data } = await axiosInstance.post(   CLIENT.WEIGHT_LOG,log);
+        return data;
     },
+
     getWeightHistory: async () => {
-        const response = await axiosInstance.get("/api/client/weight-history");
-        return response.data;
-    }
+        const { data } = await axiosInstance.get( CLIENT.WEIGHT_HISTORY);
+        return data.data;
+    },
 };
+

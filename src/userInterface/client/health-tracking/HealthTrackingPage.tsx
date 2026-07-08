@@ -1,25 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-    Scale,
-    Ruler,
-    Activity,
-    History,
-    Loader2,
-    TrendingUp,
-    ArrowRight,
-    TrendingDown,
-    Minus
-} from "lucide-react";
-import {
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-    AreaChart,
-    Area
-} from "recharts";
+import {Scale,Ruler,Activity,History,Loader2,TrendingUp,ArrowRight,TrendingDown,Minus} from "lucide-react";
+import {XAxis,YAxis,CartesianGrid,Tooltip,ResponsiveContainer,AreaChart,Area} from "recharts";
 import { healthTrackingApi } from "../../../api/health-tracking.api";
 import { getClientProfile } from "../../../api/client-profile.api";
 import { toast } from "react-hot-toast";
@@ -32,6 +14,12 @@ interface WeightLog {
     bmi: number;
     date: string;
 }
+
+const calculateBMI = (w: number, h: number) => {
+    if (!w || !h) return 0;
+    const hInMeters = h / 100;
+    return parseFloat((w / (hInMeters * hInMeters)).toFixed(1));
+};
 
 const HealthTrackingPage: React.FC = () => {
     const [weightHistory, setWeightHistory] = useState<WeightLog[]>([]);
@@ -51,13 +39,19 @@ const HealthTrackingPage: React.FC = () => {
                 healthTrackingApi.getWeightHistory(),
                 getClientProfile()
             ]);
-            setWeightHistory(history);
+            const safeHistory = Array.isArray(history)
+                ? history.map((log: WeightLog) => ({
+                    ...log,
+                    bmi: log.bmi || calculateBMI(log.weight, log.height)
+                }))
+                : [];
+            setWeightHistory(safeHistory);
             if (profileData.profile.height) setCurrentHeight(profileData.profile.height.toString());
             if (profileData.profile.weight) setCurrentWeight(profileData.profile.weight.toString());
 
             // If history has more recent weight, use that
-            if (history && history.length > 0) {
-                const latest = history[history.length - 1];
+            if (safeHistory.length > 0) {
+                const latest = safeHistory[safeHistory.length - 1];
                 setCurrentWeight(latest.weight.toString());
                 setCurrentHeight(latest.height.toString());
             }
@@ -67,12 +61,6 @@ const HealthTrackingPage: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
-
-    const calculateBMI = (w: number, h: number) => {
-        if (!w || !h) return 0;
-        const hInMeters = h / 100;
-        return parseFloat((w / (hInMeters * hInMeters)).toFixed(1));
     };
 
     const getBMICategory = (bmi: number) => {
@@ -296,7 +284,7 @@ const HealthTrackingPage: React.FC = () => {
                         </div>
                         <div className="h-[300px] w-full relative z-10">
                             {weightHistory.length > 0 ? (
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height={300}>
                                     <AreaChart data={chartData}>
                                         <defs>
                                             <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
@@ -368,7 +356,7 @@ const HealthTrackingPage: React.FC = () => {
                         </div>
                         <div className="h-[200px] w-full">
                             {weightHistory.length > 0 ? (
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height={200}>
                                     <AreaChart data={chartData}>
                                         <defs>
                                             <linearGradient id="colorBmi" x1="0" y1="0" x2="0" y2="1">

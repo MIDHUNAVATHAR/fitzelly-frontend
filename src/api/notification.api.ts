@@ -1,14 +1,9 @@
+import { type NotificationItem } from '../dtos/notification.resDTO';
+
 import { axiosInstance } from './axios';
 import { GYM } from '../constants/routes';
 
-export interface NotificationItem {
-    id: string;
-    gymId: string;
-    message: string;
-    isRead: boolean;
-    type: string;
-    createdAt: string;
-}
+
 
 export const getUnreadNotifications = async (): Promise<NotificationItem[]> => {
     const response = await axiosInstance.get(GYM.NOTIFICATIONS_UNREAD);

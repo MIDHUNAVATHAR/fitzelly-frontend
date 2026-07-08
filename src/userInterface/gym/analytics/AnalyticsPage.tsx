@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Users, Activity, Wallet, TrendingUp, TrendingDown } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { getGymAnalytics, type GymAnalyticsData } from '../../../api/analytics.api';
+import { getGymAnalytics } from '../../../api/analytics.api';
+import { type GymAnalyticsData } from '../../../dtos/analytics.resDTO';
+
 
 const COLORS = ['#34d399', '#f87171', '#60a5fa', '#fbbf24', '#a78bfa'];
 
@@ -137,7 +139,7 @@ const GymAnalyticsPage: React.FC = () => {
                         </h2>
                     </div>
                     <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height={300}>
                             <AreaChart data={monthlyRevenue} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -159,7 +161,7 @@ const GymAnalyticsPage: React.FC = () => {
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex flex-col">
                     <h2 className="text-lg font-bold text-white mb-6">Payment Status Overview</h2>
                     <div className="flex-1 h-[200px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height={200}>
                             <PieChart>
                                 <Pie
                                     data={paymentStatus}
@@ -192,7 +194,7 @@ const GymAnalyticsPage: React.FC = () => {
                 <div className="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-xl p-6">
                     <h2 className="text-lg font-bold text-white mb-6">Top Plans by Revenue</h2>
                     <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={planRevenue} layout="vertical" margin={{ top: 0, right: 30, left: 40, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#27272a" />
                                 <XAxis type="number" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
@@ -211,27 +213,27 @@ const GymAnalyticsPage: React.FC = () => {
                 {/* Retention Stats visual wrapper */}
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
                     <h2 className="text-lg font-bold text-white mb-6">Client Retention</h2>
-                    
+
                     <div className="flex flex-col items-center justify-center py-6">
                         <div className="relative w-48 h-48 flex items-center justify-center">
                             <svg className="w-full h-full transform -rotate-90">
-                                <circle 
-                                    cx="96" 
-                                    cy="96" 
-                                    r="80" 
-                                    stroke="currentColor" 
-                                    strokeWidth="16" 
-                                    fill="transparent" 
+                                <circle
+                                    cx="96"
+                                    cy="96"
+                                    r="80"
+                                    stroke="currentColor"
+                                    strokeWidth="16"
+                                    fill="transparent"
                                     className="text-zinc-800"
                                 />
-                                <circle 
-                                    cx="96" 
-                                    cy="96" 
-                                    r="80" 
-                                    stroke="currentColor" 
-                                    strokeWidth="16" 
-                                    fill="transparent" 
-                                    strokeDasharray={502.65} 
+                                <circle
+                                    cx="96"
+                                    cy="96"
+                                    r="80"
+                                    stroke="currentColor"
+                                    strokeWidth="16"
+                                    fill="transparent"
+                                    strokeDasharray={502.65}
                                     strokeDashoffset={retention.totalClients > 0 ? 502.65 - (502.65 * (retention.activeClients / retention.totalClients)) : 502.65}
                                     className="text-emerald-400 transition-all duration-1000 ease-out"
                                 />

@@ -5,13 +5,8 @@ import Sidebar from "./Sidebar";
 import { useAuth } from "../../context/useAuth";
 import { socket } from "../../config/socket";
 import toast from "react-hot-toast";
-import {
-    getUnreadNotifications,
-    getReadNotifications,
-    markNotificationAsRead,
-    markAllNotificationsAsRead
-} from "../../api/notification.api";
-import type { NotificationItem } from "../../api/notification.api";
+import { getUnreadNotifications,getReadNotifications,markNotificationAsRead,markAllNotificationsAsRead} from "../../api/notification.api";
+import { type NotificationItem } from '../../dtos/notification.resDTO';
 
 
 

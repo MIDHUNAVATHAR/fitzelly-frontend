@@ -1,35 +1,9 @@
+import { type CreatePlanDTO,type UpdatePlanDTO } from '../dtos/plan.reqDTO';
+import { type Plan } from '../dtos/plan.resDTO';
+
 import { axiosInstance } from './axios';
 import { GYM } from '../constants/routes';
 
-export interface Plan {
-    id: string;
-    gymId: string;
-    planName: string;
-    planType: 'DAY_BASED' | 'CATEGORY_BASED';
-    validity: number;
-    price: number;
-    windowPeriod: number;
-    description?: string;
-    isDeleted: boolean;
-}
-
-export interface CreatePlanDTO {
-    planName: string;
-    planType: 'DAY_BASED' | 'CATEGORY_BASED';
-    validity: number;
-    price: number;
-    windowPeriod: number;
-    description?: string;
-}
-
-export interface UpdatePlanDTO {
-    planName?: string;
-    planType?: 'DAY_BASED' | 'CATEGORY_BASED';
-    validity?: number;
-    price?: number;
-    windowPeriod?: number;
-    description?: string;
-}
 
 export const getPlans = async (
     page: number = 1,

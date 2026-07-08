@@ -90,9 +90,7 @@ export default function Header() {
                         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                     >
                         <div className="w-8 h-8 rounded bg-emerald-400 flex items-center justify-center">
-                            <div className="w-5 h-5 text-black">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14.4 14.4 9.6 9.6M18.65 9.35A9 9 0 1 1 5.35 18.65L18.65 9.35M6.34 17.66l-1.41 1.41" /></svg>
-                            </div>
+                           <img src="logo/logo.png" alt="" />
                         </div>
                         <div className="flex flex-col leading-none">
                             <span className={`text-xl font-bold tracking-wider transition-colors ${isScrolled ? "text-white" : "text-white"

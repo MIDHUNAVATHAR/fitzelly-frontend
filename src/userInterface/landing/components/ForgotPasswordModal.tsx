@@ -1,7 +1,7 @@
 import { X, ArrowLeft, Timer } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { initiateForgotpassword, verifyForgotPassword, resetPassword } from '../../../api/forgotpassword.api';
+import {  initiateForgotPassword , verifyForgotPassword, resetPassword } from '../../../api/forgotpassword.api';
 import PasswordInput from './PasswordInput';
 import { isAxiosError } from 'axios';
 
@@ -80,7 +80,7 @@ export default function ForgotPasswordModal({ isOpen, onClose, onSwitchToSignIn 
     setIsLoading(true);
 
     try {
-        const response = await initiateForgotpassword({ email, role: selectedRole });
+        const response = await initiateForgotPassword({ email, role: selectedRole });
 
         // Even if the backend didn't find the user, it should ideally return "success"
         // to prevent enumeration. 

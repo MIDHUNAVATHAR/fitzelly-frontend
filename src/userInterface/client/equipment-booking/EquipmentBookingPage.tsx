@@ -1,22 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Calendar, 
-    Clock, 
-    ChevronRight, 
-    AlertCircle, 
-    CheckCircle2, 
-    Search,
-    Dumbbell,
-    LayoutDashboard
-} from 'lucide-react';
+import { Calendar, Clock, ChevronRight, AlertCircle, CheckCircle2, Search,Dumbbell,LayoutDashboard} from 'lucide-react';
 import { getEquipments } from '../../../api/equipment.api';
-import type { Equipment } from '../../../api/equipment.api';
+import { type Equipment } from '../../../dtos/equipment.resDTO';
 import { getEquipmentSlots, bookEquipment, getMyBookings, cancelBooking } from '../../../api/equipment-booking.api';
-import type { EquipmentSlot, EquipmentBooking } from '../../../api/equipment-booking.api';
+import type { EquipmentSlot, EquipmentBooking } from "../../../dtos/equipment-booking.resDTO";
 import { getClientProfile } from '../../../api/client-profile.api';
 import { format, addDays } from 'date-fns';
 import { toast } from 'react-hot-toast';
 import { isAxiosError } from 'axios';
+
 
 const EquipmentBookingPage: React.FC = () => {
     const [gymId, setGymId] = useState<string | null>(null);

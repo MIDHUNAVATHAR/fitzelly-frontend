@@ -3,7 +3,7 @@ import { Plus, Edit2, Trash2, Loader2 } from 'lucide-react';
 import ReusableTable from '../../../components/ui/ReusableTable';
 import type { Column } from '../../../components/ui/ReusableTable';
 import { fetchSubscriptionPlans, createSubscriptionPlan, updateSubscriptionPlan, deleteSubscriptionPlan } from '../../../api/subscription-plans.api';
-import type { SubscriptionPlan } from '../../../api/subscription-plans.api';
+import { type SubscriptionPlan } from '../../../dtos/subscription-plans.resDTO';
 import { toast } from 'react-hot-toast';
 import ConfirmModal from '../../../components/ui/ConfirmModal';
 

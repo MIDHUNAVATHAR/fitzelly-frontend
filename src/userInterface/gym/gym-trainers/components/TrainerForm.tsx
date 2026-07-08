@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useForm, Controller, type FieldErrors } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Upload, FileText, Trash2 } from 'lucide-react';
-import type { Trainer } from "../../../../api/gym-trainers.api";
+import { type Trainer } from '../../../../dtos/gym-trainers.resDTO';
 import DateInput from "../../../../components/ui/DateInput";
 import ImageCropperModal from "../../../../components/ui/ImageCropperModal";
 import CertificatePreviewModal from "../../../../components/ui/CertificatePreviewModal";

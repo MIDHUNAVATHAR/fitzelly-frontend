@@ -1,24 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  CheckCircle, 
-  Clock, 
-  IndianRupee, 
-  TrendingUp, 
-  Building2,
-  ArrowRight
+import {
+    CheckCircle,
+    Clock,
+    IndianRupee,
+    TrendingUp,
+    Building2,
+    ArrowRight
 } from 'lucide-react';
-import { 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  AreaChart,
-  Area 
+import {
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    AreaChart,
+    Area
 } from 'recharts';
 import { getSuperAdminDashboard } from '../../../api/analytics.api';
-import type { SuperAdminDashboardMetrics } from '../../../api/analytics.api';
+import { type SuperAdminDashboardMetrics } from '../../../dtos/analytics.resDTO';
 import toast from 'react-hot-toast';
 
 const DashboardHome: React.FC = () => {
@@ -61,14 +61,14 @@ const DashboardHome: React.FC = () => {
         <div className="space-y-8 animate-in fade-in duration-500 p-4">
             {/* Header */}
             <div>
-                <motion.h1 
+                <motion.h1
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="text-3xl font-bold text-white tracking-tight"
                 >
                     Platform Overview
                 </motion.h1>
-                <motion.p 
+                <motion.p
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
@@ -102,7 +102,7 @@ const DashboardHome: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Revenue Chart */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.4 }}
@@ -119,38 +119,38 @@ const DashboardHome: React.FC = () => {
                         </div>
                     </div>
                     <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height={300}>
                             <AreaChart data={data.revenueTrend}>
                                 <defs>
                                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
-                                        <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                                        <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
-                                <XAxis 
-                                    dataKey="month" 
-                                    axisLine={false} 
-                                    tickLine={false} 
+                                <XAxis
+                                    dataKey="month"
+                                    axisLine={false}
+                                    tickLine={false}
                                     tick={{ fill: '#71717a', fontSize: 10 }}
                                     dy={10}
                                 />
-                                <YAxis 
-                                    axisLine={false} 
-                                    tickLine={false} 
+                                <YAxis
+                                    axisLine={false}
+                                    tickLine={false}
                                     tick={{ fill: '#71717a', fontSize: 10 }}
                                 />
-                                <Tooltip 
+                                <Tooltip
                                     contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '12px' }}
                                     itemStyle={{ color: '#f97316' }}
                                 />
-                                <Area 
-                                    type="monotone" 
-                                    dataKey="revenue" 
-                                    stroke="#f97316" 
+                                <Area
+                                    type="monotone"
+                                    dataKey="revenue"
+                                    stroke="#f97316"
                                     strokeWidth={3}
-                                    fillOpacity={1} 
-                                    fill="url(#colorRevenue)" 
+                                    fillOpacity={1}
+                                    fill="url(#colorRevenue)"
                                 />
                             </AreaChart>
                         </ResponsiveContainer>
@@ -158,7 +158,7 @@ const DashboardHome: React.FC = () => {
                 </motion.div>
 
                 {/* Recent Registrations */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.5 }}
@@ -185,11 +185,10 @@ const DashboardHome: React.FC = () => {
                                             </p>
                                         </div>
                                     </div>
-                                    <span className={`text-[10px] uppercase tracking-widest font-black px-2 py-1 rounded-md ${
-                                        gym.status === 'Approved' ? 'bg-green-500/10 text-green-500' :
+                                    <span className={`text-[10px] uppercase tracking-widest font-black px-2 py-1 rounded-md ${gym.status === 'Approved' ? 'bg-green-500/10 text-green-500' :
                                         gym.status === 'Pending' ? 'bg-orange-500/10 text-orange-500' :
-                                        'bg-red-500/10 text-red-500'
-                                    }`}>
+                                            'bg-red-500/10 text-red-500'
+                                        }`}>
                                         {gym.status}
                                     </span>
                                 </div>

@@ -12,9 +12,7 @@ import { useLocation } from 'react-router-dom';
 const ChatPage: React.FC = () => {
     const { user } = useAuth();
     const location = useLocation();
-    const {
-        messages, setMessages, sendMessage: sendSocketMessage,
-        initiateCall, typingStatus, sendTypingStatus,
+    const { messages, setMessages, sendMessage: sendSocketMessage, initiateCall, typingStatus, sendTypingStatus,
         conversations, setConversations, deleteMessage
     } = useChat();
     const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);

@@ -1,23 +1,8 @@
+import { type MessageUpdate, type CallHistorySave } from "../dtos/chat.reqDTO";
+
 import { axiosInstance } from "./axios";
 import { CHAT } from "../constants/routes";
 
-export interface MessageUpdate {
-    conversationId: string;
-    receiverId: string;
-    content: string;
-    type: string;
-}
-
-export interface CallHistorySave {
-    callerId: string;
-    receiverId: string;
-    conversationId: string;
-    type: 'video' | 'audio';
-    status: string;
-    duration: number;
-    startTime: Date;
-    endTime: Date;
-}
 
 export const getConversations = async () => {
     const response = await axiosInstance.get(CHAT.CONVERSATIONS);
@@ -64,7 +49,7 @@ export const uploadAttachment = async (file: File) => {
 };
 
 export const deleteChatMessage = async (messageId: string) => {
-    const response = await axiosInstance.delete(`/api/chat/messages/${messageId}`);
+    const response = await axiosInstance.delete(CHAT.DELETE_MESSAGE(messageId));
     return response.data;
 };
 

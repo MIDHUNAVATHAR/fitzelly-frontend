@@ -3,13 +3,15 @@ import { Mail, ArrowRight, ArrowLeft, ShieldCheck, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../api/login.api';
-import { initiateForgotpassword } from '../../api/forgotpassword.api';
+import { initiateForgotPassword } from '../../api/forgotpassword.api';
 import { verifyForgotPassword } from '../../api/forgotpassword.api';
 import { resetPassword } from '../../api/forgotpassword.api';
 import { useAuth } from '../../context/useAuth';
 import { isAxiosError } from 'axios';
 import { ROLES } from '../../constants/roles';
 import PasswordInput from '../landing/components/PasswordInput';
+import Logo from '../../components/ui/Logo';
+
 
 import { UAParser } from 'ua-parser-js';
 import axios from 'axios';
@@ -92,7 +94,7 @@ const SuperAdminLoginPage: React.FC = () => {
         if (!email) return toast.error('Please enter your email');
         setIsLoading(true);
         try {
-            const result = await initiateForgotpassword({ email: email, role: ROLES.SUPER_ADMIN })
+            const result = await initiateForgotPassword({ email: email, role: ROLES.SUPER_ADMIN })
             toast.success(result?.message || "An otp send to your email ")
             setIsLoading(false)
             setView('VERIFY_OTP')
@@ -167,10 +169,8 @@ const SuperAdminLoginPage: React.FC = () => {
                     </div>
 
                     <div className="relative z-10 flex flex-col items-center">
-                        <div className="w-10 h-10 bg-emerald-400 rounded-lg flex items-center justify-center text-black font-bold text-xl mb-3 shadow-lg shadow-emerald-400/20">
-                            F
-                        </div>
-                        <h1 className="text-xl font-bold text-white mb-1">Fitzelly</h1>
+                        <Logo/>
+                        
                         <p className="text-emerald-400 text-sm font-medium">Super Admin Portal</p>
                     </div>
                 </div>

@@ -1,5 +1,6 @@
 import { axiosInstance } from "./axios";
 import type { InternalAxiosRequestConfig } from "axios";
+import { AUTH,API_MESSAGES ,AUTH_PATHS} from "../constants/routes";
 
 type QueueItem = {
     resolve: (token: string) => void;
@@ -55,13 +56,13 @@ export const setupInterceptors = (
     }, async error => {
         const originalRequest = error.config;
 
-        const isAuthRoute = originalRequest.url?.includes("/auth/login") ||
-            originalRequest.url?.includes("/auth/refresh-token") ||
-            originalRequest.url?.includes("/auth/logout") ||
-            originalRequest.url?.includes("/auth/forgot-password/initiate")
+      const isAuthRoute =  originalRequest.url?.includes(AUTH_PATHS.LOGIN) ||
+                           originalRequest.url?.includes(AUTH_PATHS.REFRESH_TOKEN) ||
+                           originalRequest.url?.includes(AUTH_PATHS.LOGOUT) ||
+                           originalRequest.url?.includes(AUTH_PATHS.FORGOT_PASSWORD_INITIATE);
 
         // Handle Subscription Expired
-        if (error.response?.status === 403 && error.response?.data?.message === "GYM_SUBSCRIPTION_EXPIRED") {
+        if (error.response?.status === 403 && error.response?.data?.message === API_MESSAGES.GYM_SUBSCRIPTION_EXPIRED) {
             onSubscriptionExpired(true);
             return Promise.reject(error);
         }
@@ -83,12 +84,12 @@ export const setupInterceptors = (
             isRefreshing = true;
 
             try {
-                const res = await axiosInstance.get("/api/auth/refresh-token");
+                const res = await axiosInstance.get(AUTH.REFRESH_TOKEN);
 
                 const newToken = res.data.data.accessToken;
 
                 setAccessToken(newToken);
-                // processQueue(null, newToken)
+                processQueue(null, newToken)
 
                 originalRequest.headers.Authorization = `Bearer ${newToken}`;
                 return axiosInstance(originalRequest);
@@ -96,7 +97,6 @@ export const setupInterceptors = (
                 const errObj = err instanceof Error ? err : new Error("refresh token failed");
                 processQueue(errObj, null);
                 setAccessToken(null);
-                console.log("xxxxx")
                 window.location.href = "/";
 
 
@@ -108,4 +108,4 @@ export const setupInterceptors = (
         return Promise.reject(error);
     })
 
-}
+}

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { isAxiosError } from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import RejectGymModal from '../../../components/super-admin/RejectGymModal';
-import EditSubscriptionModal from '../../../components/super-admin/EditSubscriptionModal';
+import RejectGymModal from '../RejectGymModal';
+import EditSubscriptionModal from '../EditSubscriptionModal';
 import { getGymById, approveGym, rejectGym, updateGymSubscription } from "../../../api/superAdmin-gyms.api";
-import type { Gym } from "../../../api/superAdmin-gyms.api";
+import { type Gym } from '../../../dtos/superAdmin-gyms.resDTO';
 import { Loader2, ArrowLeft, Mail, Phone, MapPin, Building2, Calendar, ShieldCheck, CheckCircle2, FileText, Eye, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import ConfirmModal from '../../../components/ui/ConfirmModal';

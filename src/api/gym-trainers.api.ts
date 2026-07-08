@@ -1,3 +1,5 @@
+import { type Trainer } from "../dtos/gym-trainers.resDTO";
+
 import { axiosInstance } from "./axios";
 import { GYM } from "../constants/routes";
 
@@ -56,18 +58,4 @@ export const addTrainer = async (trainerData: Partial<Trainer> | FormData) => {
 
 
 
-export interface Trainer {
-    id: string;
-    fullName: string;
-    email: string;
-    phoneNumber: string;
-    specialization?: string;
-    salary?: number;
-    dateOfBirth: string;
-    joinedDate: string;
-    profileUrl: string;
-    qualification?: string;
-    address?: string;
-    certificates?: string[];
-    isEmailVerified: boolean
-}
+

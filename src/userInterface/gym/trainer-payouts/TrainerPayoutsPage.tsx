@@ -1,22 +1,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { 
-    Plus, 
-    Filter, 
-    ChevronLeft, 
-    ChevronRight, 
-    Edit2, 
-    Trash2, 
-    Wallet, 
-    TrendingUp, 
-    Users, 
-    X, 
-    Loader2 
-} from 'lucide-react';
+import { Plus, Filter, ChevronLeft,  ChevronRight,  Edit2, Trash2, Wallet, TrendingUp, Users, X, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { format, startOfMonth } from 'date-fns';
 import DateInput from '../../../components/ui/DateInput';
-import { getTrainerPayouts, addTrainerPayout, updateTrainerPayout, deleteTrainerPayout, type TrainerPayout } from '../../../api/trainer-payout.api';
-import { getTrainers, type Trainer } from '../../../api/gym-trainers.api';
+import { getTrainerPayouts, addTrainerPayout, updateTrainerPayout, deleteTrainerPayout } from '../../../api/trainer-payout.api';
+import { getTrainers} from '../../../api/gym-trainers.api';
+import { type Trainer } from '../../../dtos/gym-trainers.resDTO';
+import { type TrainerPayout } from '../../../dtos/trainer-payout.resDTO';
 
 const TrainerPayoutsPage: React.FC = () => {
     const [payouts, setPayouts] = useState<TrainerPayout[]>([]);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Shield, Monitor, Smartphone, Globe, Trash2, Clock, CheckCircle2, AlertCircle, AlertTriangle } from 'lucide-react';
 import { securityApi } from '../../../api/security.api';
-import type { SessionItem } from '../../../api/security.api';
+import { type SessionItem } from '../../../dtos/security.resDTO';
 import toast from 'react-hot-toast';
 
 const SecurityPage: React.FC = () => {
@@ -64,7 +64,10 @@ const SecurityPage: React.FC = () => {
     };
 
     const formatDate = (dateStr: string) => {
+        if (!dateStr) return 'N/A';
         const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return 'N/A';
+        
         return new Intl.DateTimeFormat('en-US', {
             month: 'short',
             day: 'numeric',

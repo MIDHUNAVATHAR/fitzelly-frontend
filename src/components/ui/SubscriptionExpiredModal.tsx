@@ -1,6 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "../context/useAuth";
+import { useAuth } from "../../context/useAuth";
 import { AlertCircle, LogOut } from "lucide-react";
 
 const SubscriptionExpiredModal: React.FC = () => {

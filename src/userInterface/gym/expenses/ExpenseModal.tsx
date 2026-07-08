@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import type { Expense, ExpenseCategory } from '../../../api/expense.api';
+
+import { type Expense, type ExpenseCategory } from '../../../dtos/expense.resDTO';
 
 interface ExpenseModalProps {
     isOpen: boolean;

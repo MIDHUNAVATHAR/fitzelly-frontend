@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, User, CalendarRange, Clock, AlertCircle } from 'lucide-react';
 import { updateMembership } from '../../../api/membership.api';
-import type { Membership } from '../../../api/membership.api';
-import type { Trainer } from '../../../api/gym-trainers.api';
+import { type Membership } from '../../../dtos/membership.resDTO';
+import { type Trainer } from '../../../dtos/gym-trainers.resDTO';
 import { toast } from 'react-hot-toast';
 import DateInput from '../../../components/ui/DateInput';
 import { isAxiosError } from 'axios';

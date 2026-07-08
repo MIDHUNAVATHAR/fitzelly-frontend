@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { addClient } from "../../../api/gym-clients.api";
-import type { ClientDTO } from "../../../api/gym-clients.api";
+import { type ClientDTO } from '../../../dtos/gym-clients.resDTO';
 import ClientForm from "./components/ClientForm"
 import { isAxiosError } from 'axios';
 

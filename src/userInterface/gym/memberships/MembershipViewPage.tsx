@@ -1,12 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-    ArrowLeft, Calendar, CalendarRange, ShieldCheck, Dumbbell,
-    CreditCard, Plus, Clock, Edit3, Trash2, Activity, Info
-} from 'lucide-react';
+import {ArrowLeft, Calendar, CalendarRange, ShieldCheck, Dumbbell,CreditCard, Plus, Clock, Edit3, Trash2, Activity, Info} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getMembershipById, deletePayment } from '../../../api/membership.api';
-import type { Membership, Payment } from '../../../api/membership.api';
+import { type Membership, type Payment } from '../../../dtos/membership.resDTO';
 import AddPaymentModal from './AddPaymentModal';
 import { isAxiosError } from 'axios';
 

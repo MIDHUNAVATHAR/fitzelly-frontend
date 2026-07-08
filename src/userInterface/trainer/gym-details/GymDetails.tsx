@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, AlignLeft, Info } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { getTrainerGymDetails, type GymProfile } from '../../../api/trainer-profile.api';
+import { getTrainerGymDetails } from '../../../api/trainer-profile.api';
+import type { GymProfile } from '../../../dtos/trainer-profile.resDTO';
 import { isAxiosError } from 'axios';
+
+
 
 const GymDetailsPage: React.FC = () => {
     const [gymProfile, setGymProfile] = useState<GymProfile | null>(null);

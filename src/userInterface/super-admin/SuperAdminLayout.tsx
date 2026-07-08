@@ -13,7 +13,7 @@ import {
     markNotificationAsRead,
     markAllNotificationsAsRead
 } from "../../api/notification.api";
-import type { NotificationItem } from "../../api/notification.api";
+import { type NotificationItem } from '../../dtos/notification.resDTO';
 
 const SuperAdminLayout: React.FC = () => {
     const [isMobileOpen, setIsMobileOpen] = React.useState(false);

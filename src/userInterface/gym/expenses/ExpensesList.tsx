@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Filter, Edit, Trash2, IndianRupee } from 'lucide-react';
 import { getExpenses, addExpense, updateExpense, deleteExpense } from '../../../api/expense.api';
-import type {Expense} from "../../../api/expense.api"
+import { type Expense } from '../../../dtos/expense.resDTO';
 import { toast } from 'react-hot-toast';
 import ReusableTable from '../../../components/ui/ReusableTable';
 import type { Column } from '../../../components/ui/ReusableTable';

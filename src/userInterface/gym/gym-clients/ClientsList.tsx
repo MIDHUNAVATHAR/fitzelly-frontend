@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Plus, Eye, Edit, Trash2, Mail, Loader, MessageCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { getClients, softDeleteClient, sendWelcomeEmail } from "../../../api/gym-clients.api";
-import type { ClientDTO } from "../../../api/gym-clients.api";
+import { type ClientDTO } from "../../../dtos/gym-clients.resDTO";
 import ReusableTable from "../../../components/ui/ReusableTable";
 import type { Column } from "../../../components/ui/ReusableTable";
 import SearchInput from "../../../components/ui/SearchInput";
