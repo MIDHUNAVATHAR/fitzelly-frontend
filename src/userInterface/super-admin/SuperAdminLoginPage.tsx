@@ -10,6 +10,8 @@ import { useAuth } from '../../context/useAuth';
 import { isAxiosError } from 'axios';
 import { ROLES } from '../../constants/roles';
 import PasswordInput from '../landing/components/PasswordInput';
+import Logo from '../../components/ui/Logo';
+
 
 import { UAParser } from 'ua-parser-js';
 import axios from 'axios';
@@ -167,10 +169,8 @@ const SuperAdminLoginPage: React.FC = () => {
                     </div>
 
                     <div className="relative z-10 flex flex-col items-center">
-                        <div className="w-10 h-10 bg-emerald-400 rounded-lg flex items-center justify-center text-black font-bold text-xl mb-3 shadow-lg shadow-emerald-400/20">
-                            F
-                        </div>
-                        <h1 className="text-xl font-bold text-white mb-1">Fitzelly</h1>
+                        <Logo/>
+                        
                         <p className="text-emerald-400 text-sm font-medium">Super Admin Portal</p>
                     </div>
                 </div>

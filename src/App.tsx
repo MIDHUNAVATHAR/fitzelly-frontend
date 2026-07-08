@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import LandingPage from "./userInterface/landing/LandingPage";
@@ -83,6 +83,22 @@ import MyEarningsPage from "./userInterface/trainer/earnings/MyEarningsPage";
 
 
 function App() {
+
+  /**
+   * registering service worker for enable pwa feature 
+   */
+  useEffect(()=>{
+    if("serviceWorker" in navigator){
+      navigator.serviceWorker
+      .register("/sw.js")
+      .then((registration)=>{
+        console.log("service worker registered", registration)
+      })
+      .catch((err)=>{
+        console.error("service worker registered failed",err); 
+      })
+    }
+  },[])
 
   return (
     <ChatProvider>

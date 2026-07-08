@@ -2,6 +2,7 @@ import React from 'react';
 import {LayoutDashboard,User,Users,Dumbbell,LogOut,List,ShieldCheck,Box,UserCheck,MessageSquare,MessageCircle,Receipt,Wallet,HandCoins,LineChart,Shield,Zap} from 'lucide-react';
 import { useLogout } from '../../hooks/useLogout';
 import { Link, useLocation } from 'react-router-dom';
+import Logo from '../../components/ui/Logo';
 
 interface SidebarProps {
     isMobileOpen: boolean;
@@ -52,12 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, setIsMobileOpen }) => {
             >
                 <div className="flex flex-col h-full w-full">
                     {/* Logo */}
-                    <div className="p-6 border-b border-zinc-800 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded bg-emerald-400 flex items-center justify-center">
-                            <Dumbbell className="w-5 h-5 text-black" />
-                        </div>
-                        <span className="text-xl font-bold text-white tracking-wider">FITZ<span className="text-emerald-400">ELLY</span></span>
-                    </div>
+                   <Logo/>
 
                     {/* Menu */}
                     <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
