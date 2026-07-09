@@ -208,7 +208,15 @@ const Profile: React.FC = () => {
                 logoUrl: formData.logoUrl
             };
             const updatedProfile = await updateGymProfile(updateData);
-            setProfile({ ...updatedProfile });
+            setProfile((prev)=>(prev? { ...updatedProfile,
+                  // Keep existing subscription details
+            subscriptionStatus: prev.subscriptionStatus,
+            planName: prev.planName,
+            amount: prev.amount,
+            paymentMethod: prev.paymentMethod,
+            startDate: prev.startDate,
+            expiryDate: prev.expiryDate,
+             }:{...updatedProfile}));
             setIsEditing(false);
             toast.success("Profile updated successfully");
         } catch {
