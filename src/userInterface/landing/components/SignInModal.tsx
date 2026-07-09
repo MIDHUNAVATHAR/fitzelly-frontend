@@ -97,7 +97,10 @@ export default function SignInModal({ isOpen, onClose, onSwitchToSignUp, onForgo
 
             if (axios.isAxiosError(err)) {
 
-                setError("Invalid email or password")
+                 console.log("Status:", err.response?.status);
+        console.log("Data:", err.response?.data);
+
+        setError(err.response?.data?.message ||err.message ||"Login failed");
             } else
                 setError("Network error. Please try again.");
         } finally {

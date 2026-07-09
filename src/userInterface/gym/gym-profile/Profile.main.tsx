@@ -1,0 +1,804 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Mail, Phone, MapPin, Edit3, Camera, Save, AlertTriangle, Clock, FileText, Trash2, Plus, Eye } from 'lucide-react';
+
+import { toast } from 'react-hot-toast';
+import { getGymProfile, updateGymProfile, uploadGymLogo, uploadGymCertificate, deleteGymCertificate, reApplyGym } from "../../../api/gym-profile.api";
+import { type GymProfile } from '../../../dtos/gym-profile.resDTO';
+import { useImageCropper } from '../../../hooks/useImageCropper';
+import ImageCropperModal from '../../../components/ui/ImageCropperModal';
+import { useLocation } from '../../../hooks/useLocation';
+import Spinner from '../../../components/ui/Spinner';
+import ConfirmModal from '../../../components/ui/ConfirmModal';
+
+
+const Profile: React.FC = () => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [loadingProfile, setLoadingProfile] = useState(true);
+
+    const [profile, setProfile] = useState<GymProfile | null>(null);
+    const [formData, setFormData] = useState<GymProfile>({});
+    const [showLocationWarning, setShowLocationWarning] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isReApplying, setIsReApplying] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const certInputRef = useRef<HTMLInputElement>(null);
+
+    // Certificate states
+    const [croppingType, setCroppingType] = useState<'logo' | 'certificate'>('logo');
+    const [certName, setCertName] = useState('');
+    const [isUploadingCert, setIsUploadingCert] = useState(false);
+    const [certToDelete, setCertToDelete] = useState<string | null>(null);
+    const [showCertNameModal, setShowCertNameModal] = useState(false);
+    const [pendingCertFile, setPendingCertFile] = useState<File | null>(null);
+
+    // Location hook
+    const { getCurrentLocation, loadingLocation } = useLocation();
+
+    // Handle cropped image
+    const handleCroppedImage = async (croppedImageBlob: Blob) => {
+        try {
+            const fileName = `${croppingType}-${Date.now()}.jpg`;
+            const file = new File([croppedImageBlob], fileName, { type: "image/jpeg" });
+
+            const toastId = toast.loading(`Uploading ${croppingType === 'logo' ? 'logo' : 'certificate'}...`);
+
+            if (croppingType === 'logo') {
+                const { logoUrl } = await uploadGymLogo(file);
+                setProfile(prev => prev ? ({ ...prev, logoUrl }) : null);
+                setFormData(prev => ({ ...prev, logoUrl }));
+                toast.success("Profile picture updated!");
+            } else {
+                const updatedGym = await uploadGymCertificate(file, certName || 'Certificate');
+                setProfile(updatedGym);
+                setFormData(updatedGym);
+                toast.success("Certificate uploaded successfully!");
+                setCertName('');
+            }
+            toast.dismiss(toastId);
+        } catch (error) {
+            console.error('Error uploading cropped image:', error);
+            toast.error("Failed to upload image");
+        }
+    };
+
+    // Use the image cropper hook
+    const {
+        imageSrc,
+        crop,
+        zoom,
+        isCropping,
+        isUploadingImage,
+        setCrop,
+        setZoom,
+        handleFileSelect,
+        handleUploadCroppedImage,
+        onCropComplete,
+        cancelCropping
+    } = useImageCropper({
+        onCropComplete: handleCroppedImage,
+        aspectRatio: 1 // Square for gym logo
+    });
+
+    useEffect(() => {
+        loadProfile();
+    }, []);
+
+    const loadProfile = async () => {
+        try {
+            const profileData = await getGymProfile();
+            setProfile(profileData);
+            setFormData(profileData);
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to load profile");
+        } finally {
+            setLoadingProfile(false);
+        }
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0];
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                toast.error("Please select an image file");
+                return;
+            }
+
+            // Validate file size -max 5MB
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error("Image size should be less than 5MB");
+                return;
+            }
+
+            setCroppingType('logo');
+            await handleFileSelect(file);
+            e.target.value = '';
+        }
+    };
+
+    const handleCertFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0];
+
+            // Validate size
+            if (file.size > 10 * 1024 * 1024) {
+                toast.error("File size should be less than 10MB");
+                return;
+            }
+
+            const isPdf = file.type === 'application/pdf';
+            const isImage = file.type.startsWith('image/');
+
+            if (!isPdf && !isImage) {
+                toast.error("Only PDF and image files are allowed");
+                return;
+            }
+
+            setPendingCertFile(file);
+            setShowCertNameModal(true);
+            e.target.value = '';
+        }
+    };
+
+    const confirmCertUpload = async () => {
+        if (!pendingCertFile || !certName.trim()) {
+            toast.error("Please enter a name for the certificate");
+            return;
+        }
+
+        const file = pendingCertFile;
+        const name = certName.trim();
+        setShowCertNameModal(false);
+        setPendingCertFile(null);
+
+        try {
+            const toastId = toast.loading(`Uploading ${file.type === 'application/pdf' ? 'PDF' : 'image'} certificate...`);
+            const updatedGym = await uploadGymCertificate(file, name);
+            setProfile(updatedGym);
+            setFormData(updatedGym);
+            toast.dismiss(toastId);
+            toast.success("Certificate uploaded successfully!");
+            setCertName('');
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to upload certificate");
+        }
+    };
+
+    const handleDeleteCert = async () => {
+        if (!certToDelete) return;
+        try {
+            setIsUploadingCert(true);
+            const updatedGym = await deleteGymCertificate(certToDelete);
+            setProfile(updatedGym);
+            setFormData(updatedGym);
+            toast.success("Certificate deleted successfully");
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to delete certificate");
+        } finally {
+            setIsUploadingCert(false);
+            setCertToDelete(null);
+        }
+    };
+
+    const handleSave = async () => {
+
+        const { gymName, caption, phoneNumber, address, description } = formData;
+
+        if (!gymName?.trim() || !caption?.trim() || !phoneNumber?.trim() || !address?.trim() || !description?.trim()) {
+            toast.error("All fields are mandatory");
+            return;
+        }
+
+        if (gymName?.trim().length > 30 || caption?.trim().length > 50 || phoneNumber?.trim().length > 30 || address?.trim().length > 30 || description?.trim().length > 30) {
+            toast.error("Data too long...");
+            return;
+        }
+        setIsSaving(true);
+        try {
+            const updateData = {
+                gymName,
+                caption,
+                phoneNumber,
+                address,
+                description,
+                logoUrl: formData.logoUrl
+            };
+            const updatedProfile = await updateGymProfile(updateData);
+            setProfile((prev)=>(prev? { ...updatedProfile,
+                  // Keep existing subscription details
+            subscriptionStatus: prev.subscriptionStatus,
+            planName: prev.planName,
+            amount: prev.amount,
+            paymentMethod: prev.paymentMethod,
+            startDate: prev.startDate,
+            expiryDate: prev.expiryDate,
+             }:{...updatedProfile}));
+            setIsEditing(false);
+            toast.success("Profile updated successfully");
+        } catch {
+            toast.error("Failed to update the profile");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleCancel = () => {
+        setFormData(profile || {});
+        setIsEditing(false);
+    };
+
+    const handleReApply = async () => {
+        if (!profile) return;
+
+        // Frontend validation for completeness
+        const isComplete = 
+            profile.logoUrl && 
+            profile.gymName && 
+            profile.phoneNumber && 
+            profile.address && 
+            profile.description && 
+            profile.location?.latitude && 
+            profile.location?.longitude && 
+            profile.certificates && 
+            profile.certificates.length > 0;
+
+        if (!isComplete) {
+            toast.error("Profile is incomplete. Please ensure logo, details, location, and at least one certificate are provided.", {
+                duration: 5000,
+                icon: '⚠️'
+            });
+            return;
+        }
+
+        try {
+            setIsReApplying(true);
+            await reApplyGym();
+            toast.success("Re-application submitted successfully! Super-admin has been notified.");
+            await loadProfile(); // Refresh profile to see 'Pending' status
+        } catch (error: unknown) {
+            console.error(error);
+            let message = "Failed to re-apply";
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosError = error as { response?: { data?: { message?: string } } };
+                message = axiosError.response?.data?.message || message;
+            }
+            toast.error(message);
+        } finally {
+            setIsReApplying(false);
+        }
+    };
+
+    const handleGetLocation = () => {
+        setShowLocationWarning(true);
+    };
+
+    const confirmUpdateLocation = async () => {
+        setShowLocationWarning(false);
+
+        const coords = await getCurrentLocation();
+
+        if (coords) {
+            try {
+                await updateGymProfile({
+                    location: { latitude: coords.latitude, longitude: coords.longitude }
+                });
+
+                const updatedLocation = { latitude: coords.latitude, longitude: coords.longitude };
+                setProfile(prev => prev ? ({ ...prev, location: updatedLocation }) : { location: updatedLocation });
+                setFormData(prev => ({ ...prev, location: updatedLocation }));
+
+                toast.success("Gym location updated to your current position!");
+            } catch {
+                toast.error("Failed to update location on server");
+            }
+        }
+    };
+
+
+    // Check if approval status is not approved
+
+    const isNotApproved = profile?.approvalStatus !== "Approved";
+
+    // Get status color based on subscription status
+    const getStatusColor = (status: string | undefined) => {
+        switch (status) {
+            case 'Active': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+            case 'Trial': return 'text-blue-400 bg-blue-400/10 border-blue-400/20';
+            case 'Expired': return 'text-red-400 bg-red-400/10 border-red-400/20';
+            default: return 'text-amber-400 bg-amber-400/10 border-amber-400/20'; // Pending
+        }
+    };
+
+
+
+    if (loadingProfile) {
+        return (
+            <div className="w-full animate-in fade-in duration-500">
+                <Spinner />
+            </div>
+        );
+    }
+
+
+
+    return (
+        <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <h1 className="text-2xl font-bold text-white">Gym Profile</h1>
+            </div>
+
+            {/* Approval Status Banner - Pending / Rejected */}
+            {isNotApproved && !loadingProfile && (
+                <div className={`mb-6 border rounded-xl p-4 sm:p-5 backdrop-blur-sm ${profile?.approvalStatus === 'Rejected' 
+                    ? 'bg-red-500/10 border-red-500/30' 
+                    : 'bg-gradient-to-r from-amber-300/20 to-orange-400/20 border-amber-500/30'}`}>
+                    <div className="flex items-start gap-3 sm:gap-4">
+                        <div className={`p-2 sm:p-3 rounded-xl flex-shrink-0 ${profile?.approvalStatus === 'Rejected' ? 'bg-red-500/20' : 'bg-amber-500/20'}`}>
+                            {profile?.approvalStatus === 'Rejected' ? (
+                                <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
+                            ) : (
+                                <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" />
+                            )}
+                        </div>
+                        <div className="flex-1">
+                            <h3 className={`text-base sm:text-lg font-semibold mb-1 ${profile?.approvalStatus === 'Rejected' ? 'text-red-500' : 'text-amber-400'}`}>
+                                Approval {profile?.approvalStatus}
+                            </h3>
+                            
+                            {profile?.approvalStatus === 'Rejected' ? (
+                                <div className="space-y-3">
+                                    <p className="text-sm sm:text-base text-red-200/90 italic">
+                                        Reason: "{profile.rejectionReason || "No reason provided."}"
+                                    </p>
+                                    <p className="text-sm sm:text-base text-zinc-300">
+                                        Please update your profile details as per the feedback and re-apply for verification.
+                                    </p>
+                                    <button 
+                                        onClick={handleReApply}
+                                        disabled={isReApplying}
+                                        className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg text-sm transition-all shadow-lg shadow-red-500/20 disabled:opacity-50"
+                                    >
+                                        {isReApplying ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : "Re-apply Now"}
+                                    </button>
+                                </div>
+                            ) : (
+                                <p className="text-sm sm:text-base text-amber-200/90">
+                                    Your gym profile is currently under review. Once approved, you'll automatically receive a <span className="font-bold text-amber-300">30-day free trial</span> to explore all premium features!
+                                </p>
+                            )}
+
+                            <div className="mt-3 flex flex-wrap gap-2">
+                                <span className={`text-xs px-2 py-1 rounded-full border ${profile?.approvalStatus === 'Rejected' ? 'bg-zinc-800 text-zinc-500 border-zinc-700' : 'bg-amber-500/20 text-amber-300 border-amber-500/30'}`}>
+                                    ✓ Complete your profile
+                                </span>
+                                <span className={`text-xs px-2 py-1 rounded-full border ${profile?.approvalStatus === 'Rejected' ? 'bg-zinc-800 text-zinc-500 border-zinc-700' : 'bg-amber-500/20 text-amber-300 border-amber-500/30'}`}>
+                                    ✓ Get approved
+                                </span>
+                                <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded-full border border-emerald-500/30">
+                                    🎁 30 days free trial
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
+
+
+
+            <div className="grid grid-cols-1 gap-6">
+                <div className="space-y-6">
+                    {/* Main Card */}
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+                        <div className="h-20 sm:h-40 bg-gradient-to-r from-emerald-900/20 to-zinc-900 relative">
+                            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-400/10 via-transparent to-transparent"></div>
+                        </div>
+
+                        <div className="px-4 sm:px-6 pb-6 sm:pb-8 relative">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                ref={fileInputRef}
+                                className="hidden"
+                                onChange={handleFileChange}
+                            />
+                            <div
+                                onClick={() => fileInputRef.current?.click()}
+                                className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl sm:rounded-2xl bg-zinc-800 border-4 border-zinc-900 absolute -top-10 sm:-top-14 flex items-center justify-center group cursor-pointer overflow-hidden shadow-xl"
+                            >
+                                {profile?.logoUrl || formData.logoUrl ? (
+                                    <img
+                                        src={profile?.logoUrl || formData.logoUrl}
+                                        alt="Gym Logo"
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            // Fallback if image fails to load
+                                            const target = e.target as HTMLImageElement;
+                                            target.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23222'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial, sans-serif' font-size='16' fill='%234a4a4a'%3Egym%3C/text%3E%3C/svg%3E`;
+                                        }}
+                                    />
+                                ) : (
+                                    <span className="text-2xl sm:text-3xl font-bold text-zinc-600 group-hover:hidden">𓆩gym𓆪</span>
+                                )}
+                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Camera className="w-5 h-5 sm:w-8 sm:h-8 text-white" />
+                                </div>
+                            </div>
+
+                            <div className="ml-24 sm:ml-32 pt-0 sm:pt-2">
+                                {!isEditing && (
+                                    <div className="flex justify-end mb-3 sm:mb-4">
+                                        <button
+                                            onClick={() => setIsEditing(true)}
+                                            className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-emerald-400 text-black font-semibold rounded-lg text-xs sm:text-sm hover:bg-emerald-500 transition-colors"
+                                        >
+                                            <Edit3 className="w-3 h-3 sm:w-4 sm:h-4" />
+                                            Edit Profile
+                                        </button>
+                                    </div>
+                                )}
+
+                                {isEditing ? (
+                                    <div className="space-y-4 max-w-lg">
+                                        <div>
+                                            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block">Gym Name</label>
+                                            <input
+                                                type="text"
+                                                value={formData.gymName || ''}
+                                                onChange={e => setFormData({ ...formData, gymName: e.target.value })}
+                                                className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-400 transition-colors text-sm sm:text-base"
+                                                placeholder="Enter gym name"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1.5 block">Caption / Tagline</label>
+                                            <input
+                                                type="text"
+                                                value={formData.caption || ''}
+                                                onChange={e => setFormData({ ...formData, caption: e.target.value })}
+                                                className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-400 transition-colors text-sm sm:text-base"
+                                                placeholder="e.g. Premium Fitness Center"
+                                            />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <h2 className="text-xl sm:text-2xl font-bold text-white">{profile?.gymName || formData.gymName || "Gym Name"}</h2>
+                                        <p className="text-zinc-400 text-sm sm:text-base mt-1">{profile?.caption || formData.caption || "Add a caption"}</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mt-8 sm:mt-10 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+                                <div className="group">
+                                    <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">Email Address</label>
+                                    <div className="flex items-center gap-3 text-zinc-300 p-3 bg-zinc-950/50 rounded-lg border border-zinc-800/50 text-sm sm:text-base">
+                                        <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
+                                        <span className="opacity-70 cursor-not-allowed truncate" title="Email cannot be changed">{profile?.email || formData.email || "email@example.com"}</span>
+                                        <span className="ml-auto text-xs bg-zinc-800 px-2 py-0.5 rounded text-zinc-500 flex-shrink-0">Read-only</span>
+                                    </div>
+                                </div>
+
+                                <div className="group">
+                                    <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">Phone Number</label>
+                                    {isEditing ? (
+                                        <div className="relative">
+                                            <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 absolute left-3 top-2.5 z-10" />
+                                            <input
+                                                type="text"
+                                                value={formData.phoneNumber || ''}
+                                                onChange={e => setFormData({ ...formData, phoneNumber: e.target.value })}
+                                                className="w-full pl-10 bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-400 transition-colors text-sm sm:text-base"
+                                                placeholder="+1 (555) 000-0000"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-3 text-zinc-300 p-3 bg-zinc-950/50 rounded-lg border border-zinc-800/50 text-sm sm:text-base">
+                                            <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
+                                            <span className="truncate">{profile?.phoneNumber || formData.phoneNumber || "Not set"}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="group md:col-span-2">
+                                    <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 block">Address</label>
+                                    {isEditing ? (
+                                        <div className="relative">
+                                            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 absolute left-3 top-2.5 z-10" />
+                                            <input
+                                                type="text"
+                                                value={formData.address || ''}
+                                                onChange={e => setFormData({ ...formData, address: e.target.value })}
+                                                className="w-full pl-10 bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-400 transition-colors text-sm sm:text-base"
+                                                placeholder="123 Fitness St, Muscle City"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-3 text-zinc-300 p-3 bg-zinc-950/50 rounded-lg border border-zinc-800/50 text-sm sm:text-base">
+                                            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
+                                            <span className="truncate">{profile?.address || formData.address || "Not set"}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* About Section */}
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-6">
+                        <h3 className="text-lg font-semibold text-white mb-4">About the Gym</h3>
+                        {isEditing ? (
+                            <div className="space-y-4">
+                                <textarea
+                                    value={formData.description || ''}
+                                    onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-400 transition-colors min-h-[120px] text-sm sm:text-base"
+                                    placeholder="Describe your gym..."
+                                />
+                                <div className="flex gap-3 justify-end pt-2">
+                                    <button onClick={handleCancel} disabled={isSaving} className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-zinc-800 text-white font-semibold rounded-lg text-sm hover:bg-zinc-700 transition-colors disabled:opacity-50">
+                                        Cancel
+                                    </button>
+                                    <button onClick={handleSave} disabled={isSaving} className="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-emerald-400 text-black font-semibold rounded-lg text-sm hover:bg-emerald-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                        {isSaving ? <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
+                                        Save Changes
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="text-zinc-400 text-sm sm:text-base leading-relaxed whitespace-pre-line">
+                                {profile?.description || formData.description || "No description provided yet."}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Location Section */}
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-6">
+                        <div className="mb-6">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                                <div className="flex-1">
+                                    <h3 className="text-lg font-semibold text-white">Gym Location</h3>
+                                    <p className="text-zinc-400 text-sm mt-1">Set your gym's precise location data for attendance tracking.</p>
+                                </div>
+                                <div className={`self-start sm:self-center px-3 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap ${profile?.location?.latitude ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
+                                    {profile?.location?.latitude ? 'Location Configured' : 'Location Not Set'}
+                                </div>
+                                <button
+                                    onClick={handleGetLocation}
+                                    disabled={loadingLocation}
+                                    className="flex items-center gap-2 px-4 py-2 bg-emerald-400 text-black font-bold rounded-xl text-sm hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-500/10 mt-3 sm:mt-0 disabled:opacity-50"
+                                >
+                                    <MapPin className="w-4 h-4" />
+                                    {loadingLocation ? "Updating..." : "Update Location"}
+                                </button>
+                            </div>
+                            <div className="text-xs text-amber-500/90 bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-lg flex gap-2 items-start">
+                                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                                <span>Important: Only update this when you are physically standing at the gym location.</span>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    {/* Certificates Section */}
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                            <div className="flex-1">
+                                <h3 className="text-lg font-semibold text-white">Certificates & Licenses</h3>
+                                <p className="text-zinc-400 text-sm mt-1">Upload and manage your gym's official verification documents.</p>
+                            </div>
+                            <button
+                                onClick={() => certInputRef.current?.click()}
+                                className="flex items-center gap-2 px-4 py-2 bg-emerald-400 text-black font-bold rounded-xl text-sm hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-500/10"
+                            >
+                                <Plus className="w-4 h-4" />
+                                Add New
+                            </button>
+                            <input
+                                type="file"
+                                ref={certInputRef}
+                                className="hidden"
+                                onChange={handleCertFileChange}
+                                accept="application/pdf,image/*"
+                            />
+                        </div>
+
+                        {profile?.certificates && profile.certificates.length > 0 ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                                {profile.certificates.map((cert) => (
+                                    <div key={cert.key} className="group bg-zinc-950/50 border border-zinc-800/30 rounded-xl overflow-hidden hover:border-emerald-500/30 transition-all duration-300">
+                                        <div className="aspect-[3/4] bg-zinc-900 flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-zinc-900 to-black">
+                                            {cert.type === 'PDF' ? (
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <FileText className="w-8 h-8 text-zinc-700" />
+                                                    <span className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest">PDF</span>
+                                                </div>
+                                            ) : (
+                                                <img src={cert.url} alt={cert.name} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                                            )}
+
+                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2">
+                                                <a
+                                                    href={cert.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="p-2 bg-white text-black rounded-full hover:scale-110 transition-transform"
+                                                    title="View Document"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                </a>
+                                                <button
+                                                    onClick={() => setCertToDelete(cert.key)}
+                                                    className="p-2 bg-red-500/20 backdrop-blur-md text-red-500 border border-red-500/30 rounded-full hover:bg-red-500 hover:text-white transition-all hover:scale-110"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="p-2 bg-zinc-900/50">
+                                            <h4 className="text-[10px] font-bold text-zinc-300 truncate text-center">{cert.name}</h4>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="p-10 rounded-2xl bg-zinc-950/30 border border-dashed border-zinc-800 flex flex-col items-center justify-center text-center">
+                                <FileText className="w-12 h-12 text-zinc-700 mb-4" />
+                                <p className="text-zinc-500 font-medium text-sm">No verification documents added yet.</p>
+                                <p className="text-zinc-600 text-[11px] mt-1 max-w-[200px]">Upload certificates or licenses to verify your business and build trust.</p>
+                            </div>
+                        )}
+                    </div>
+
+
+
+                    {/* Subscription Details Section */}
+                    {profile?.subscriptionStatus && profile.subscriptionStatus !== "Pending" && (
+                        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-6 mt-6">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                                <div className="flex-1">
+                                    <h3 className="text-lg font-semibold text-white">Subscription Details</h3>
+                                    <p className="text-zinc-400 text-sm mt-1">Manage and view your gym's current subscription plan.</p>
+                                </div>
+                                <div className={`self-start sm:self-center px-4 py-1.5 rounded-full text-xs font-bold border uppercase tracking-wider ${getStatusColor(profile?.subscriptionStatus)}`}>
+                                    {profile?.subscriptionStatus}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 bg-zinc-950/50 p-4 sm:p-6 rounded-xl border border-zinc-800/50">
+                                <div className="space-y-1">
+                                    <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Plan Name</p>
+                                    <p className="text-white font-medium">{profile?.planName || 'N/A'}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Amount Paid</p>
+                                    <p className="text-emerald-400 font-bold">₹{profile?.amount?.toLocaleString() || '0'}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Payment Method</p>
+                                    <p className="text-zinc-300 font-medium capitalize">{profile?.paymentMethod || 'N/A'}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Start Date</p>
+                                    <div className="flex items-center gap-2 text-zinc-300">
+                                        <Clock className="w-4 h-4 text-zinc-500" />
+                                        <span className="font-medium">
+                                            {profile?.startDate ? new Date(profile.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Expiry Date</p>
+                                    <div className="flex items-center gap-2 text-zinc-300">
+                                        <Clock className="w-4 h-4 text-zinc-500" />
+                                        <span className="font-medium text-red-400/90">
+                                            {profile?.expiryDate ? new Date(profile.expiryDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Days Remaining</p>
+                                    {profile?.expiryDate && (
+                                        <p className="text-blue-400 font-bold">
+                                            {Math.max(0, Math.ceil((new Date(profile.expiryDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))} Days
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Image Cropper Modal */}
+                    {isCropping && imageSrc && (
+                        <ImageCropperModal
+                            imageSrc={imageSrc}
+                            crop={crop}
+                            zoom={zoom}
+                            isUploading={isUploadingImage}
+                            onCropChange={setCrop}
+                            onZoomChange={setZoom}
+                            onCropComplete={onCropComplete}
+                            onUpload={handleUploadCroppedImage}
+                            onCancel={cancelCropping}
+                            title="Adjust Gym Logo"
+                            aspectRatio={1}
+                        />
+                    )}
+
+                    {/* Location Warning Modal */}
+                    {showLocationWarning && (
+                        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                            <div className="bg-zinc-900 rounded-2xl w-full max-w-md overflow-hidden border border-red-500/30 p-6 text-center">
+                                <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                                <h3 className="text-xl font-bold text-white mb-2">Are you at the gym?</h3>
+                                <p className="text-zinc-400 mb-6">Please ensure you are physically standing at your gym's location for accuracy.</p>
+                                <div className="flex gap-3">
+                                    <button onClick={() => setShowLocationWarning(false)} className="flex-1 px-4 py-3 bg-zinc-800 text-white font-semibold rounded-xl">Cancel</button>
+                                    <button onClick={confirmUpdateLocation} className="flex-1 px-4 py-3 bg-emerald-400 text-black font-semibold rounded-xl">Yes, I'm here</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+
+                    {/* Certificate Name Modal */}
+                    {showCertNameModal && (
+                        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                            <div className="bg-zinc-900 rounded-2xl w-full max-w-sm overflow-hidden border border-zinc-800 p-6 flex flex-col items-center text-center shadow-2xl animate-in zoom-in-95 duration-200">
+                                <div className="w-16 h-16 bg-emerald-400/10 rounded-full flex items-center justify-center mb-6">
+                                    <FileText className="w-8 h-8 text-emerald-400" />
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-2">Certificate Name</h3>
+                                <p className="text-zinc-500 text-sm mb-6">Enter a descriptive name for this document.</p>
+                                <input
+                                    type="text"
+                                    value={certName}
+                                    onChange={(e) => setCertName(e.target.value)}
+                                    placeholder="e.g. Health License 2024"
+                                    className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-400 mb-6 transition-all"
+                                    autoFocus
+                                />
+                                <div className="flex gap-3 w-full">
+                                    <button
+                                        onClick={() => { setShowCertNameModal(false); setCertName(''); setPendingCertFile(null); }}
+                                        className="flex-1 px-4 py-3 bg-zinc-800 text-white font-bold rounded-xl hover:bg-zinc-700 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={confirmCertUpload}
+                                        disabled={!certName.trim()}
+                                        className="flex-1 px-4 py-3 bg-emerald-400 text-black font-bold rounded-xl hover:bg-emerald-500 transition-colors disabled:opacity-50"
+                                    >
+                                        Continue
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Certificate Delete Modal */}
+                    <ConfirmModal
+                        isOpen={!!certToDelete}
+                        onClose={() => setCertToDelete(null)}
+                        onConfirm={handleDeleteCert}
+                        title="Delete Certificate?"
+                        message="This process cannot be undone. The document will be permanently removed from our servers."
+                        variant="danger"
+                        confirmText="Delete Document"
+                        isProcessing={isUploadingCert}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Profile;
