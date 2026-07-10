@@ -14,17 +14,22 @@ interface Props {
     onSave: () => void;
 }
 
-const Field = ({ icon: Icon, label, value, onChange, placeholder, type = 'text', area }: any) => (
+interface FieldProps {
+    icon: React.ElementType;
+    label: string;
+    value: string;
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    placeholder: string;
+    type?: string;
+}
+
+const Field = ({ icon: Icon, label, value, onChange, placeholder, type = 'text' }: FieldProps) => (
     <label className="space-y-2">
         <span className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">{label}</span>
-        {area ? (
-            <textarea value={value} onChange={onChange} placeholder={placeholder} className="w-full min-h-28 rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-white outline-none focus:border-emerald-400" />
-        ) : (
-            <div className="relative">
-                <Icon className="absolute left-3 top-1/2 w-4 h-4 -translate-y-1/2 text-emerald-400" />
-                <input value={value} onChange={onChange} type={type} placeholder={placeholder} className="w-full rounded-2xl border border-zinc-700 bg-zinc-950 py-3 pl-10 pr-4 text-sm text-white outline-none focus:border-emerald-400" />
-            </div>
-        )}
+        <div className="relative">
+            <Icon className="absolute left-3 top-1/2 w-4 h-4 -translate-y-1/2 text-emerald-400" />
+            <input value={value} onChange={onChange} type={type} placeholder={placeholder} className="w-full rounded-2xl border border-zinc-700 bg-zinc-950 py-3 pl-10 pr-4 text-sm text-white outline-none focus:border-emerald-400" />
+        </div>
     </label>
 );
 
@@ -56,10 +61,10 @@ export const ProfileEditModal: React.FC<Props> = ({ profile, formData, isOpen, i
                         </div>
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
-                        <Field icon={UserRound} label="Gym Name" value={formData.gymName || ''} onChange={(e: any) => onChange({ ...formData, gymName: e.target.value })} placeholder="Gym name" />
-                        <Field icon={MessageSquareText} label="Caption" value={formData.caption || ''} onChange={(e: any) => onChange({ ...formData, caption: e.target.value })} placeholder="Short tagline" />
-                        <Field icon={Phone} label="Phone Number" value={formData.phoneNumber || ''} onChange={(e: any) => onChange({ ...formData, phoneNumber: e.target.value })} placeholder="Phone number" />
-                        <Field icon={MapPin} label="Address" value={formData.address || ''} onChange={(e: any) => onChange({ ...formData, address: e.target.value })} placeholder="Gym address" />
+                        <Field icon={UserRound} label="Gym Name" value={formData.gymName || ''} onChange={(e) => onChange({ ...formData, gymName: e.target.value })} placeholder="Gym name" />
+                        <Field icon={MessageSquareText} label="Caption" value={formData.caption || ''} onChange={(e) => onChange({ ...formData, caption: e.target.value })} placeholder="Short tagline" />
+                        <Field icon={Phone} label="Phone Number" value={formData.phoneNumber || ''} onChange={(e) => onChange({ ...formData, phoneNumber: e.target.value })} placeholder="Phone number" />
+                        <Field icon={MapPin} label="Address" value={formData.address || ''} onChange={(e) => onChange({ ...formData, address: e.target.value })} placeholder="Gym address" />
                         <label className="space-y-2 md:col-span-2">
                             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">About Gym</span>
                             <textarea value={formData.description || ''} onChange={(e) => onChange({ ...formData, description: e.target.value })} placeholder="Tell members what makes your gym special" className="w-full min-h-32 rounded-2xl border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-white outline-none focus:border-emerald-400" />

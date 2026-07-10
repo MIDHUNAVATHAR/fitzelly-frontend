@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import { getGymProfile, updateGymProfile, uploadGymLogo, uploadGymCertificate, 
-    deleteGymCertificate, reApplyGym 
-} from "../../../../api/gym-profile.api";
+    deleteGymCertificate, reApplyGym } from "../../../../api/gym-profile.api";
 import { type GymProfile } from '../../../../dtos/gym-profile.resDTO';
 import { useImageCropper } from '../../../../hooks/useImageCropper';
 import { useLocation } from '../../../../hooks/useLocation';

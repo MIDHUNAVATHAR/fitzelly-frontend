@@ -14,7 +14,7 @@ const Item = ({ label, value, accent = '' }: { label: string; value: string; acc
 export const SubscriptionSection: React.FC<Props> = ({ profile, statusColor }) => {
     if (!profile || profile.subscriptionStatus === 'Pending') return null;
     const expiry = profile.expiryDate ? new Date(profile.expiryDate).getTime() : 0;
-    const daysRemaining = expiry ? Math.max(0, Math.ceil((expiry - Date.now()) / 86400000)) : 0;
+    const daysRemaining = expiry ? Math.max(0, Math.ceil((expiry - new Date().getTime()) / 86400000)) : 0;
     const format = (value?: string) => value ? new Date(value).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
     return (
         <section className="rounded-[28px] border border-zinc-800 bg-zinc-900 p-4 sm:p-6">
