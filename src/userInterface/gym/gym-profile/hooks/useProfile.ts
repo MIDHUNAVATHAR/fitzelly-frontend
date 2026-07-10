@@ -1,16 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
-import { 
-    getGymProfile, 
-    updateGymProfile, 
-    uploadGymLogo, 
-    uploadGymCertificate, 
-    deleteGymCertificate, 
-    reApplyGym 
+import { getGymProfile, updateGymProfile, uploadGymLogo, uploadGymCertificate, 
+    deleteGymCertificate, reApplyGym 
 } from "../../../../api/gym-profile.api";
 import { type GymProfile } from '../../../../dtos/gym-profile.resDTO';
 import { useImageCropper } from '../../../../hooks/useImageCropper';
 import { useLocation } from '../../../../hooks/useLocation';
+
+const keepSubscriptionDetails = (current: GymProfile | null | undefined, next: GymProfile): GymProfile => ({
+    ...next,
+    subscriptionStatus: current?.subscriptionStatus ?? next.subscriptionStatus,
+    planName: current?.planName ?? next.planName,
+    amount: current?.amount ?? next.amount,
+    paymentMethod: current?.paymentMethod ?? next.paymentMethod,
+    startDate: current?.startDate ?? next.startDate,
+    expiryDate: current?.expiryDate ?? next.expiryDate,
+});
 
 export const useProfile = () => {
     const [isEditing, setIsEditing] = useState(false);
@@ -62,15 +67,8 @@ export const useProfile = () => {
         try {
             const updateData = { gymName, caption, phoneNumber, address, description, logoUrl: formData.logoUrl };
             const updatedProfile = await updateGymProfile(updateData);
-            setProfile((prev) => prev ? {
-                ...updatedProfile,
-                subscriptionStatus: prev.subscriptionStatus,
-                planName: prev.planName,
-                amount: prev.amount,
-                paymentMethod: prev.paymentMethod,
-                startDate: prev.startDate,
-                expiryDate: prev.expiryDate,
-            } : { ...updatedProfile });
+            setProfile((prev) => keepSubscriptionDetails(prev, updatedProfile));
+            setFormData((prev) => keepSubscriptionDetails(prev, updatedProfile));
             setIsEditing(false);
             toast.success("Profile updated successfully");
         } catch {
@@ -111,6 +109,7 @@ export const useProfile = () => {
     };
 
     const handleGetLocation = () => setShowLocationWarning(true);
+    const closeLocationWarning = () => setShowLocationWarning(false);
 
     const confirmUpdateLocation = async () => {
         setShowLocationWarning(false);
@@ -162,8 +161,8 @@ export const useProfile = () => {
         try {
             const toastId = toast.loading(`Uploading certificate...`);
             const updatedGym = await uploadGymCertificate(file, name);
-            setProfile(updatedGym);
-            setFormData(updatedGym);
+            setProfile((prev) => keepSubscriptionDetails(prev, updatedGym));
+            setFormData((prev) => keepSubscriptionDetails(prev, updatedGym));
             toast.dismiss(toastId);
             toast.success("Certificate uploaded!");
             setCertName('');
@@ -178,8 +177,8 @@ export const useProfile = () => {
         try {
             setIsUploadingCert(true);
             const updatedGym = await deleteGymCertificate(certToDelete);
-            setProfile(updatedGym);
-            setFormData(updatedGym);
+            setProfile((prev) => keepSubscriptionDetails(prev, updatedGym));
+            setFormData((prev) => keepSubscriptionDetails(prev, updatedGym));
             toast.success("Certificate deleted");
         } catch (error) {
             console.error(error);
@@ -286,6 +285,7 @@ export const useProfile = () => {
         handleCancel,
         handleReApply,
         handleGetLocation,
+        closeLocationWarning,
         confirmUpdateLocation,
         confirmCertUpload,
         handleDeleteCert,
@@ -298,6 +298,7 @@ export const useProfile = () => {
         setShowCertNameModal,
         setPendingCertFile,
         setCertToDelete,
+        setShowLocationWarning,
         isNotApproved,
         getStatusColor,
     };

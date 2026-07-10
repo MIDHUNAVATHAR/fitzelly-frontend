@@ -1,38 +1,16 @@
 import React from 'react';
 import { AlertTriangle } from 'lucide-react';
 
-interface LocationWarningModalProps {
-    onCancel: () => void;
-    onConfirm: () => void;
-}
-
-export const LocationWarningModal: React.FC<LocationWarningModalProps> = ({
-    onCancel,
-    onConfirm,
-}) => {
-    return (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="bg-zinc-900 rounded-2xl w-full max-w-sm overflow-hidden border border-red-500/30 p-6 text-center">
-                <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-3" />
-                <h3 className="text-lg font-bold text-white mb-2">Are you at the gym?</h3>
-                <p className="text-zinc-400 text-sm mb-6">
-                    Please ensure you are physically standing at your gym's location for accuracy.
-                </p>
-                <div className="flex gap-3">
-                    <button
-                        onClick={onCancel}
-                        className="flex-1 px-4 py-2.5 bg-zinc-800 text-white font-semibold rounded-xl text-sm"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={onConfirm}
-                        className="flex-1 px-4 py-2.5 bg-emerald-400 text-black font-semibold rounded-xl text-sm"
-                    >
-                        Yes, I'm here
-                    </button>
-                </div>
+export const LocationWarningModal: React.FC<{ onCancel: () => void; onConfirm: () => void; }> = ({ onCancel, onConfirm }) => (
+    <div className="fixed inset-0 z-[110] flex items-end bg-black/80 p-0 sm:items-center sm:justify-center sm:p-4">
+        <div className="w-full rounded-t-[28px] border border-red-500/30 bg-zinc-900 p-5 sm:max-w-md sm:rounded-3xl">
+            <AlertTriangle className="mx-auto mb-3 w-12 h-12 text-red-400" />
+            <h3 className="text-center text-lg font-bold text-white">Are you at the gym?</h3>
+            <p className="mt-2 text-center text-sm text-zinc-400">Please confirm you are physically at the location before updating.</p>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+                <button onClick={onCancel} className="rounded-2xl border border-zinc-700 px-4 py-3 text-sm font-semibold text-white">Cancel</button>
+                <button onClick={onConfirm} className="rounded-2xl bg-emerald-400 px-4 py-3 text-sm font-semibold text-black">Confirm</button>
             </div>
         </div>
-    );
-};
+    </div>
+);

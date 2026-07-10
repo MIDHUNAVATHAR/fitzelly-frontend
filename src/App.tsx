@@ -25,7 +25,7 @@ const ClientLayout = lazyComponent(React.lazy(() => import("./userInterface/clie
 const TrainerLayout = lazyComponent(React.lazy(() => import("./userInterface/trainer/TrainerLayout")));
 
 import DashboardHome from "./userInterface/gym/DashboardHome";
-import GymProfile from "./userInterface/gym/gym-profile/Profile.main"
+import GymProfile from "./userInterface/gym/gym-profile/Profile"
 
 import GymClients from "./userInterface/gym/gym-clients/ClientsList";
 import AddClient from "./userInterface/gym/gym-clients/AddClient";

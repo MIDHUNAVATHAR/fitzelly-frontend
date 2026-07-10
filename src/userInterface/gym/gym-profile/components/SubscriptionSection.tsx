@@ -1,90 +1,41 @@
 import React from 'react';
-import {  Wallet } from 'lucide-react';
+import { Wallet } from 'lucide-react';
 import type { GymProfile } from '../../../../dtos/gym-profile.resDTO';
 
-interface SubscriptionSectionProps {
-    profile: GymProfile | null;
-    statusColor: string;
-}
+interface Props { profile: GymProfile | null; statusColor: string; }
 
-export const SubscriptionSection: React.FC<SubscriptionSectionProps> = ({
-    profile,
-    statusColor,
-}) => {
-    if (!profile) return null;
+const Item = ({ label, value, accent = '' }: { label: string; value: string; accent?: string }) => (
+    <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-3">
+        <p className="text-[11px] uppercase tracking-[0.2em] text-zinc-500">{label}</p>
+        <p className={`mt-2 text-sm font-semibold ${accent || 'text-zinc-100'}`}>{value}</p>
+    </div>
+);
 
-    const formatDate = (date: string | undefined) => {
-        if (!date) return 'N/A';
-        return new Date(date).toLocaleDateString('en-IN', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-        });
-    };
-
-    const getDaysRemaining = () => {
-        if (!profile?.expiryDate) return 0;
-        const diff = new Date(profile.expiryDate).getTime() - new Date().getTime();
-        return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-    };
-
-    const daysRemaining = getDaysRemaining();
-
+export const SubscriptionSection: React.FC<Props> = ({ profile, statusColor }) => {
+    if (!profile || profile.subscriptionStatus === 'Pending') return null;
+    const expiry = profile.expiryDate ? new Date(profile.expiryDate).getTime() : 0;
+    const daysRemaining = expiry ? Math.max(0, Math.ceil((expiry - Date.now()) / 86400000)) : 0;
+    const format = (value?: string) => value ? new Date(value).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
     return (
-        <div className="border-t border-zinc-800 py-3">
-            <div className="px-1">
-                <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-                        Subscription
-                    </h3>
-                    <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColor}`}>
-                        {profile?.subscriptionStatus}
-                    </div>
-                </div>
-
-                <div className="bg-zinc-900/30 rounded-xl p-3 space-y-2">
-                    {/* Plan & Amount */}
-                    <div className="flex items-center justify-between">
-                        <span className="font-semibold text-white">
-                            {profile?.planName || 'N/A'}
-                        </span>
-                        <span className="text-emerald-400 font-bold">
-                            ₹{profile?.amount?.toLocaleString() || '0'}
-                        </span>
-                    </div>
-
-                    {/* Divider */}
-                    <div className="border-t border-zinc-800/50" />
-
-                    {/* Dates */}
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                            <p className="text-xs text-zinc-500">Start</p>
-                            <p className="text-zinc-300">{formatDate(profile?.startDate)}</p>
-                        </div>
-                        <div>
-                            <p className="text-xs text-zinc-500">Expires</p>
-                            <p className="text-zinc-300">{formatDate(profile?.expiryDate)}</p>
-                        </div>
-                    </div>
-
-                    {/* Days Remaining */}
-                    {daysRemaining > 0 && (
-                        <div className="flex items-center justify-between pt-1">
-                            <span className="text-xs text-zinc-500">Days Remaining</span>
-                            <span className="text-blue-400 font-bold">{daysRemaining} Days</span>
-                        </div>
-                    )}
-
-                    {/* Payment Method */}
-                    {profile?.paymentMethod && (
-                        <div className="flex items-center gap-1.5 text-xs text-zinc-400 pt-1 border-t border-zinc-800/50">
-                            <Wallet className="w-3 h-3" />
-                            <span>Paid via {profile.paymentMethod}</span>
-                        </div>
-                    )}
-                </div>
+        <section className="rounded-[28px] border border-zinc-800 bg-zinc-900 p-4 sm:p-6">
+            <div className="mb-4 flex items-center justify-between gap-3">
+                <div><h3 className="text-lg font-semibold text-white">Subscription</h3><p className="text-sm text-zinc-400">Two-up cards stay readable on phones.</p></div>
+                <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusColor}`}>{profile.subscriptionStatus}</span>
             </div>
-        </div>
+            <div className="grid grid-cols-2 gap-3">
+                <Item label="Plan" value={profile.planName || 'N/A'} />
+                <Item label="Amount" value={`₹${profile.amount?.toLocaleString() || '0'}`} accent="text-emerald-400" />
+                <Item label="Start" value={format(profile.startDate)} />
+                <Item label="Expiry" value={format(profile.expiryDate)} accent="text-red-300" />
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+                <Item label="Days Left" value={daysRemaining ? `${daysRemaining} days` : 'Expired'} accent="text-blue-300" />
+                <Item label="Method" value={profile.paymentMethod || 'N/A'} />
+            </div>
+            <div className="mt-3 flex items-center gap-2 rounded-2xl border border-zinc-800 bg-zinc-950/60 px-3 py-3 text-sm text-zinc-300">
+                <Wallet className="w-4 h-4 text-emerald-400" />
+                <span>{profile.planName || 'Plan'} active on {profile.paymentMethod || 'payment method unavailable'}</span>
+            </div>
+        </section>
     );
 };
